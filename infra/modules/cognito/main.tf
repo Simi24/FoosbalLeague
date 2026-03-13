@@ -32,6 +32,10 @@ resource "aws_cognito_user_pool" "main" {
       max_length = 64
     }
   }
+
+  lifecycle {
+    ignore_changes = [schema]
+  }
 }
 
 resource "aws_cognito_user_pool_client" "web" {
