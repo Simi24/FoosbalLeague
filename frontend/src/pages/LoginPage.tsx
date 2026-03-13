@@ -7,7 +7,6 @@ import { isLocalMode, loginWithCredentials, initAuth } from "@/features/auth";
 export const LoginPage = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const authError = useAppSelector((state) => state.auth.error);
   const authStatus = useAppSelector((state) => state.auth.status);
 
   const [email, setEmail] = useState("");
@@ -32,7 +31,7 @@ export const LoginPage = () => {
   };
 
   const isLoading = authStatus === "loading";
-  const displayError = error || authError;
+  const displayError = error;
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-bg-primary">

@@ -60,11 +60,13 @@ resource "aws_apigatewayv2_route" "root" {
 resource "aws_apigatewayv2_route" "options_proxy" {
   api_id    = aws_apigatewayv2_api.main.id
   route_key = "OPTIONS /{proxy+}"
+  target    = "integrations/${aws_apigatewayv2_integration.lambda.id}"
 }
 
 resource "aws_apigatewayv2_route" "options_root" {
   api_id    = aws_apigatewayv2_api.main.id
   route_key = "OPTIONS /"
+  target    = "integrations/${aws_apigatewayv2_integration.lambda.id}"
 }
 
 resource "aws_lambda_permission" "apigw" {
