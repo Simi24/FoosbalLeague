@@ -100,6 +100,8 @@ if [[ -n "${API_ID}" && "${API_ID}" != "None" ]]; then
     case "${route_key}" in
       "ANY /{proxy+}") import_resource "module.api_gateway.aws_apigatewayv2_route.proxy" "${API_ID}/${route_id}" ;;
       "ANY /") import_resource "module.api_gateway.aws_apigatewayv2_route.root" "${API_ID}/${route_id}" ;;
+      "OPTIONS /{proxy+}") import_resource "module.api_gateway.aws_apigatewayv2_route.options_proxy" "${API_ID}/${route_id}" ;;
+      "OPTIONS /") import_resource "module.api_gateway.aws_apigatewayv2_route.options_root" "${API_ID}/${route_id}" ;;
     esac
   done < <(aws apigatewayv2 get-routes --api-id "${API_ID}" \
     --query "Items[*].[RouteKey,RouteId]" --output text --region "${REGION}" 2>/dev/null || echo "")
