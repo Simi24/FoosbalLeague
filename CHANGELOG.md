@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/Simi24/FoosbalLeague/compare/foosball-league-v0.2.0...foosball-league-v0.2.1) (2026-03-13)
+
+
+### Bug Fixes
+
+* 🐛 disable buildx provenance for Lambda compatibility ([08f2146](https://github.com/Simi24/FoosbalLeague/commit/08f2146b781473595696447e1a53a40906a82380))
+
 ## [0.2.0](https://github.com/Simi24/FoosbalLeague/compare/foosball-league-v0.1.0...foosball-league-v0.2.0) (2026-03-13)
 
 
