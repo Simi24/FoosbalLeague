@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.5](https://github.com/Simi24/FoosbalLeague/compare/foosball-league-v0.2.4...foosball-league-v0.2.5) (2026-03-13)
+
+
+### Bug Fixes
+
+* 🐛 add integration target to OPTIONS routes and hide init auth errors on login page ([86ad061](https://github.com/Simi24/FoosbalLeague/commit/86ad0614edadd33dae59125a29bf2ebc40d8ff1d))
+
 ## [0.2.4](https://github.com/Simi24/FoosbalLeague/compare/foosball-league-v0.2.3...foosball-league-v0.2.4) (2026-03-13)
 
 
