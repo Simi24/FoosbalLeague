@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.3](https://github.com/Simi24/FoosbalLeague/compare/foosball-league-v0.2.2...foosball-league-v0.2.3) (2026-03-13)
+
+
+### Bug Fixes
+
+* 🐛 ignore cognito schema changes after pool creation ([e793277](https://github.com/Simi24/FoosbalLeague/commit/e793277e8de6aa8ebfb133ab8943cc7f47537329))
+
 ## [0.2.2](https://github.com/Simi24/FoosbalLeague/compare/foosball-league-v0.2.1...foosball-league-v0.2.2) (2026-03-13)
 
 
