@@ -169,6 +169,18 @@ def get_league_members(league_id: str) -> list[EnrollmentModel]:
     return [item for item in results if isinstance(item, EnrollmentModel)]
 
 
+def get_player_enrollments(
+    tenant_id: str, player_id: str
+) -> list[EnrollmentModel]:
+    """Get all enrollments for a player across leagues."""
+    results = BaseEntity.query(f"TENANT#{tenant_id}").starts_with("ENROLL#").all()
+    return [
+        item
+        for item in results
+        if isinstance(item, EnrollmentModel) and item.player_id == player_id
+    ]
+
+
 def get_enrollment(
     tenant_id: str, league_id: str, player_id: str
 ) -> EnrollmentModel | None:

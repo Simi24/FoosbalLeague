@@ -70,3 +70,14 @@ export type EloHistoryPoint = {
   delta: number;
   timestamp: string;
 };
+
+export type MyLeague = {
+  league_id: string;
+  name: string;
+  league_type: "1v1" | "2v2";
+  description: string;
+  member_count: number;
+  match_count: number;
+  role: "player" | "admin";
+  current_elo: number;
+};

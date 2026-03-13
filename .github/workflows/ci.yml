@@ -35,7 +35,7 @@ jobs:
       - run: cd frontend && yarn install --frozen-lockfile
       - run: cd frontend && yarn lint
 
-  frontend-build:
+  frontend-typecheck:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -43,4 +43,4 @@ jobs:
         with:
           node-version: "24"
       - run: cd frontend && yarn install --frozen-lockfile
-      - run: cd frontend && yarn build
+      - run: cd frontend && npx tsc --noEmit

@@ -17,7 +17,6 @@ export const getRefreshToken = (): string | null => {
 export const clearTokens = (): void => {
   sessionStorage.removeItem(ID_TOKEN_KEY);
   sessionStorage.removeItem(REFRESH_TOKEN_KEY);
-  sessionStorage.removeItem("pkce_code_verifier");
 };
 
 export const isTokenExpired = (token: string): boolean => {

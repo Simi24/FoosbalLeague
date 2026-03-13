@@ -1,18 +1,38 @@
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 
-import { isLocalMode, buildLoginUrl } from "@/features/auth";
+import { useAppDispatch, useAppSelector } from "@/app/hooks";
+import { isLocalMode, loginWithCredentials, initAuth } from "@/features/auth";
 
 export const LoginPage = () => {
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const authError = useAppSelector((state) => state.auth.error);
+  const authStatus = useAppSelector((state) => state.auth.status);
 
-  const handleLogin = async () => {
-    console.log(isLocalMode() ? "Local mode: redirecting to home page" : "Redirecting to SSO login");
-    if (isLocalMode()) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+
+    const result = await dispatch(loginWithCredentials({ email, password }));
+    if (loginWithCredentials.fulfilled.match(result)) {
       navigate("/");
-      return;
+    } else {
+      setError(result.error.message ?? "Login failed");
     }
-    window.location.href = await buildLoginUrl();
   };
+
+  const handleLocalLogin = async () => {
+    await dispatch(initAuth());
+    navigate("/");
+  };
+
+  const isLoading = authStatus === "loading";
+  const displayError = error || authError;
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-bg-primary">
@@ -24,14 +44,63 @@ export const LoginPage = () => {
           ELO-based office foosball rankings
         </p>
 
-        <button
-          onClick={handleLogin}
-          className="flex w-full items-center justify-center gap-2 rounded border border-neon-green px-4 py-3 text-sm font-medium text-neon-green transition-all hover:bg-neon-green hover:text-bg-primary"
-        >
-          Sign in
-        </button>
+        {displayError && (
+          <div className="mb-4 rounded border border-danger bg-danger/10 px-3 py-2 text-sm text-danger">
+            {displayError}
+          </div>
+        )}
 
-        <p className="mt-6 text-center text-xs text-text-muted">
+        {isLocalMode() ? (
+          <button
+            onClick={handleLocalLogin}
+            className="flex w-full items-center justify-center gap-2 rounded border border-neon-green px-4 py-3 text-sm font-medium text-neon-green transition-all hover:bg-neon-green hover:text-bg-primary"
+          >
+            Enter as Local Dev
+          </button>
+        ) : (
+          <form onSubmit={handleLogin}>
+            <div className="mb-4">
+              <label className="mb-1 block text-sm text-text-secondary">Email</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full rounded border border-border bg-bg-tertiary px-3 py-2 text-sm text-text-primary outline-none focus:border-neon-green"
+                required
+                autoComplete="email"
+              />
+            </div>
+            <div className="mb-6">
+              <label className="mb-1 block text-sm text-text-secondary">Password</label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full rounded border border-border bg-bg-tertiary px-3 py-2 text-sm text-text-primary outline-none focus:border-neon-green"
+                required
+                autoComplete="current-password"
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="flex w-full items-center justify-center gap-2 rounded border border-neon-green px-4 py-3 text-sm font-medium text-neon-green transition-all hover:bg-neon-green hover:text-bg-primary disabled:opacity-50"
+            >
+              {isLoading ? "Signing in..." : "Sign in"}
+            </button>
+          </form>
+        )}
+
+        {!isLocalMode() && (
+          <p className="mt-6 text-center text-sm text-text-secondary">
+            Don't have an account?{" "}
+            <Link to="/signup" className="text-neon-green hover:underline">
+              Sign up
+            </Link>
+          </p>
+        )}
+
+        <p className="mt-4 text-center text-xs text-text-muted">
           Internal use only
         </p>
       </div>

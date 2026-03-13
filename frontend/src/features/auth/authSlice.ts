@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
 import { apiFetch } from "@/api";
-import { isLocalMode, exchangeCodeForTokens, buildLogoutUrl } from "./cognito";
+import { isLocalMode, cognitoLogin } from "./cognito";
 import { saveTokens, getIdToken, clearTokens, isTokenExpired } from "./tokenStorage";
 
 type UserInfo = {
@@ -10,6 +10,7 @@ type UserInfo = {
   name: string;
   groups: string[];
   tenant_id: string;
+  player_id: string | null;
 };
 
 type AuthState = {
@@ -49,10 +50,10 @@ export const initAuth = createAsyncThunk(
   },
 );
 
-export const handleCallback = createAsyncThunk(
-  "auth/handleCallback",
-  async (code: string) => {
-    const tokens = await exchangeCodeForTokens(code);
+export const loginWithCredentials = createAsyncThunk(
+  "auth/loginWithCredentials",
+  async ({ email, password }: { email: string; password: string }) => {
+    const tokens = await cognitoLogin(email, password);
     saveTokens(tokens);
     return fetchMe();
   },
@@ -67,9 +68,6 @@ export const authSlice = createSlice({
       state.isAuthenticated = false;
       state.status = "idle";
       clearTokens();
-      if (!isLocalMode()) {
-        window.location.href = buildLogoutUrl();
-      }
     },
   },
   extraReducers: (builder) => {
@@ -87,17 +85,18 @@ export const authSlice = createSlice({
         state.error = action.error.message ?? "Auth failed";
         state.isAuthenticated = false;
       })
-      .addCase(handleCallback.pending, (state) => {
+      .addCase(loginWithCredentials.pending, (state) => {
         state.status = "loading";
+        state.error = null;
       })
-      .addCase(handleCallback.fulfilled, (state, action) => {
+      .addCase(loginWithCredentials.fulfilled, (state, action) => {
         state.status = "succeeded";
         state.user = action.payload;
         state.isAuthenticated = true;
       })
-      .addCase(handleCallback.rejected, (state, action) => {
+      .addCase(loginWithCredentials.rejected, (state, action) => {
         state.status = "failed";
-        state.error = action.error.message ?? "Callback failed";
+        state.error = action.error.message ?? "Login failed";
         state.isAuthenticated = false;
       });
   },

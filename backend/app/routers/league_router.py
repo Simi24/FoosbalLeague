@@ -8,6 +8,7 @@ from schemas.league import (
     CreateLeagueRequest,
     LeagueMemberResponse,
     LeagueResponse,
+    MyLeagueResponse,
     UpdateLeagueRequest,
 )
 from services.league_service import (
@@ -15,6 +16,7 @@ from services.league_service import (
     get_enrollment,
     get_league,
     get_league_members,
+    get_player_enrollments,
     join_league,
     leave_league,
     list_leagues,
@@ -26,6 +28,37 @@ router = APIRouter(
     prefix="/api/v1/leagues",
     tags=["leagues"],
 )
+
+
+@router.get("/my", response_model=list[MyLeagueResponse])
+async def read_my_leagues(
+    user: dict[str, Any] = Depends(get_current_user),
+    tenant_id: str = Depends(get_tenant_id),
+) -> list[MyLeagueResponse]:
+    """List leagues the current player is enrolled in."""
+    player = get_player_by_cognito_sub(tenant_id, user.get("sub", ""))
+    if not player:
+        return []
+
+    enrollments = get_player_enrollments(tenant_id, player.player_id)
+    result: list[MyLeagueResponse] = []
+    for enrollment in enrollments:
+        league = get_league(tenant_id, enrollment.league_id)
+        if not league:
+            continue
+        result.append(
+            MyLeagueResponse(
+                league_id=league.league_id,
+                name=league.name,
+                league_type=league.league_type,
+                description=league.description,
+                member_count=league.member_count,
+                match_count=league.match_count,
+                role=enrollment.role,
+                current_elo=enrollment.current_elo,
+            )
+        )
+    return result
 
 
 @router.get("/", response_model=list[LeagueResponse])
@@ -64,6 +97,19 @@ async def create_new_league(
         description=body.description,
         created_by=user.get("sub", ""),
     )
+
+    # Auto-enroll creator as admin
+    player = get_player_by_cognito_sub(tenant_id, user.get("sub", ""))
+    if player:
+        join_league(
+            tenant_id=tenant_id,
+            league_id=league.league_id,
+            player_id=player.player_id,
+            display_name=player.display_name,
+            role="admin",
+        )
+        league = get_league(tenant_id, league.league_id)
+
     return LeagueResponse(
         league_id=league.league_id,
         name=league.name,

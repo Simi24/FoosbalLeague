@@ -4,9 +4,9 @@ import { Routes, Route } from "react-router-dom";
 import { ProtectedRoute } from "@/components/auth";
 import { AppShell } from "@/components/layout";
 import { initAuth } from "@/features/auth";
-import { CallbackPage } from "@/pages/CallbackPage";
 import { DashboardPage } from "@/pages/DashboardPage";
 import { LoginPage } from "@/pages/LoginPage";
+import { SignupPage } from "@/pages/SignupPage";
 import { NotFoundPage } from "@/pages/NotFoundPage";
 import { LeagueListPage } from "@/projects/league/pages/LeagueListPage";
 import { LeagueDetailPage } from "@/projects/league/pages/LeagueDetailPage";
@@ -28,7 +28,7 @@ export const App = () => {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
-      <Route path="/callback" element={<CallbackPage />} />
+      <Route path="/signup" element={<SignupPage />} />
       <Route
         path="*"
         element={

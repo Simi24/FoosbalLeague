@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends
 from dependencies.auth import get_current_user
 from dependencies.tenant import get_tenant_id
 from schemas.auth import RegisterRequest, RegisterResponse, UserInfo
+from services.player_service import get_player_by_cognito_sub
 
 router = APIRouter(
     prefix="/api/v1/auth",
@@ -20,12 +21,17 @@ async def get_me(
     """Return current authenticated user info."""
     groups_raw = user.get("cognito:groups", [])
     groups = groups_raw if isinstance(groups_raw, list) else [g for g in groups_raw.split(",") if g] if groups_raw else []
+
+    sub = user.get("sub", "")
+    player = get_player_by_cognito_sub(tenant_id, sub) if sub else None
+
     return UserInfo(
-        sub=user.get("sub", ""),
+        sub=sub,
         email=user.get("email", ""),
         name=user.get("name", ""),
         groups=groups,
         tenant_id=tenant_id,
+        player_id=player.player_id if player else None,
     )
 
 

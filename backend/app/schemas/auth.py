@@ -9,6 +9,7 @@ class UserInfo(BaseModel):
     name: str = Field(..., description="Display name")
     groups: list[str] = Field(default_factory=list, description="Cognito groups")
     tenant_id: str = Field(default="default", description="Tenant ID")
+    player_id: str | None = Field(default=None, description="Player ID if registered")
 
     model_config = ConfigDict(extra="forbid")
 

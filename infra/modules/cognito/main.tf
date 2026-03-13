@@ -38,32 +38,10 @@ resource "aws_cognito_user_pool_client" "web" {
   name         = "${var.project}-${var.environment}-web"
   user_pool_id = aws_cognito_user_pool.main.id
 
-  supported_identity_providers         = ["COGNITO"]
-  allowed_oauth_flows                  = ["code"]
-  allowed_oauth_flows_user_pool_client = true
-  allowed_oauth_scopes                 = ["email", "openid", "profile"]
-
   explicit_auth_flows = [
     "ALLOW_USER_PASSWORD_AUTH",
     "ALLOW_REFRESH_TOKEN_AUTH",
   ]
-
-  callback_urls = var.environment == "prod" ? [
-    "https://foosball.example.com/callback"
-  ] : [
-    "http://localhost:5173/callback"
-  ]
-
-  logout_urls = var.environment == "prod" ? [
-    "https://foosball.example.com/logout"
-  ] : [
-    "http://localhost:5173/logout"
-  ]
-}
-
-resource "aws_cognito_user_pool_domain" "main" {
-  domain       = "${var.project}-${var.environment}"
-  user_pool_id = aws_cognito_user_pool.main.id
 }
 
 output "user_pool_id" {
@@ -72,8 +50,4 @@ output "user_pool_id" {
 
 output "client_id" {
   value = aws_cognito_user_pool_client.web.id
-}
-
-output "user_pool_domain" {
-  value = aws_cognito_user_pool_domain.main.domain
 }

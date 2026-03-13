@@ -47,3 +47,18 @@ class LeagueMemberResponse(BaseModel):
     current_elo: int
 
     model_config = ConfigDict(extra="forbid")
+
+
+class MyLeagueResponse(BaseModel):
+    """League with enrollment info for current player."""
+
+    league_id: str
+    name: str
+    league_type: Literal["1v1", "2v2"]
+    description: str
+    member_count: int
+    match_count: int
+    role: Literal["player", "admin"]
+    current_elo: int
+
+    model_config = ConfigDict(extra="forbid")

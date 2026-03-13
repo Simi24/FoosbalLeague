@@ -55,6 +55,7 @@ resource "aws_lambda_function" "main" {
   role          = aws_iam_role.lambda.arn
   package_type  = "Image"
   image_uri     = "${data.aws_ecr_repository.main.repository_url}:${var.image_tag}"
+  architectures = ["arm64"]
   timeout       = 300
   memory_size   = 512
 
