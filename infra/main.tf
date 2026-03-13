@@ -1,0 +1,61 @@
+terraform {
+  required_version = ">= 1.5"
+
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+  }
+}
+
+provider "aws" {
+  region = var.aws_region
+
+  default_tags {
+    tags = {
+      terraform   = "true"
+      environment = var.environment
+      project     = var.project
+      subproject  = var.subproject
+    }
+  }
+}
+
+module "dynamodb" {
+  source      = "./modules/dynamodb"
+  environment = var.environment
+  project     = var.project
+}
+
+module "cognito" {
+  source      = "./modules/cognito"
+  environment = var.environment
+  project     = var.project
+}
+
+module "lambda" {
+  source      = "./modules/lambda"
+  environment = var.environment
+  project     = var.project
+  image_tag   = var.image_tag
+  table_arn   = module.dynamodb.table_arn
+  table_name  = module.dynamodb.table_name
+}
+
+module "api_gateway" {
+  source               = "./modules/api-gateway"
+  environment          = var.environment
+  project              = var.project
+  lambda_invoke_arn    = module.lambda.invoke_arn
+  lambda_function_name = module.lambda.function_name
+  cognito_user_pool_id = module.cognito.user_pool_id
+  cognito_client_id    = module.cognito.client_id
+  aws_region           = var.aws_region
+}
+
+module "s3_frontend" {
+  source      = "./modules/s3-frontend"
+  environment = var.environment
+  project     = var.project
+}

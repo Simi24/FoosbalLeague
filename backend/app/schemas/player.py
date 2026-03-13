@@ -1,0 +1,29 @@
+from pydantic import BaseModel, ConfigDict, Field
+
+
+class PlayerResponse(BaseModel):
+    """Player public profile."""
+
+    player_id: str
+    display_name: str
+    email: str
+    tenant_id: str
+    total_matches: int = 0
+    total_wins: int = 0
+    total_losses: int = 0
+
+    model_config = ConfigDict(extra="forbid")
+
+
+class PlayerStatsResponse(BaseModel):
+    """Aggregated player stats."""
+
+    player_id: str
+    display_name: str
+    total_matches: int = 0
+    total_wins: int = 0
+    total_losses: int = 0
+    win_rate: float = 0.0
+    leagues: list[str] = Field(default_factory=list)
+
+    model_config = ConfigDict(extra="forbid")

@@ -1,0 +1,41 @@
+services:
+  task:
+    build:
+      context: .
+      target: dev
+    platform: linux/arm64
+    restart: on-failure
+    environment:
+      APP_NAME: foosball-league
+      LOCAL: true
+      ENV: local
+      CLOUD_ENV: local
+      LOG_LEVEL: DEBUG
+      DEFAULT_TENANT_ID: default
+      DYNAMODB_TABLE: foosball-league
+      AWS_ENDPOINT_URL: http://localstack:4566
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+      AWS_DEFAULT_REGION: eu-west-1
+      AWS_LAMBDA_FUNCTION_TIMEOUT: 300
+      AWS_LAMBDA_FUNCTION_MEMORY_SIZE: 512
+    volumes:
+      - ./app:/var/task
+      - ~/.aws:/root/.aws:ro
+    ports:
+      - 9000:8080
+      - 5678:5678
+    command: >
+      sh -c "python -Xfrozen_modules=off -m debugpy --listen 0.0.0.0:5678
+      -m uvicorn main:app --host 0.0.0.0 --port 8080 --reload --log-level debug"
+
+  localstack:
+    image: localstack/localstack
+    ports:
+      - "127.0.0.1:4566:4566"
+    environment:
+      DEBUG: ${DEBUG:-0}
+    volumes:
+      - "${LOCALSTACK_VOLUME_DIR:-./localstack_volume}:/var/lib/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "./init-aws.sh:/etc/localstack/init/ready.d/init-aws.sh:ro"
