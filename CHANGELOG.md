@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.2](https://github.com/Simi24/FoosbalLeague/compare/foosball-league-v0.2.1...foosball-league-v0.2.2) (2026-03-13)
+
+
+### Bug Fixes
+
+* 🔧 add deploy resilience with state reconciliation and locking ([f83155e](https://github.com/Simi24/FoosbalLeague/commit/f83155e21f621562e5ab99fc15015b85d267caa7))
+
 ## [0.2.1](https://github.com/Simi24/FoosbalLeague/compare/foosball-league-v0.2.0...foosball-league-v0.2.1) (2026-03-13)
 
 
