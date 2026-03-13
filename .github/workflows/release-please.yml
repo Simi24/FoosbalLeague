@@ -9,6 +9,10 @@ permissions:
   pull-requests: write
   id-token: write
 
+concurrency:
+  group: release-please
+  cancel-in-progress: false
+
 jobs:
   release-please:
     runs-on: ubuntu-latest

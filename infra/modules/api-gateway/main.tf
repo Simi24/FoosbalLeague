@@ -58,6 +58,7 @@ resource "aws_apigatewayv2_route" "root" {
 }
 
 resource "aws_lambda_permission" "apigw" {
+  statement_id  = "AllowAPIGateway"
   action        = "lambda:InvokeFunction"
   function_name = var.lambda_function_name
   principal     = "apigateway.amazonaws.com"
