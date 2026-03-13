@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.4](https://github.com/Simi24/FoosbalLeague/compare/foosball-league-v0.2.3...foosball-league-v0.2.4) (2026-03-13)
+
+
+### Bug Fixes
+
+* 🐛 add OPTIONS routes without auth for CORS preflight ([50b2df5](https://github.com/Simi24/FoosbalLeague/commit/50b2df5b53af45a07cda38de1a6ed758fcb8bf9e))
+
 ## [0.2.3](https://github.com/Simi24/FoosbalLeague/compare/foosball-league-v0.2.2...foosball-league-v0.2.3) (2026-03-13)
 
 
