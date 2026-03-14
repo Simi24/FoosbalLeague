@@ -3,19 +3,21 @@ import { Link } from "react-router-dom";
 import { MdChevronRight, MdPeople } from "react-icons/md";
 
 import { apiFetch } from "@/api";
+import { useAppSelector } from "@/app/hooks";
 import { EmptyState } from "../components";
 import type { Player } from "../types";
 
 export const PlayerListPage = () => {
+  const currentPlayerId = useAppSelector((state) => state.auth.user?.player_id);
   const [players, setPlayers] = useState<Player[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     apiFetch("/players/")
       .then((r) => r.json())
-      .then(setPlayers)
+      .then((all: Player[]) => setPlayers(all.filter((p) => p.player_id !== currentPlayerId)))
       .finally(() => setLoading(false));
-  }, []);
+  }, [currentPlayerId]);
 
   if (loading) {
     return (

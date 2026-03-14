@@ -4,6 +4,7 @@ import {
   MdLeaderboard,
   MdSportsSoccer,
   MdPeople,
+  MdPerson,
   MdSettings,
 } from "react-icons/md";
 
@@ -12,6 +13,7 @@ const navItems = [
   { to: "/leagues", icon: MdSportsSoccer, label: "Leagues" },
   { to: "/leaderboard", icon: MdLeaderboard, label: "Leaderboard" },
   { to: "/players", icon: MdPeople, label: "Players" },
+  { to: "/profile", icon: MdPerson, label: "Profile" },
 ];
 
 export const Sidebar = () => {
