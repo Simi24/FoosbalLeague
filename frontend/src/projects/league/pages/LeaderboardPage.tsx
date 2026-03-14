@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
 import { apiFetch } from "@/api";
-import type { Leaderboard, League, MyLeague } from "../types";
+import type { Leaderboard, MyLeague } from "../types";
 
 const getRankStyle = (rank: number): string => {
   if (rank === 1) return "bg-amber-50 border-amber-200";
@@ -12,32 +12,28 @@ const getRankStyle = (rank: number): string => {
 };
 
 const getRankBadge = (rank: number): string | null => {
-  if (rank === 1) return "🥇";
-  if (rank === 2) return "🥈";
-  if (rank === 3) return "🥉";
+  if (rank === 1) return "\u{1F947}";
+  if (rank === 2) return "\u{1F948}";
+  if (rank === 3) return "\u{1F949}";
   return null;
 };
 
 export const LeaderboardPage = () => {
   const { id: leagueId } = useParams<{ id: string }>();
-  const [leagues, setLeagues] = useState<League[]>([]);
+  const [leagues, setLeagues] = useState<MyLeague[]>([]);
   const [selectedLeague, setSelectedLeague] = useState(leagueId ?? "");
   const [leaderboard, setLeaderboard] = useState<Leaderboard | null>(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    Promise.all([
-      apiFetch("/leagues/").then((r) => r.json()) as Promise<League[]>,
-      apiFetch("/leagues/my").then((r) => (r.ok ? r.json() : [])) as Promise<MyLeague[]>,
-    ]).then(([allLeagues, myLeagues]) => {
-      setLeagues(allLeagues);
-      if (!selectedLeague && allLeagues.length > 0) {
-        const defaultLeague = myLeagues.length > 0
-          ? myLeagues[0]!.league_id
-          : allLeagues[0]!.league_id;
-        setSelectedLeague(defaultLeague);
-      }
-    });
+    apiFetch("/leagues/my")
+      .then((r) => (r.ok ? r.json() : []))
+      .then((myLeagues: MyLeague[]) => {
+        setLeagues(myLeagues);
+        if (!selectedLeague && myLeagues.length > 0) {
+          setSelectedLeague(myLeagues[0]!.league_id);
+        }
+      });
   }, []);
 
   useEffect(() => {
