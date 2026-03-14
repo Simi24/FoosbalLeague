@@ -3,12 +3,12 @@ import { useParams } from "react-router-dom";
 
 import { apiFetch } from "@/api";
 import { EloHistoryChart, StatCard } from "../components";
-import type { EloHistoryPoint, Leaderboard, MyLeague, Player, RankingEntry } from "../types";
+import type { EloHistoryPoint, Leaderboard, League, Player, RankingEntry } from "../types";
 
 export const PlayerProfilePage = () => {
   const { id: playerId } = useParams<{ id: string }>();
   const [player, setPlayer] = useState<Player | null>(null);
-  const [leagues, setLeagues] = useState<MyLeague[]>([]);
+  const [leagues, setLeagues] = useState<League[]>([]);
   const [selectedLeague, setSelectedLeague] = useState("");
   const [rankingEntry, setRankingEntry] = useState<RankingEntry | null>(null);
   const [eloHistory, setEloHistory] = useState<EloHistoryPoint[]>([]);
@@ -18,13 +18,14 @@ export const PlayerProfilePage = () => {
     if (!playerId) return;
     Promise.all([
       apiFetch(`/players/${playerId}`).then((r) => r.json()),
-      apiFetch("/leagues/my").then((r) => (r.ok ? r.json() : [])) as Promise<MyLeague[]>,
+      apiFetch("/leagues/").then((r) => r.json()) as Promise<League[]>,
     ])
-      .then(([p, lg]) => {
+      .then(([p, allLeagues]) => {
         setPlayer(p);
-        setLeagues(lg);
-        if (lg.length > 0 && !selectedLeague) {
-          setSelectedLeague(lg[0]!.league_id);
+        const sorted = [...allLeagues].sort((a, b) => b.match_count - a.match_count);
+        setLeagues(sorted);
+        if (sorted.length > 0 && !selectedLeague) {
+          setSelectedLeague(sorted[0]!.league_id);
         }
       })
       .finally(() => setLoading(false));
