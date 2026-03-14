@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { MdAdd, MdCheck, MdClose, MdHistory, MdLeaderboard, MdLogout } from "react-icons/md";
+import { MdAdd, MdCheck, MdClose, MdHistory, MdLeaderboard, MdLogout, MdSettings } from "react-icons/md";
 
 import { apiFetch } from "@/api";
 import { useAppSelector } from "@/app/hooks";
@@ -92,6 +92,14 @@ export const LeagueDetailPage = () => {
             >
               <MdLogout size={16} /> Leave
             </button>
+          )}
+          {isAdmin && (
+            <Link
+              to={`/leagues/${id}/settings`}
+              className="flex items-center gap-2 rounded-lg border border-border px-3 py-2.5 text-sm text-text-secondary transition-colors hover:bg-bg-tertiary hover:text-text-primary"
+            >
+              <MdSettings size={16} />
+            </Link>
           )}
           <Link
             to={`/leagues/${id}/leaderboard`}

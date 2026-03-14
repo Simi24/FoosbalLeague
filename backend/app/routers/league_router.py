@@ -12,17 +12,21 @@ from schemas.league import (
     UpdateLeagueRequest,
 )
 from services.league_service import (
+    add_player_to_league,
     create_league,
+    delete_league,
     get_enrollment,
     get_league,
     get_league_members,
     get_player_enrollments,
     join_league,
+    kick_player,
     leave_league,
     list_leagues,
+    set_member_role,
     update_league,
 )
-from services.player_service import get_player_by_cognito_sub
+from services.player_service import get_player, get_player_by_cognito_sub
 
 router = APIRouter(
     prefix="/api/v1/leagues",
@@ -231,3 +235,91 @@ async def read_league_members(
         )
         for m in members
     ]
+
+
+def _require_admin(tenant_id: str, league_id: str, user: dict) -> None:
+    """Validate the current user is an admin of the league."""
+    player = get_player_by_cognito_sub(tenant_id, user.get("sub", ""))
+    if not player:
+        raise HTTPException(status_code=400, detail="Player not registered")
+    enrollment = get_enrollment(tenant_id, league_id, player.player_id)
+    if not enrollment or enrollment.role != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+
+
+@router.delete("/{league_id}", status_code=200)
+async def delete_league_endpoint(
+    league_id: str,
+    user: dict[str, Any] = Depends(get_current_user),
+    tenant_id: str = Depends(get_tenant_id),
+) -> dict:
+    """Delete a league and all its data. Admin only."""
+    _require_admin(tenant_id, league_id, user)
+    success = delete_league(tenant_id, league_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="League not found")
+    return {"status": "deleted", "league_id": league_id}
+
+
+@router.post("/{league_id}/kick/{player_id}", status_code=200)
+async def kick_player_endpoint(
+    league_id: str,
+    player_id: str,
+    user: dict[str, Any] = Depends(get_current_user),
+    tenant_id: str = Depends(get_tenant_id),
+) -> dict:
+    """Remove a player from a league. Admin only."""
+    _require_admin(tenant_id, league_id, user)
+    success = kick_player(tenant_id, league_id, player_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Player not in this league")
+    return {"status": "kicked", "player_id": player_id}
+
+
+@router.post("/{league_id}/promote/{player_id}", status_code=200)
+async def promote_player_endpoint(
+    league_id: str,
+    player_id: str,
+    user: dict[str, Any] = Depends(get_current_user),
+    tenant_id: str = Depends(get_tenant_id),
+) -> dict:
+    """Promote a player to admin. Admin only."""
+    _require_admin(tenant_id, league_id, user)
+    success = set_member_role(tenant_id, league_id, player_id, "admin")
+    if not success:
+        raise HTTPException(status_code=404, detail="Player not in this league")
+    return {"status": "promoted", "player_id": player_id}
+
+
+@router.post("/{league_id}/demote/{player_id}", status_code=200)
+async def demote_player_endpoint(
+    league_id: str,
+    player_id: str,
+    user: dict[str, Any] = Depends(get_current_user),
+    tenant_id: str = Depends(get_tenant_id),
+) -> dict:
+    """Demote an admin to player. Admin only."""
+    _require_admin(tenant_id, league_id, user)
+    success = set_member_role(tenant_id, league_id, player_id, "player")
+    if not success:
+        raise HTTPException(status_code=404, detail="Player not in this league")
+    return {"status": "demoted", "player_id": player_id}
+
+
+@router.post("/{league_id}/add/{player_id}", status_code=201)
+async def add_player_endpoint(
+    league_id: str,
+    player_id: str,
+    user: dict[str, Any] = Depends(get_current_user),
+    tenant_id: str = Depends(get_tenant_id),
+) -> dict:
+    """Add a player to a league. Admin only."""
+    _require_admin(tenant_id, league_id, user)
+    existing = get_enrollment(tenant_id, league_id, player_id)
+    if existing:
+        raise HTTPException(status_code=400, detail="Player already in league")
+    target = get_player(tenant_id, player_id)
+    if not target:
+        raise HTTPException(status_code=404, detail="Player not found")
+    add_player_to_league(tenant_id, league_id, player_id, target.display_name)
+    return {"status": "added", "player_id": player_id}

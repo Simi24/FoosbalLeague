@@ -183,6 +183,70 @@ def get_player_enrollments(
     ]
 
 
+def kick_player(tenant_id: str, league_id: str, player_id: str) -> bool:
+    """Remove a player from a league (admin action). Same as leave but admin-initiated."""
+    return leave_league(tenant_id, league_id, player_id)
+
+
+def set_member_role(
+    tenant_id: str,
+    league_id: str,
+    player_id: str,
+    role: Literal["player", "admin"],
+) -> bool:
+    """Change a member's role."""
+    enrollment = BaseEntity.get(
+        f"TENANT#{tenant_id}", f"ENROLL#{league_id}#{player_id}"
+    )
+    if not enrollment or not isinstance(enrollment, EnrollmentModel):
+        return False
+
+    now = datetime.now(timezone.utc)
+    EnrollmentModel.update(enrollment.pk, enrollment.sk).set(
+        "role", role
+    ).set("updated_at", now).execute()
+
+    logger.info(f"Player {player_id} role set to {role} in league {league_id}")
+    return True
+
+
+def delete_league(tenant_id: str, league_id: str) -> bool:
+    """Delete a league and all associated data."""
+    league = get_league(tenant_id, league_id)
+    if not league:
+        return False
+
+    # Delete all enrollments
+    for enrollment in get_league_members(league_id):
+        EnrollmentModel.delete(enrollment.pk, enrollment.sk)
+
+    # Delete all ratings
+    ratings = (
+        BaseEntity.query_index("GSI1", f"LEAGUE#{league_id}")
+        .starts_with("RATING#")
+        .all()
+    )
+    for r in ratings:
+        if isinstance(r, RatingModel):
+            RatingModel.delete(r.pk, r.sk)
+
+    # Delete league
+    LeagueModel.delete(league.pk, league.sk)
+
+    logger.info(f"Deleted league {league_id} and all associated data")
+    return True
+
+
+def add_player_to_league(
+    tenant_id: str,
+    league_id: str,
+    player_id: str,
+    display_name: str,
+) -> EnrollmentModel:
+    """Admin adds a player to a league."""
+    return join_league(tenant_id, league_id, player_id, display_name, role="player")
+
+
 def get_enrollment(
     tenant_id: str, league_id: str, player_id: str
 ) -> EnrollmentModel | None:
