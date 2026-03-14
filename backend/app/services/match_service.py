@@ -131,7 +131,15 @@ def confirm_match(
     ).set("updated_at", now).execute()
 
     logger.info(f"Confirmed match {match_id}, ELO changes: {elo_changes}")
-    return get_match(tenant_id, match_id)
+
+    # Evaluate achievements
+    from services.achievement_service import evaluate_achievements
+
+    confirmed_match = get_match(tenant_id, match_id)
+    if confirmed_match:
+        evaluate_achievements(tenant_id, league_id=match.league_id, match=confirmed_match)
+
+    return confirmed_match
 
 
 def dispute_match(

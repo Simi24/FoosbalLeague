@@ -81,3 +81,13 @@ export type MyLeague = {
   role: "player" | "admin";
   current_elo: number;
 };
+
+export type Achievement = {
+  type: string;
+  name: string;
+  description: string;
+  icon: string;
+  rarity: string;
+  unlocked: boolean;
+  unlocked_at: string | null;
+};

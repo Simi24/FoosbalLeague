@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from mangum import Mangum
 
 from middlewares.aws_api_gateway_path import AWSAPIGatewayMiddleware
-from routers import auth_router, player_router, league_router, match_router, ranking_router, admin_router
+from routers import achievement_router, auth_router, player_router, league_router, match_router, ranking_router, admin_router
 from version import __version__
 
 
@@ -33,6 +33,7 @@ app.include_router(player_router.router)
 app.include_router(league_router.router)
 app.include_router(match_router.router)
 app.include_router(ranking_router.router)
+app.include_router(achievement_router.router)
 app.include_router(admin_router.router)
 
 

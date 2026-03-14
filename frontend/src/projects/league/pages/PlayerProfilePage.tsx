@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
 import { apiFetch } from "@/api";
-import { EloHistoryChart, StatCard } from "../components";
-import type { EloHistoryPoint, Leaderboard, League, Player, RankingEntry } from "../types";
+import { AchievementBadge, EloHistoryChart, StatCard } from "../components";
+import type { Achievement, EloHistoryPoint, Leaderboard, League, Player, RankingEntry } from "../types";
 
 export const PlayerProfilePage = () => {
   const { id: playerId } = useParams<{ id: string }>();
@@ -12,6 +12,7 @@ export const PlayerProfilePage = () => {
   const [selectedLeague, setSelectedLeague] = useState("");
   const [rankingEntry, setRankingEntry] = useState<RankingEntry | null>(null);
   const [eloHistory, setEloHistory] = useState<EloHistoryPoint[]>([]);
+  const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -39,10 +40,13 @@ export const PlayerProfilePage = () => {
         .then((r) => (r.ok ? r.json() : null)) as Promise<Leaderboard | null>,
       apiFetch(`/rankings/player/${playerId}/history?league_id=${selectedLeague}`)
         .then((r) => (r.ok ? r.json() : { history: [] })) as Promise<{ history: EloHistoryPoint[] }>,
-    ]).then(([leaderboard, historyData]) => {
+      apiFetch(`/achievements/player/${playerId}?league_id=${selectedLeague}`)
+        .then((r) => (r.ok ? r.json() : { achievements: [] })) as Promise<{ achievements: Achievement[] }>,
+    ]).then(([leaderboard, historyData, achievementData]) => {
       const entry = leaderboard?.entries.find((e) => e.player_id === playerId) ?? null;
       setRankingEntry(entry);
       setEloHistory(historyData.history);
+      setAchievements(achievementData.achievements);
     });
   }, [playerId, selectedLeague]);
 
@@ -58,6 +62,9 @@ export const PlayerProfilePage = () => {
   const winRate = rankingEntry && rankingEntry.matches_played > 0
     ? (rankingEntry.win_rate * 100).toFixed(0)
     : "0";
+
+  const unlockedAchievements = achievements.filter((a) => a.unlocked);
+  const lockedAchievements = achievements.filter((a) => !a.unlocked);
 
   return (
     <div>
@@ -97,6 +104,29 @@ export const PlayerProfilePage = () => {
         <p className="mb-6 text-sm text-text-muted">Not enrolled in any league yet.</p>
       )}
 
+      {/* Achievements */}
+      {achievements.length > 0 && (
+        <div className="mb-6 rounded-xl border border-border bg-bg-secondary p-5 shadow-sm">
+          <h2 className="mb-4 text-lg font-semibold text-text-primary">
+            Achievements
+            {unlockedAchievements.length > 0 && (
+              <span className="ml-2 text-sm font-normal text-text-muted">
+                {unlockedAchievements.length}/{achievements.length}
+              </span>
+            )}
+          </h2>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            {unlockedAchievements.map((a) => (
+              <AchievementBadge key={a.type} {...a} />
+            ))}
+            {lockedAchievements.map((a) => (
+              <AchievementBadge key={a.type} {...a} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ELO History */}
       {leagues.length > 0 && (
         <div className="rounded-xl border border-border bg-bg-secondary p-5 shadow-sm">
           <h2 className="mb-4 text-lg font-semibold text-text-primary">
