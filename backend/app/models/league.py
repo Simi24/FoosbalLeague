@@ -19,5 +19,6 @@ class LeagueModel(BaseEntity):
     initial_elo: int = 1200
     description: str = ""
     created_by: str = ""
+    invite_code: str = ""
     member_count: int = 0
     match_count: int = 0

@@ -4,24 +4,29 @@ import { MdAdd, MdPeople, MdSportsSoccer } from "react-icons/md";
 
 import { apiFetch } from "@/api";
 import { CreateLeagueForm, EmptyState } from "../components";
-import type { League } from "../types";
+import type { MyLeague } from "../types";
 
 export const LeagueListPage = () => {
-  const [leagues, setLeagues] = useState<League[]>([]);
+  const [leagues, setLeagues] = useState<MyLeague[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
 
-  useEffect(() => {
-    apiFetch("/leagues/")
-      .then((r) => r.json())
+  const fetchData = () => {
+    setLoading(true);
+    apiFetch("/leagues/my")
+      .then((r) => (r.ok ? r.json() : []))
       .then(setLeagues)
       .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    fetchData();
   }, []);
 
   return (
     <div>
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-text-primary">Leagues</h1>
+        <h1 className="text-2xl font-bold text-text-primary">My Leagues</h1>
         <button
           onClick={() => setShowCreate(!showCreate)}
           className="flex items-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-hover"
@@ -31,9 +36,9 @@ export const LeagueListPage = () => {
         </button>
       </div>
 
-      {showCreate && <CreateLeagueForm onCreated={(lg) => {
-        setLeagues((prev) => [...prev, lg]);
+      {showCreate && <CreateLeagueForm onCreated={() => {
         setShowCreate(false);
+        fetchData();
       }} />}
 
       {loading ? (
@@ -44,7 +49,7 @@ export const LeagueListPage = () => {
         <EmptyState
           icon={<MdSportsSoccer size={40} />}
           title="No leagues yet"
-          description="Create the first league and invite your colleagues!"
+          description="Create a league and share the invite code with your colleagues!"
           action={
             <button
               onClick={() => setShowCreate(true)}
@@ -62,9 +67,12 @@ export const LeagueListPage = () => {
               to={`/leagues/${league.league_id}`}
               className="rounded-xl border border-border bg-bg-secondary p-5 shadow-sm transition-all hover:border-accent hover:shadow-md"
             >
-              <h3 className="mb-2 text-lg font-semibold text-text-primary">
-                {league.name}
-              </h3>
+              <div className="mb-2 flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-text-primary">{league.name}</h3>
+                <span className="rounded-full bg-accent-light px-2.5 py-0.5 text-xs font-medium text-accent">
+                  {league.role}
+                </span>
+              </div>
               <div className="flex items-center gap-4 text-sm text-text-secondary">
                 <span className="flex items-center gap-1">
                   <MdPeople size={14} /> {league.member_count}
@@ -77,10 +85,11 @@ export const LeagueListPage = () => {
                 </span>
               </div>
               {league.description && (
-                <p className="mt-2 text-sm text-text-muted">
-                  {league.description}
-                </p>
+                <p className="mt-2 text-sm text-text-muted">{league.description}</p>
               )}
+              <div className="mt-3 text-sm text-text-secondary">
+                ELO: <span className="font-mono font-semibold text-accent">{league.current_elo}</span>
+              </div>
             </Link>
           ))}
         </div>

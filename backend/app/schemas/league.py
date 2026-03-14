@@ -14,6 +14,14 @@ class CreateLeagueRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
+class JoinByCodeRequest(BaseModel):
+    """Join a league by invite code."""
+
+    code: str = Field(..., min_length=4, max_length=10)
+
+    model_config = ConfigDict(extra="forbid")
+
+
 class UpdateLeagueRequest(BaseModel):
     """Update league settings."""
 
@@ -60,5 +68,6 @@ class MyLeagueResponse(BaseModel):
     match_count: int
     role: Literal["player", "admin"]
     current_elo: int
+    invite_code: str | None = None
 
     model_config = ConfigDict(extra="forbid")

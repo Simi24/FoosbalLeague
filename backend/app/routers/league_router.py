@@ -6,6 +6,7 @@ from dependencies.auth import get_current_user
 from dependencies.tenant import get_tenant_id
 from schemas.league import (
     CreateLeagueRequest,
+    JoinByCodeRequest,
     LeagueMemberResponse,
     LeagueResponse,
     MyLeagueResponse,
@@ -17,12 +18,14 @@ from services.league_service import (
     delete_league,
     get_enrollment,
     get_league,
+    get_league_by_invite_code,
     get_league_members,
     get_player_enrollments,
     join_league,
     kick_player,
     leave_league,
     list_leagues,
+    regenerate_invite_code,
     set_member_role,
     update_league,
 )
@@ -60,6 +63,7 @@ async def read_my_leagues(
                 match_count=league.match_count,
                 role=enrollment.role,
                 current_elo=enrollment.current_elo,
+                invite_code=league.invite_code if enrollment.role == "admin" else None,
             )
         )
     return result
@@ -177,28 +181,32 @@ async def patch_league(
     )
 
 
-@router.post("/{league_id}/join", status_code=201)
-async def join_league_endpoint(
-    league_id: str,
+@router.post("/join", status_code=201)
+async def join_by_code_endpoint(
+    body: JoinByCodeRequest,
     user: dict[str, Any] = Depends(get_current_user),
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict:
-    """Join a league."""
+    """Join a league using an invite code."""
     player = get_player_by_cognito_sub(tenant_id, user.get("sub", ""))
     if not player:
         raise HTTPException(status_code=400, detail="Player not registered")
 
-    existing = get_enrollment(tenant_id, league_id, player.player_id)
+    league = get_league_by_invite_code(tenant_id, body.code)
+    if not league:
+        raise HTTPException(status_code=404, detail="Invalid invite code")
+
+    existing = get_enrollment(tenant_id, league.league_id, player.player_id)
     if existing:
         raise HTTPException(status_code=400, detail="Already a member")
 
-    enrollment = join_league(
+    join_league(
         tenant_id=tenant_id,
-        league_id=league_id,
+        league_id=league.league_id,
         player_id=player.player_id,
         display_name=player.display_name,
     )
-    return {"status": "joined", "league_id": league_id, "player_id": player.player_id}
+    return {"status": "joined", "league_id": league.league_id, "league_name": league.name}
 
 
 @router.post("/{league_id}/leave", status_code=200)
@@ -323,3 +331,17 @@ async def add_player_endpoint(
         raise HTTPException(status_code=404, detail="Player not found")
     add_player_to_league(tenant_id, league_id, player_id, target.display_name)
     return {"status": "added", "player_id": player_id}
+
+
+@router.post("/{league_id}/regenerate-code", status_code=200)
+async def regenerate_code_endpoint(
+    league_id: str,
+    user: dict[str, Any] = Depends(get_current_user),
+    tenant_id: str = Depends(get_tenant_id),
+) -> dict:
+    """Regenerate the invite code for a league. Admin only."""
+    _require_admin(tenant_id, league_id, user)
+    new_code = regenerate_invite_code(tenant_id, league_id)
+    if not new_code:
+        raise HTTPException(status_code=404, detail="League not found")
+    return {"invite_code": new_code}

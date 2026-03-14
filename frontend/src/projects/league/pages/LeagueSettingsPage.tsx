@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { MdArrowBack, MdPersonAdd, MdPersonRemove, MdStar, MdStarBorder, MdDelete } from "react-icons/md";
+import { MdArrowBack, MdContentCopy, MdPersonAdd, MdPersonRemove, MdRefresh, MdStar, MdStarBorder, MdDelete } from "react-icons/md";
 
 import { apiFetch } from "@/api";
 import { useAppSelector } from "@/app/hooks";
-import type { League, LeagueMember, Player } from "../types";
+import type { League, LeagueMember, MyLeague, Player } from "../types";
 
 export const LeagueSettingsPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -14,6 +14,7 @@ export const LeagueSettingsPage = () => {
   const [members, setMembers] = useState<LeagueMember[]>([]);
   const [allPlayers, setAllPlayers] = useState<Player[]>([]);
   const [loading, setLoading] = useState(true);
+  const [inviteCode, setInviteCode] = useState("");
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
 
@@ -24,13 +25,16 @@ export const LeagueSettingsPage = () => {
       apiFetch(`/leagues/${id}`).then((r) => r.json()) as Promise<League>,
       apiFetch(`/leagues/${id}/members`).then((r) => r.json()) as Promise<LeagueMember[]>,
       apiFetch("/players/").then((r) => r.json()) as Promise<Player[]>,
+      apiFetch("/leagues/my").then((r) => (r.ok ? r.json() : [])) as Promise<MyLeague[]>,
     ])
-      .then(([lg, mem, players]) => {
+      .then(([lg, mem, players, myLeagues]) => {
         setLeague(lg);
         setMembers(mem);
         setAllPlayers(players);
         setName(lg.name);
         setDescription(lg.description);
+        const myEntry = myLeagues.find((l) => l.league_id === id);
+        if (myEntry?.invite_code) setInviteCode(myEntry.invite_code);
       })
       .finally(() => setLoading(false));
   };
@@ -133,6 +137,41 @@ export const LeagueSettingsPage = () => {
           </button>
         </div>
       </div>
+
+      {/* Invite Code */}
+      {inviteCode && (
+        <div className="mb-6 rounded-xl border border-border bg-bg-secondary p-5 shadow-sm">
+          <h2 className="mb-2 text-lg font-semibold text-text-primary">Invite Code</h2>
+          <p className="mb-3 text-sm text-text-secondary">
+            Share this code with others so they can join your league.
+          </p>
+          <div className="flex items-center gap-2">
+            <div className="flex-1 rounded-lg border border-accent/30 bg-accent-light/30 px-4 py-3 text-center font-mono text-2xl font-bold tracking-[0.3em] text-accent">
+              {inviteCode}
+            </div>
+            <button
+              onClick={() => navigator.clipboard.writeText(inviteCode)}
+              className="rounded-lg border border-border p-3 text-text-secondary transition-colors hover:bg-bg-tertiary hover:text-text-primary"
+              title="Copy code"
+            >
+              <MdContentCopy size={18} />
+            </button>
+            <button
+              onClick={async () => {
+                const res = await apiFetch(`/leagues/${id}/regenerate-code`, { method: "POST" });
+                if (res.ok) {
+                  const data = await res.json();
+                  setInviteCode(data.invite_code);
+                }
+              }}
+              className="rounded-lg border border-border p-3 text-text-secondary transition-colors hover:bg-bg-tertiary hover:text-text-primary"
+              title="Generate new code"
+            >
+              <MdRefresh size={18} />
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Members */}
       <div className="mb-6 rounded-xl border border-border bg-bg-secondary p-5 shadow-sm">

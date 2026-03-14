@@ -21,6 +21,7 @@ def create_league(
 ) -> LeagueModel:
     """Create a new league."""
     league_id = str(uuid.uuid4())[:8]
+    invite_code = str(uuid.uuid4())[:6].upper()
     now = datetime.now(timezone.utc)
 
     league = LeagueModel(
@@ -34,12 +35,38 @@ def create_league(
         initial_elo=initial_elo,
         description=description,
         created_by=created_by,
+        invite_code=invite_code,
         created_at=now,
         updated_at=now,
     )
     league.save()
-    logger.info(f"Created league {league_id} ({name}) in tenant {tenant_id}")
+    logger.info(f"Created league {league_id} ({name}) with invite code {invite_code}")
     return league
+
+
+def get_league_by_invite_code(tenant_id: str, code: str) -> LeagueModel | None:
+    """Find a league by its invite code."""
+    leagues = list_leagues(tenant_id)
+    for league in leagues:
+        if league.invite_code == code.upper():
+            return league
+    return None
+
+
+def regenerate_invite_code(tenant_id: str, league_id: str) -> str | None:
+    """Generate a new invite code for a league."""
+    league = get_league(tenant_id, league_id)
+    if not league:
+        return None
+
+    new_code = str(uuid.uuid4())[:6].upper()
+    now = datetime.now(timezone.utc)
+    LeagueModel.update(league.pk, league.sk).set(
+        "invite_code", new_code
+    ).set("updated_at", now).execute()
+
+    logger.info(f"Regenerated invite code for league {league_id}: {new_code}")
+    return new_code
 
 
 def get_league(tenant_id: str, league_id: str) -> LeagueModel | None:

@@ -80,6 +80,7 @@ export type MyLeague = {
   match_count: number;
   role: "player" | "admin";
   current_elo: number;
+  invite_code: string | null;
 };
 
 export type Achievement = {

@@ -1,21 +1,23 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { MdAdd, MdPeople, MdSportsSoccer, MdSearch } from "react-icons/md";
+import { MdAdd, MdPeople, MdSportsSoccer, MdVpnKey } from "react-icons/md";
 
 import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import { apiFetch } from "@/api";
 import { initAuth } from "@/features/auth";
 import { CreateLeagueForm } from "@/projects/league/components";
-import type { League, MyLeague } from "@/projects/league/types";
+import type { MyLeague } from "@/projects/league/types";
 
 export const DashboardPage = () => {
   const dispatch = useAppDispatch();
   const user = useAppSelector((state) => state.auth.user);
 
   const [myLeagues, setMyLeagues] = useState<MyLeague[]>([]);
-  const [allLeagues, setAllLeagues] = useState<League[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
+  const [joinCode, setJoinCode] = useState("");
+  const [joinError, setJoinError] = useState("");
+  const [showJoin, setShowJoin] = useState(false);
 
   // Registration state
   const [displayName, setDisplayName] = useState("");
@@ -30,14 +32,9 @@ export const DashboardPage = () => {
       return;
     }
     setLoading(true);
-    const [myRes, allRes] = await Promise.all([
-      apiFetch("/leagues/my"),
-      apiFetch("/leagues/"),
-    ]);
-    const my = myRes.ok ? ((await myRes.json()) as MyLeague[]) : [];
-    const all = allRes.ok ? ((await allRes.json()) as League[]) : [];
+    const res = await apiFetch("/leagues/my");
+    const my = res.ok ? ((await res.json()) as MyLeague[]) : [];
     setMyLeagues(my);
-    setAllLeagues(all);
     setLoading(false);
   };
 
@@ -65,13 +62,21 @@ export const DashboardPage = () => {
     setRegistering(false);
   };
 
-  const myLeagueIds = new Set(myLeagues.map((l) => l.league_id));
-  const availableLeagues = allLeagues.filter((l) => !myLeagueIds.has(l.league_id));
-
-  const handleJoin = async (leagueId: string) => {
-    const response = await apiFetch(`/leagues/${leagueId}/join`, { method: "POST" });
+  const handleJoinByCode = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setJoinError("");
+    const response = await apiFetch("/leagues/join", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ code: joinCode }),
+    });
     if (response.ok) {
+      setJoinCode("");
+      setShowJoin(false);
       await fetchData();
+    } else {
+      const data = await response.json();
+      setJoinError(data.detail ?? "Invalid code");
     }
   };
 
@@ -137,35 +142,71 @@ export const DashboardPage = () => {
         <h1 className="text-2xl font-bold text-text-primary">
           Welcome back{user?.name ? `, ${user.name}` : ""}
         </h1>
-        <button
-          onClick={() => setShowCreate(!showCreate)}
-          className="flex items-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-hover"
-        >
-          <MdAdd size={16} />
-          Create League
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => { setShowJoin(!showJoin); setShowCreate(false); }}
+            className="flex items-center gap-2 rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-text-secondary transition-colors hover:bg-bg-tertiary hover:text-text-primary"
+          >
+            <MdVpnKey size={16} />
+            Join League
+          </button>
+          <button
+            onClick={() => { setShowCreate(!showCreate); setShowJoin(false); }}
+            className="flex items-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-hover"
+          >
+            <MdAdd size={16} />
+            Create League
+          </button>
+        </div>
       </div>
+
+      {/* Join by code */}
+      {showJoin && (
+        <div className="mb-6 rounded-xl border border-border bg-bg-secondary p-5 shadow-sm">
+          <h2 className="mb-3 text-lg font-semibold text-text-primary">Join with Invite Code</h2>
+          <form onSubmit={handleJoinByCode} className="flex gap-3">
+            <input
+              type="text"
+              value={joinCode}
+              onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
+              placeholder="Enter code (e.g. A1B2C3)"
+              className="flex-1 rounded-lg border border-border bg-bg-tertiary px-3 py-2.5 text-sm font-mono uppercase tracking-widest text-text-primary outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+              required
+              maxLength={10}
+            />
+            <button
+              type="submit"
+              className="rounded-lg bg-accent px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-hover"
+            >
+              Join
+            </button>
+          </form>
+          {joinError && (
+            <p className="mt-2 text-sm text-danger">{joinError}</p>
+          )}
+        </div>
+      )}
 
       {showCreate && <CreateLeagueForm onCreated={handleCreated} />}
 
       {/* Onboarding card when user has no leagues */}
-      {myLeagues.length === 0 && (
+      {myLeagues.length === 0 && !showCreate && !showJoin && (
         <div className="mb-8 rounded-xl border border-accent/30 bg-accent-light/50 p-6">
           <h2 className="mb-2 text-lg font-semibold text-text-primary">Get started with FoosLeague</h2>
-          <p className="mb-4 text-sm text-text-secondary">Join an existing league or create your own to start tracking matches.</p>
+          <p className="mb-4 text-sm text-text-secondary">Create a league and invite your colleagues, or join one with an invite code.</p>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <Link
-              to="/leagues"
-              className="flex items-center gap-3 rounded-xl border border-border bg-bg-secondary p-4 transition-colors hover:border-accent"
+            <button
+              onClick={() => setShowJoin(true)}
+              className="flex items-center gap-3 rounded-xl border border-border bg-bg-secondary p-4 text-left transition-colors hover:border-accent"
             >
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent-light">
-                <MdSearch size={20} className="text-accent" />
+                <MdVpnKey size={20} className="text-accent" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-text-primary">Browse & Join a League</p>
-                <p className="text-xs text-text-secondary">Find leagues to compete in</p>
+                <p className="text-sm font-semibold text-text-primary">Join with Code</p>
+                <p className="text-xs text-text-secondary">Enter an invite code from a friend</p>
               </div>
-            </Link>
+            </button>
             <button
               onClick={() => setShowCreate(true)}
               className="flex items-center gap-3 rounded-xl border border-border bg-bg-secondary p-4 text-left transition-colors hover:border-accent"
@@ -184,7 +225,7 @@ export const DashboardPage = () => {
 
       {/* My Leagues */}
       {myLeagues.length > 0 && (
-        <section className="mb-8">
+        <section>
           <h2 className="mb-4 text-lg font-semibold text-text-primary">My Leagues</h2>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
             {myLeagues.map((league) => (
@@ -214,43 +255,6 @@ export const DashboardPage = () => {
                   ELO: <span className="font-mono font-semibold text-accent">{league.current_elo}</span>
                 </div>
               </Link>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* Available Leagues */}
-      {availableLeagues.length > 0 && (
-        <section>
-          <h2 className="mb-4 text-lg font-semibold text-text-primary">Available Leagues</h2>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {availableLeagues.map((league) => (
-              <div
-                key={league.league_id}
-                className="rounded-xl border border-border bg-bg-secondary p-5 shadow-sm"
-              >
-                <h3 className="mb-2 text-lg font-semibold text-text-primary">{league.name}</h3>
-                <div className="flex items-center gap-4 text-sm text-text-secondary">
-                  <span className="flex items-center gap-1">
-                    <MdPeople size={14} /> {league.member_count}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <MdSportsSoccer size={14} /> {league.match_count}
-                  </span>
-                  <span className="rounded-full bg-bg-tertiary px-2.5 py-0.5 text-xs font-medium text-text-secondary">
-                    {league.league_type}
-                  </span>
-                </div>
-                {league.description && (
-                  <p className="mt-2 text-sm text-text-muted">{league.description}</p>
-                )}
-                <button
-                  onClick={() => handleJoin(league.league_id)}
-                  className="mt-3 rounded-lg bg-accent px-4 py-1.5 text-sm font-medium text-white transition-colors hover:bg-accent-hover"
-                >
-                  Join
-                </button>
-              </div>
             ))}
           </div>
         </section>
