@@ -1,5 +1,30 @@
 # Changelog
 
+## [0.3.0](https://github.com/Simi24/FoosbalLeague/compare/foosball-league-v0.2.5...foosball-league-v0.3.0) (2026-03-14)
+
+
+### Features
+
+* ✨ add achievement system with 10 badges and gamification ([13bb054](https://github.com/Simi24/FoosbalLeague/commit/13bb054d4134383336fe35e21944947a0f69382f))
+* ✨ add dedicated Profile page, fix league visibility scoping ([77c6255](https://github.com/Simi24/FoosbalLeague/commit/77c625582338e03cab1ccfc9ade4a02c44a7b1c6))
+* ✨ add league admin settings page with member management ([cbdd59b](https://github.com/Simi24/FoosbalLeague/commit/cbdd59b292b4979a6ef910ae96b66367e174b618))
+* ✨ add match history page and leave league button ([50ccca4](https://github.com/Simi24/FoosbalLeague/commit/50ccca403c2c8729eb86f18a3661f2e9e0904600))
+* ✨ fix match display, add confirm/dispute UI, ELO history chart, and player stats ([c4936ae](https://github.com/Simi24/FoosbalLeague/commit/c4936ae4e054089cf694d037ccd0f7ff54ab0ad8))
+* ✨ redesign Record Match with two-column layout and ELO delta preview ([23e48bc](https://github.com/Simi24/FoosbalLeague/commit/23e48bc124b6b7547ada7f40541378c15c91da93))
+* ✨ replace public league browsing with invite code system ([5fb56ad](https://github.com/Simi24/FoosbalLeague/commit/5fb56adcb6f34c725b63f3f99eb310efda14e9de))
+* 🔒 enforce full league isolation, remove global player visibility ([3c7195d](https://github.com/Simi24/FoosbalLeague/commit/3c7195d4bee328707309a01438ff90bd83393f95))
+* add integration tests and improve backend functionality ([b8b87cb](https://github.com/Simi24/FoosbalLeague/commit/b8b87cbc3a64ffbb005cf849f8ffffd3eafd8ed7))
+
+
+### Bug Fixes
+
+* 🎨 simplify stats to per-league only, remove cross-league aggregates ([087f332](https://github.com/Simi24/FoosbalLeague/commit/087f3327d220de8682f18eeb670124a1d9d54abd))
+* 🐛 ensure unique invite codes and redirect after league creation ([e61bb32](https://github.com/Simi24/FoosbalLeague/commit/e61bb323592eac8347abdf2e3f3429de7efcb5c7))
+* 🐛 leaderboard shows only enrolled leagues in dropdown ([97bb7e9](https://github.com/Simi24/FoosbalLeague/commit/97bb7e9b6032b441056f9eb5b25f33f0150196ea))
+* 🐛 player profile defaults to most active league dynamically ([9b97fee](https://github.com/Simi24/FoosbalLeague/commit/9b97fee36562c28dd3a3c3c14e18ff79d63c6a02))
+* 🐛 player profile dropdown shows only shared leagues ([f3c9ff3](https://github.com/Simi24/FoosbalLeague/commit/f3c9ff3b231a3afefb72cae09c1980fdc5e1957f))
+* 🔧 add invite_code to seed leagues in init-aws.sh ([b98d2a8](https://github.com/Simi24/FoosbalLeague/commit/b98d2a8a4a9d52caecc08c621c4ecd15334effb5))
+
 ## [0.2.5](https://github.com/Simi24/FoosbalLeague/compare/foosball-league-v0.2.4...foosball-league-v0.2.5) (2026-03-13)
 
 
