@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { MdArrowBack, MdContentCopy, MdPersonAdd, MdPersonRemove, MdRefresh, MdStar, MdStarBorder, MdDelete } from "react-icons/md";
+import { MdArrowBack, MdContentCopy, MdPersonRemove, MdRefresh, MdStar, MdStarBorder, MdDelete } from "react-icons/md";
 
 import { apiFetch } from "@/api";
 import { useAppSelector } from "@/app/hooks";
-import type { League, LeagueMember, MyLeague, Player } from "../types";
+import type { League, LeagueMember, MyLeague } from "../types";
 
 export const LeagueSettingsPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -12,7 +12,6 @@ export const LeagueSettingsPage = () => {
   const user = useAppSelector((state) => state.auth.user);
   const [league, setLeague] = useState<League | null>(null);
   const [members, setMembers] = useState<LeagueMember[]>([]);
-  const [allPlayers, setAllPlayers] = useState<Player[]>([]);
   const [loading, setLoading] = useState(true);
   const [inviteCode, setInviteCode] = useState("");
   const [name, setName] = useState("");
@@ -24,13 +23,11 @@ export const LeagueSettingsPage = () => {
     Promise.all([
       apiFetch(`/leagues/${id}`).then((r) => r.json()) as Promise<League>,
       apiFetch(`/leagues/${id}/members`).then((r) => r.json()) as Promise<LeagueMember[]>,
-      apiFetch("/players/").then((r) => r.json()) as Promise<Player[]>,
       apiFetch("/leagues/my").then((r) => (r.ok ? r.json() : [])) as Promise<MyLeague[]>,
     ])
-      .then(([lg, mem, players, myLeagues]) => {
+      .then(([lg, mem, myLeagues]) => {
         setLeague(lg);
         setMembers(mem);
-        setAllPlayers(players);
         setName(lg.name);
         setDescription(lg.description);
         const myEntry = myLeagues.find((l) => l.league_id === id);
@@ -45,9 +42,6 @@ export const LeagueSettingsPage = () => {
 
   const currentMember = members.find((m) => m.player_id === user?.player_id);
   const isAdmin = currentMember?.role === "admin";
-
-  const memberIds = new Set(members.map((m) => m.player_id));
-  const nonMembers = allPlayers.filter((p) => !memberIds.has(p.player_id));
 
   const handleSave = async () => {
     await apiFetch(`/leagues/${id}`, {
@@ -70,11 +64,6 @@ export const LeagueSettingsPage = () => {
 
   const handleDemote = async (playerId: string) => {
     await apiFetch(`/leagues/${id}/demote/${playerId}`, { method: "POST" });
-    fetchData();
-  };
-
-  const handleAdd = async (playerId: string) => {
-    await apiFetch(`/leagues/${id}/add/${playerId}`, { method: "POST" });
     fetchData();
   };
 
@@ -224,32 +213,6 @@ export const LeagueSettingsPage = () => {
           ))}
         </div>
       </div>
-
-      {/* Add Members */}
-      {nonMembers.length > 0 && (
-        <div className="mb-6 rounded-xl border border-border bg-bg-secondary p-5 shadow-sm">
-          <h2 className="mb-4 text-lg font-semibold text-text-primary">Add Players</h2>
-          <div className="space-y-1">
-            {nonMembers.map((p) => (
-              <div
-                key={p.player_id}
-                className="flex items-center justify-between rounded-lg px-3 py-2 hover:bg-bg-tertiary"
-              >
-                <div>
-                  <span className="text-sm font-medium text-text-primary">{p.display_name}</span>
-                  <span className="ml-2 text-xs text-text-muted">{p.email}</span>
-                </div>
-                <button
-                  onClick={() => handleAdd(p.player_id)}
-                  className="flex items-center gap-1 rounded-lg bg-accent/10 px-3 py-1.5 text-xs font-medium text-accent transition-colors hover:bg-accent/20"
-                >
-                  <MdPersonAdd size={14} /> Add
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* Danger Zone */}
       <div className="rounded-xl border-2 border-danger/30 bg-danger/5 p-5">

@@ -17,7 +17,6 @@ import { MatchHistoryPage } from "@/projects/league/pages/MatchHistoryPage";
 import { LeagueSettingsPage } from "@/projects/league/pages/LeagueSettingsPage";
 import { LeaderboardPage } from "@/projects/league/pages/LeaderboardPage";
 import { PlayerProfilePage } from "@/projects/league/pages/PlayerProfilePage";
-import { PlayerListPage } from "@/projects/league/pages/PlayerListPage";
 import { useAppDispatch, useAppSelector } from "./hooks";
 
 export const App = () => {
@@ -60,7 +59,6 @@ export const App = () => {
                   element={<LeaderboardPage />}
                 />
                 <Route path="/leaderboard" element={<LeaderboardPage />} />
-                <Route path="/players" element={<PlayerListPage />} />
                 <Route path="/players/:id" element={<PlayerProfilePage />} />
                 <Route path="/profile" element={<ProfilePage />} />
                 <Route path="/settings" element={<SettingsPage />} />
