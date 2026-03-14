@@ -21,11 +21,24 @@ export const PlayerProfilePage = () => {
       apiFetch(`/players/${playerId}`).then((r) => r.json()),
       apiFetch("/leagues/my").then((r) => (r.ok ? r.json() : [])) as Promise<MyLeague[]>,
     ])
-      .then(([p, myLeagues]) => {
+      .then(async ([p, myLeagues]) => {
         setPlayer(p);
-        setLeagues(myLeagues);
-        if (myLeagues.length > 0 && !selectedLeague) {
-          setSelectedLeague(myLeagues[0]!.league_id);
+
+        // Filter to only leagues where the viewed player also has a ranking
+        const checks = await Promise.all(
+          myLeagues.map(async (lg) => {
+            const res = await apiFetch(`/rankings/league/${lg.league_id}`);
+            if (!res.ok) return null;
+            const data = (await res.json()) as Leaderboard;
+            const hasPlayer = data.entries.some((e) => e.player_id === playerId);
+            return hasPlayer ? lg : null;
+          }),
+        );
+        const shared = checks.filter((lg): lg is MyLeague => lg !== null);
+
+        setLeagues(shared);
+        if (shared.length > 0 && !selectedLeague) {
+          setSelectedLeague(shared[0]!.league_id);
         }
       })
       .finally(() => setLoading(false));
