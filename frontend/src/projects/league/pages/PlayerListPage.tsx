@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { MdPeople } from "react-icons/md";
+import { MdChevronRight, MdPeople } from "react-icons/md";
 
 import { apiFetch } from "@/api";
 import { EmptyState } from "../components";
@@ -37,51 +37,19 @@ export const PlayerListPage = () => {
         />
       ) : (
         <div className="overflow-hidden rounded-xl border border-border bg-bg-secondary shadow-sm">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-border text-left text-sm text-text-secondary">
-                <th className="px-4 py-3">Player</th>
-                <th className="px-4 py-3 text-right">Matches</th>
-                <th className="px-4 py-3 text-right">Wins</th>
-                <th className="px-4 py-3 text-right">Losses</th>
-                <th className="px-4 py-3 text-right">Win %</th>
-              </tr>
-            </thead>
-            <tbody>
-              {players.map((p) => {
-                const winRate = p.total_matches > 0
-                  ? ((p.total_wins / p.total_matches) * 100).toFixed(0)
-                  : "0";
-                return (
-                  <tr
-                    key={p.player_id}
-                    className="border-b border-border/50 transition-colors hover:bg-bg-tertiary"
-                  >
-                    <td className="px-4 py-3">
-                      <Link
-                        to={`/players/${p.player_id}`}
-                        className="text-sm font-medium text-text-primary hover:text-accent"
-                      >
-                        {p.display_name}
-                      </Link>
-                    </td>
-                    <td className="px-4 py-3 text-right text-sm text-text-secondary">
-                      {p.total_matches}
-                    </td>
-                    <td className="px-4 py-3 text-right text-sm text-success">
-                      {p.total_wins}
-                    </td>
-                    <td className="px-4 py-3 text-right text-sm text-danger">
-                      {p.total_losses}
-                    </td>
-                    <td className="px-4 py-3 text-right text-sm text-text-secondary">
-                      {winRate}%
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+          {players.map((p) => (
+            <Link
+              key={p.player_id}
+              to={`/players/${p.player_id}`}
+              className="flex items-center justify-between border-b border-border/50 px-4 py-3 transition-colors hover:bg-bg-tertiary last:border-b-0"
+            >
+              <div>
+                <p className="text-sm font-medium text-text-primary">{p.display_name}</p>
+                <p className="text-xs text-text-muted">{p.email}</p>
+              </div>
+              <MdChevronRight size={20} className="text-text-muted" />
+            </Link>
+          ))}
         </div>
       )}
     </div>

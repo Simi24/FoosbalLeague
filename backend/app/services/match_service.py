@@ -118,7 +118,6 @@ def confirm_match(
         _write_elo_history(
             tenant_id, match.league_id, pid, match.match_id, delta, now
         )
-        _update_player_stats(tenant_id, pid, is_winner)
 
     # Update match status
     elo_changes_serializable = {
@@ -251,24 +250,3 @@ def _write_elo_history(
         updated_at=now,
     )
     history.save()
-
-
-def _update_player_stats(
-    tenant_id: str,
-    player_id: str,
-    is_winner: bool,
-) -> None:
-    """Update global player stats after a confirmed match."""
-    from models.player import PlayerModel
-
-    player = BaseEntity.get(f"TENANT#{tenant_id}", f"PLAYER#{player_id}")
-    if not player or not isinstance(player, PlayerModel):
-        return
-
-    PlayerModel.update(player.pk, player.sk).set(
-        "total_matches", player.total_matches + 1
-    ).set(
-        "total_wins", player.total_wins + (1 if is_winner else 0)
-    ).set(
-        "total_losses", player.total_losses + (0 if is_winner else 1)
-    ).execute()

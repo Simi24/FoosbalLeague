@@ -3,14 +3,15 @@ import { useParams } from "react-router-dom";
 
 import { apiFetch } from "@/api";
 import { EloHistoryChart, StatCard } from "../components";
-import type { EloHistoryPoint, MyLeague, Player } from "../types";
+import type { EloHistoryPoint, Leaderboard, MyLeague, Player, RankingEntry } from "../types";
 
 export const PlayerProfilePage = () => {
   const { id: playerId } = useParams<{ id: string }>();
   const [player, setPlayer] = useState<Player | null>(null);
-  const [eloHistory, setEloHistory] = useState<EloHistoryPoint[]>([]);
   const [leagues, setLeagues] = useState<MyLeague[]>([]);
   const [selectedLeague, setSelectedLeague] = useState("");
+  const [rankingEntry, setRankingEntry] = useState<RankingEntry | null>(null);
+  const [eloHistory, setEloHistory] = useState<EloHistoryPoint[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -31,9 +32,17 @@ export const PlayerProfilePage = () => {
 
   useEffect(() => {
     if (!playerId || !selectedLeague) return;
-    apiFetch(`/rankings/player/${playerId}/history?league_id=${selectedLeague}`)
-      .then((r) => (r.ok ? r.json() : { history: [] }))
-      .then((data: { history: EloHistoryPoint[] }) => setEloHistory(data.history));
+
+    Promise.all([
+      apiFetch(`/rankings/league/${selectedLeague}`)
+        .then((r) => (r.ok ? r.json() : null)) as Promise<Leaderboard | null>,
+      apiFetch(`/rankings/player/${playerId}/history?league_id=${selectedLeague}`)
+        .then((r) => (r.ok ? r.json() : { history: [] })) as Promise<{ history: EloHistoryPoint[] }>,
+    ]).then(([leaderboard, historyData]) => {
+      const entry = leaderboard?.entries.find((e) => e.player_id === playerId) ?? null;
+      setRankingEntry(entry);
+      setEloHistory(historyData.history);
+    });
   }, [playerId, selectedLeague]);
 
   if (loading) {
@@ -45,43 +54,53 @@ export const PlayerProfilePage = () => {
   }
   if (!player) return <p className="text-danger">Player not found</p>;
 
-  const winRate =
-    player.total_matches > 0
-      ? ((player.total_wins / player.total_matches) * 100).toFixed(0)
-      : "0";
+  const winRate = rankingEntry && rankingEntry.matches_played > 0
+    ? (rankingEntry.win_rate * 100).toFixed(0)
+    : "0";
 
   return (
     <div>
-      <h1 className="mb-2 text-2xl font-bold text-text-primary">
-        {player.display_name}
-      </h1>
-      <p className="mb-6 text-sm text-text-secondary">{player.email}</p>
-
-      <div className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-4">
-        <StatCard label="Matches" value={player.total_matches} />
-        <StatCard label="Wins" value={player.total_wins} color="text-success" />
-        <StatCard label="Losses" value={player.total_losses} color="text-danger" />
-        <StatCard label="Win Rate" value={`${winRate}%`} color="text-accent" />
+      <div className="mb-6 flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-text-primary">
+            {player.display_name}
+          </h1>
+          <p className="text-sm text-text-secondary">{player.email}</p>
+        </div>
+        {leagues.length > 0 && (
+          <select
+            value={selectedLeague}
+            onChange={(e) => setSelectedLeague(e.target.value)}
+            className="rounded-lg border border-border bg-bg-tertiary px-3 py-2.5 text-sm text-text-primary outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+          >
+            {leagues.map((lg) => (
+              <option key={lg.league_id} value={lg.league_id}>
+                {lg.name}
+              </option>
+            ))}
+          </select>
+        )}
       </div>
+
+      {rankingEntry ? (
+        <div className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-5">
+          <StatCard label="ELO" value={rankingEntry.elo} color="text-accent" />
+          <StatCard label="Rank" value={`#${rankingEntry.rank}`} />
+          <StatCard label="Wins" value={rankingEntry.wins} color="text-success" />
+          <StatCard label="Losses" value={rankingEntry.losses} color="text-danger" />
+          <StatCard label="Win Rate" value={`${winRate}%`} color="text-accent" />
+        </div>
+      ) : leagues.length > 0 ? (
+        <p className="mb-6 text-sm text-text-muted">No stats in this league yet.</p>
+      ) : (
+        <p className="mb-6 text-sm text-text-muted">Not enrolled in any league yet.</p>
+      )}
 
       {leagues.length > 0 && (
         <div className="rounded-xl border border-border bg-bg-secondary p-5 shadow-sm">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-text-primary">
-              ELO History
-            </h2>
-            <select
-              value={selectedLeague}
-              onChange={(e) => setSelectedLeague(e.target.value)}
-              className="rounded-lg border border-border bg-bg-tertiary px-3 py-2 text-sm text-text-primary outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
-            >
-              {leagues.map((lg) => (
-                <option key={lg.league_id} value={lg.league_id}>
-                  {lg.name}
-                </option>
-              ))}
-            </select>
-          </div>
+          <h2 className="mb-4 text-lg font-semibold text-text-primary">
+            ELO History
+          </h2>
           {eloHistory.length > 0 ? (
             <EloHistoryChart data={eloHistory} />
           ) : (
