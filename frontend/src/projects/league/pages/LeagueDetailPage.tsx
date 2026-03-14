@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useParams } from "react-router-dom";
-import { MdAdd, MdCheck, MdClose, MdLeaderboard } from "react-icons/md";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import { MdAdd, MdCheck, MdClose, MdHistory, MdLeaderboard, MdLogout } from "react-icons/md";
 
 import { apiFetch } from "@/api";
 import { useAppSelector } from "@/app/hooks";
@@ -8,6 +8,7 @@ import type { League, LeagueMember, Match } from "../types";
 
 export const LeagueDetailPage = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const user = useAppSelector((state) => state.auth.user);
   const [league, setLeague] = useState<League | null>(null);
   const [members, setMembers] = useState<LeagueMember[]>([]);
@@ -57,6 +58,11 @@ export const LeagueDetailPage = () => {
     if (res.ok) fetchData();
   };
 
+  const handleLeave = async () => {
+    const res = await apiFetch(`/leagues/${id}/leave`, { method: "POST" });
+    if (res.ok) navigate("/");
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -79,6 +85,14 @@ export const LeagueDetailPage = () => {
           </p>
         </div>
         <div className="flex gap-2">
+          {currentMember && !isAdmin && (
+            <button
+              onClick={handleLeave}
+              className="flex items-center gap-2 rounded-lg border border-danger/30 px-3 py-2.5 text-sm text-danger transition-colors hover:bg-danger/5"
+            >
+              <MdLogout size={16} /> Leave
+            </button>
+          )}
           <Link
             to={`/leagues/${id}/leaderboard`}
             className="flex items-center gap-2 rounded-lg border border-border px-3 py-2.5 text-sm text-text-secondary transition-colors hover:bg-bg-tertiary hover:text-text-primary"
@@ -127,9 +141,19 @@ export const LeagueDetailPage = () => {
 
         {/* Recent Matches */}
         <div className="rounded-xl border border-border bg-bg-secondary p-5 shadow-sm">
-          <h2 className="mb-4 text-lg font-semibold text-text-primary">
-            Recent Matches
-          </h2>
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-text-primary">
+              Recent Matches
+            </h2>
+            {matches.length > 5 && (
+              <Link
+                to={`/leagues/${id}/matches`}
+                className="flex items-center gap-1 text-xs font-medium text-accent hover:text-accent-hover"
+              >
+                <MdHistory size={14} /> View all
+              </Link>
+            )}
+          </div>
           {matches.length === 0 ? (
             <p className="text-sm text-text-muted">No matches yet.</p>
           ) : (

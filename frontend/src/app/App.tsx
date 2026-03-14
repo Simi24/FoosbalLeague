@@ -12,6 +12,7 @@ import { NotFoundPage } from "@/pages/NotFoundPage";
 import { LeagueListPage } from "@/projects/league/pages/LeagueListPage";
 import { LeagueDetailPage } from "@/projects/league/pages/LeagueDetailPage";
 import { MatchRecordPage } from "@/projects/league/pages/MatchRecordPage";
+import { MatchHistoryPage } from "@/projects/league/pages/MatchHistoryPage";
 import { LeaderboardPage } from "@/projects/league/pages/LeaderboardPage";
 import { PlayerProfilePage } from "@/projects/league/pages/PlayerProfilePage";
 import { PlayerListPage } from "@/projects/league/pages/PlayerListPage";
@@ -40,6 +41,10 @@ export const App = () => {
                 <Route path="/" element={<DashboardPage />} />
                 <Route path="/leagues" element={<LeagueListPage />} />
                 <Route path="/leagues/:id" element={<LeagueDetailPage />} />
+                <Route
+                  path="/leagues/:id/matches"
+                  element={<MatchHistoryPage />}
+                />
                 <Route
                   path="/leagues/:id/match/new"
                   element={<MatchRecordPage />}
