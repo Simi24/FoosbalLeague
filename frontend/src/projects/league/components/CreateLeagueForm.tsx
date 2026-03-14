@@ -1,9 +1,11 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import { apiFetch } from "@/api";
 import type { League } from "../types";
 
-export const CreateLeagueForm = ({ onCreated }: { onCreated: (lg: League) => void }) => {
+export const CreateLeagueForm = ({ onCreated }: { onCreated?: (lg: League) => void }) => {
+  const navigate = useNavigate();
   const [name, setName] = useState("");
   const [leagueType, setLeagueType] = useState<"1v1" | "2v2">("2v2");
   const [description, setDescription] = useState("");
@@ -16,8 +18,9 @@ export const CreateLeagueForm = ({ onCreated }: { onCreated: (lg: League) => voi
       body: JSON.stringify({ name, league_type: leagueType, description }),
     });
     if (response.ok) {
-      const league = await response.json();
-      onCreated(league);
+      const league = (await response.json()) as League;
+      if (onCreated) onCreated(league);
+      navigate(`/leagues/${league.league_id}/settings`);
     }
   };
 

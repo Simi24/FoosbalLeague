@@ -21,7 +21,7 @@ def create_league(
 ) -> LeagueModel:
     """Create a new league."""
     league_id = str(uuid.uuid4())[:8]
-    invite_code = str(uuid.uuid4())[:6].upper()
+    invite_code = _generate_unique_invite_code(tenant_id)
     now = datetime.now(timezone.utc)
 
     league = LeagueModel(
@@ -44,6 +44,16 @@ def create_league(
     return league
 
 
+def _generate_unique_invite_code(tenant_id: str, max_retries: int = 10) -> str:
+    """Generate a unique invite code that doesn't collide with existing leagues."""
+    existing_codes = {lg.invite_code for lg in list_leagues(tenant_id) if lg.invite_code}
+    for _ in range(max_retries):
+        code = str(uuid.uuid4())[:6].upper()
+        if code not in existing_codes:
+            return code
+    return str(uuid.uuid4())[:8].upper()
+
+
 def get_league_by_invite_code(tenant_id: str, code: str) -> LeagueModel | None:
     """Find a league by its invite code."""
     leagues = list_leagues(tenant_id)
@@ -59,7 +69,7 @@ def regenerate_invite_code(tenant_id: str, league_id: str) -> str | None:
     if not league:
         return None
 
-    new_code = str(uuid.uuid4())[:6].upper()
+    new_code = _generate_unique_invite_code(tenant_id)
     now = datetime.now(timezone.utc)
     LeagueModel.update(league.pk, league.sk).set(
         "invite_code", new_code
