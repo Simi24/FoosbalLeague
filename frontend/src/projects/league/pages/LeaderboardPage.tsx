@@ -2,7 +2,21 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
 import { apiFetch } from "@/api";
-import type { Leaderboard, League } from "../types";
+import type { Leaderboard, League, MyLeague } from "../types";
+
+const getRankStyle = (rank: number): string => {
+  if (rank === 1) return "bg-amber-50 border-amber-200";
+  if (rank === 2) return "bg-gray-50 border-gray-200";
+  if (rank === 3) return "bg-orange-50 border-orange-200";
+  return "";
+};
+
+const getRankBadge = (rank: number): string | null => {
+  if (rank === 1) return "🥇";
+  if (rank === 2) return "🥈";
+  if (rank === 3) return "🥉";
+  return null;
+};
 
 export const LeaderboardPage = () => {
   const { id: leagueId } = useParams<{ id: string }>();
@@ -12,15 +26,19 @@ export const LeaderboardPage = () => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    apiFetch("/leagues/")
-      .then((r) => r.json())
-      .then((data: League[]) => {
-        setLeagues(data);
-        if (!selectedLeague && data.length > 0 && data[0]) {
-          setSelectedLeague(data[0].league_id);
-        }
-      });
-  }, [selectedLeague]);
+    Promise.all([
+      apiFetch("/leagues/").then((r) => r.json()) as Promise<League[]>,
+      apiFetch("/leagues/my").then((r) => (r.ok ? r.json() : [])) as Promise<MyLeague[]>,
+    ]).then(([allLeagues, myLeagues]) => {
+      setLeagues(allLeagues);
+      if (!selectedLeague && allLeagues.length > 0) {
+        const defaultLeague = myLeagues.length > 0
+          ? myLeagues[0]!.league_id
+          : allLeagues[0]!.league_id;
+        setSelectedLeague(defaultLeague);
+      }
+    });
+  }, []);
 
   useEffect(() => {
     if (!selectedLeague) return;
@@ -38,7 +56,7 @@ export const LeaderboardPage = () => {
         <select
           value={selectedLeague}
           onChange={(e) => setSelectedLeague(e.target.value)}
-          className="rounded border border-border bg-bg-tertiary px-3 py-2 text-sm text-text-primary outline-none focus:border-neon-green"
+          className="rounded-lg border border-border bg-bg-tertiary px-3 py-2.5 text-sm text-text-primary outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
         >
           {leagues.map((lg) => (
             <option key={lg.league_id} value={lg.league_id}>
@@ -49,11 +67,13 @@ export const LeaderboardPage = () => {
       </div>
 
       {loading ? (
-        <p className="text-text-muted">Loading...</p>
+        <div className="flex items-center justify-center py-12">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent border-t-transparent" />
+        </div>
       ) : !leaderboard || leaderboard.entries.length === 0 ? (
         <p className="text-text-muted">No rankings yet.</p>
       ) : (
-        <div className="rounded border border-border bg-bg-secondary">
+        <div className="overflow-hidden rounded-xl border border-border bg-bg-secondary shadow-sm">
           <table className="w-full">
             <thead>
               <tr className="border-b border-border text-left text-sm text-text-secondary">
@@ -66,36 +86,39 @@ export const LeaderboardPage = () => {
               </tr>
             </thead>
             <tbody>
-              {leaderboard.entries.map((entry) => (
-                <tr
-                  key={entry.player_id}
-                  className="border-b border-border/50 transition-colors hover:bg-bg-tertiary"
-                >
-                  <td className="px-4 py-3 text-sm text-text-muted">
-                    {entry.rank}
-                  </td>
-                  <td className="px-4 py-3">
-                    <Link
-                      to={`/players/${entry.player_id}`}
-                      className="text-sm text-text-primary hover:text-neon-green"
-                    >
-                      {entry.display_name}
-                    </Link>
-                  </td>
-                  <td className="px-4 py-3 text-right font-mono text-sm text-neon-green">
-                    {entry.elo}
-                  </td>
-                  <td className="px-4 py-3 text-right text-sm text-success">
-                    {entry.wins}
-                  </td>
-                  <td className="px-4 py-3 text-right text-sm text-danger">
-                    {entry.losses}
-                  </td>
-                  <td className="px-4 py-3 text-right text-sm text-text-secondary">
-                    {(entry.win_rate * 100).toFixed(0)}%
-                  </td>
-                </tr>
-              ))}
+              {leaderboard.entries.map((entry) => {
+                const badge = getRankBadge(entry.rank);
+                return (
+                  <tr
+                    key={entry.player_id}
+                    className={`border-b border-border/50 transition-colors hover:bg-bg-tertiary ${getRankStyle(entry.rank)}`}
+                  >
+                    <td className="px-4 py-3 text-sm text-text-muted">
+                      {badge ?? entry.rank}
+                    </td>
+                    <td className="px-4 py-3">
+                      <Link
+                        to={`/players/${entry.player_id}`}
+                        className="text-sm font-medium text-text-primary hover:text-accent"
+                      >
+                        {entry.display_name}
+                      </Link>
+                    </td>
+                    <td className="px-4 py-3 text-right font-mono text-sm font-semibold text-accent">
+                      {entry.elo}
+                    </td>
+                    <td className="px-4 py-3 text-right text-sm text-success">
+                      {entry.wins}
+                    </td>
+                    <td className="px-4 py-3 text-right text-sm text-danger">
+                      {entry.losses}
+                    </td>
+                    <td className="px-4 py-3 text-right text-sm text-text-secondary">
+                      {(entry.win_rate * 100).toFixed(0)}%
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

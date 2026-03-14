@@ -21,14 +21,17 @@ export const CreateLeagueForm = ({ onCreated }: { onCreated: (lg: League) => voi
     }
   };
 
+  const inputClass =
+    "w-full rounded-lg border border-border bg-bg-tertiary px-3 py-2.5 text-sm text-text-primary outline-none focus:border-accent focus:ring-2 focus:ring-accent/20";
+
   return (
-    <form onSubmit={handleSubmit} className="mb-6 rounded border border-border bg-bg-secondary p-5">
+    <form onSubmit={handleSubmit} className="mb-6 rounded-xl border border-border bg-bg-secondary p-5 shadow-sm">
       <div className="mb-4">
-        <label className="mb-1 block text-sm text-text-secondary">Name</label>
+        <label className="mb-1 block text-sm font-medium text-text-secondary">Name</label>
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="w-full rounded border border-border bg-bg-tertiary px-3 py-2 text-sm text-text-primary outline-none focus:border-neon-green"
+          className={inputClass}
           required
         />
       </div>
@@ -38,7 +41,7 @@ export const CreateLeagueForm = ({ onCreated }: { onCreated: (lg: League) => voi
             type="radio"
             checked={leagueType === "2v2"}
             onChange={() => setLeagueType("2v2")}
-            className="accent-neon-green"
+            className="accent-accent"
           />
           2v2
         </label>
@@ -47,22 +50,22 @@ export const CreateLeagueForm = ({ onCreated }: { onCreated: (lg: League) => voi
             type="radio"
             checked={leagueType === "1v1"}
             onChange={() => setLeagueType("1v1")}
-            className="accent-neon-green"
+            className="accent-accent"
           />
           1v1
         </label>
       </div>
       <div className="mb-4">
-        <label className="mb-1 block text-sm text-text-secondary">Description</label>
+        <label className="mb-1 block text-sm font-medium text-text-secondary">Description</label>
         <input
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          className="w-full rounded border border-border bg-bg-tertiary px-3 py-2 text-sm text-text-primary outline-none focus:border-neon-green"
+          className={inputClass}
         />
       </div>
       <button
         type="submit"
-        className="rounded bg-neon-green px-4 py-2 text-sm font-medium text-bg-primary transition-all hover:bg-neon-green-dim"
+        className="rounded-lg bg-accent px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-hover"
       >
         Create
       </button>

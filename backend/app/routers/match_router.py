@@ -32,6 +32,14 @@ async def create_match(
     if not player:
         raise HTTPException(status_code=400, detail="Player not registered")
 
+    # Validate submitter is a member of the league
+    submitter_enrollment = get_enrollment(tenant_id, body.league_id, player.player_id)
+    if not submitter_enrollment:
+        raise HTTPException(
+            status_code=403,
+            detail="You must be a member of the league to record matches",
+        )
+
     match = record_match(
         tenant_id=tenant_id,
         league_id=body.league_id,

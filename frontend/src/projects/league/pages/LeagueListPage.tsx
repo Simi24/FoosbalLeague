@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { MdAdd, MdPeople, MdSportsSoccer } from "react-icons/md";
 
 import { apiFetch } from "@/api";
-import { CreateLeagueForm } from "../components";
+import { CreateLeagueForm, EmptyState } from "../components";
 import type { League } from "../types";
 
 export const LeagueListPage = () => {
@@ -24,7 +24,7 @@ export const LeagueListPage = () => {
         <h1 className="text-2xl font-bold text-text-primary">Leagues</h1>
         <button
           onClick={() => setShowCreate(!showCreate)}
-          className="flex items-center gap-2 rounded border border-neon-green px-4 py-2 text-sm text-neon-green transition-all hover:bg-neon-green hover:text-bg-primary"
+          className="flex items-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-hover"
         >
           <MdAdd size={16} />
           Create League
@@ -37,16 +37,30 @@ export const LeagueListPage = () => {
       }} />}
 
       {loading ? (
-        <p className="text-text-muted">Loading...</p>
+        <div className="flex items-center justify-center py-12">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent border-t-transparent" />
+        </div>
       ) : leagues.length === 0 ? (
-        <p className="text-text-muted">No leagues yet. Create one!</p>
+        <EmptyState
+          icon={<MdSportsSoccer size={40} />}
+          title="No leagues yet"
+          description="Create the first league and invite your colleagues!"
+          action={
+            <button
+              onClick={() => setShowCreate(true)}
+              className="rounded-lg bg-accent px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-hover"
+            >
+              Create League
+            </button>
+          }
+        />
       ) : (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           {leagues.map((league) => (
             <Link
               key={league.league_id}
               to={`/leagues/${league.league_id}`}
-              className="rounded border border-border bg-bg-secondary p-5 transition-all hover:border-neon-green"
+              className="rounded-xl border border-border bg-bg-secondary p-5 shadow-sm transition-all hover:border-accent hover:shadow-md"
             >
               <h3 className="mb-2 text-lg font-semibold text-text-primary">
                 {league.name}
@@ -58,7 +72,7 @@ export const LeagueListPage = () => {
                 <span className="flex items-center gap-1">
                   <MdSportsSoccer size={14} /> {league.match_count}
                 </span>
-                <span className="rounded bg-bg-tertiary px-2 py-0.5 text-xs text-neon-green">
+                <span className="rounded-full bg-bg-tertiary px-2.5 py-0.5 text-xs font-medium text-text-secondary">
                   {league.league_type}
                 </span>
               </div>

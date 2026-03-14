@@ -18,7 +18,7 @@ export const Sidebar = () => {
   return (
     <aside className="fixed left-0 top-0 flex h-full w-56 flex-col border-r border-border bg-bg-secondary">
       <div className="flex h-14 items-center border-b border-border px-4">
-        <span className="text-lg font-bold text-neon-green">FoosLeague</span>
+        <span className="text-lg font-bold text-accent">FoosLeague</span>
       </div>
 
       <nav className="flex-1 space-y-1 p-3">
@@ -27,9 +27,9 @@ export const Sidebar = () => {
             key={to}
             to={to}
             className={({ isActive }) =>
-              `flex items-center gap-3 rounded px-3 py-2 text-sm transition-colors ${
+              `flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors ${
                 isActive
-                  ? "bg-neon-green/10 text-neon-green"
+                  ? "bg-accent-light text-accent font-medium"
                   : "text-text-secondary hover:bg-bg-tertiary hover:text-text-primary"
               }`
             }
@@ -43,7 +43,7 @@ export const Sidebar = () => {
       <div className="border-t border-border p-3">
         <NavLink
           to="/settings"
-          className="flex items-center gap-3 rounded px-3 py-2 text-sm text-text-secondary transition-colors hover:bg-bg-tertiary hover:text-text-primary"
+          className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-text-secondary transition-colors hover:bg-bg-tertiary hover:text-text-primary"
         >
           <MdSettings size={18} />
           <span>Settings</span>

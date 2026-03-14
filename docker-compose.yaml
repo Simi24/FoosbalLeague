@@ -13,6 +13,8 @@ services:
       LOG_LEVEL: DEBUG
       DEFAULT_TENANT_ID: default
       DYNAMODB_TABLE: foosball-league
+      COGNITO_USER_POOL_ID: eu-west-1_7VnItbnZH
+      COGNITO_REGION: eu-west-1
       AWS_ENDPOINT_URL: http://localstack:4566
       AWS_ACCESS_KEY_ID: test
       AWS_SECRET_ACCESS_KEY: test
@@ -41,6 +43,8 @@ services:
       - 5173:5173
     environment:
       - VITE_API_URL=http://localhost:9000
+      - VITE_COGNITO_REGION=eu-west-1
+      - VITE_COGNITO_CLIENT_ID=71i6pq68u6ne9sl6lof24u1glj
 
   localstack:
     image: localstack/localstack

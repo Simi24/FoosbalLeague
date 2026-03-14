@@ -86,17 +86,17 @@ export const MatchRecordPage = () => {
       </h1>
 
       <form onSubmit={handleSubmit}>
-        <div className="mb-6 rounded border border-border bg-bg-secondary p-5">
+        <div className="mb-6 rounded-xl border border-border bg-bg-secondary p-5 shadow-sm">
           <h2 className="mb-3 text-lg font-semibold text-text-primary">
             Select Players
           </h2>
-          <div className="space-y-2">
+          <div className="space-y-1">
             {members.map((m) => {
               const playerTeam = getPlayerTeam(m.player_id);
               return (
                 <div
                   key={m.player_id}
-                  className="flex items-center justify-between rounded px-3 py-2 hover:bg-bg-tertiary"
+                  className="flex items-center justify-between rounded-lg px-3 py-2 hover:bg-bg-tertiary"
                 >
                   <span className="text-sm text-text-primary">
                     {m.display_name}
@@ -108,10 +108,10 @@ export const MatchRecordPage = () => {
                     <button
                       type="button"
                       onClick={() => togglePlayer(m.player_id, 1)}
-                      className={`rounded px-3 py-1 text-xs transition-all ${
+                      className={`rounded-lg px-3 py-1 text-xs font-medium transition-all ${
                         playerTeam === 1
-                          ? "bg-neon-green text-bg-primary"
-                          : "border border-border text-text-secondary hover:border-neon-green"
+                          ? "bg-accent text-white"
+                          : "border border-border text-text-secondary hover:border-accent hover:text-accent"
                       }`}
                     >
                       Team 1
@@ -119,10 +119,10 @@ export const MatchRecordPage = () => {
                     <button
                       type="button"
                       onClick={() => togglePlayer(m.player_id, 2)}
-                      className={`rounded px-3 py-1 text-xs transition-all ${
+                      className={`rounded-lg px-3 py-1 text-xs font-medium transition-all ${
                         playerTeam === 2
-                          ? "bg-neon-green text-bg-primary"
-                          : "border border-border text-text-secondary hover:border-neon-green"
+                          ? "bg-accent text-white"
+                          : "border border-border text-text-secondary hover:border-accent hover:text-accent"
                       }`}
                     >
                       Team 2
@@ -136,7 +136,7 @@ export const MatchRecordPage = () => {
 
         <div className="mb-6 grid grid-cols-2 gap-4">
           <div>
-            <label className="mb-1 block text-sm text-text-secondary">
+            <label className="mb-1 block text-sm font-medium text-text-secondary">
               Team 1 Score
             </label>
             <input
@@ -144,12 +144,12 @@ export const MatchRecordPage = () => {
               min="0"
               value={score1}
               onChange={(e) => setScore1(e.target.value)}
-              className="w-full rounded border border-border bg-bg-tertiary px-3 py-2 text-center font-mono text-2xl text-neon-green outline-none focus:border-neon-green"
+              className="w-full rounded-lg border border-border bg-bg-tertiary px-3 py-2.5 text-center font-mono text-2xl text-accent outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
               required
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm text-text-secondary">
+            <label className="mb-1 block text-sm font-medium text-text-secondary">
               Team 2 Score
             </label>
             <input
@@ -157,7 +157,7 @@ export const MatchRecordPage = () => {
               min="0"
               value={score2}
               onChange={(e) => setScore2(e.target.value)}
-              className="w-full rounded border border-border bg-bg-tertiary px-3 py-2 text-center font-mono text-2xl text-neon-green outline-none focus:border-neon-green"
+              className="w-full rounded-lg border border-border bg-bg-tertiary px-3 py-2.5 text-center font-mono text-2xl text-accent outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
               required
             />
           </div>
@@ -170,7 +170,7 @@ export const MatchRecordPage = () => {
         <button
           type="submit"
           disabled={submitting}
-          className="w-full rounded bg-neon-green px-4 py-3 text-sm font-medium text-bg-primary transition-all hover:bg-neon-green-dim disabled:opacity-50"
+          className="w-full rounded-lg bg-accent px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-accent-hover disabled:opacity-50"
         >
           {submitting ? "Recording..." : "Record Match"}
         </button>

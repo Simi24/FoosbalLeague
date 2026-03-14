@@ -1,10 +1,6 @@
 const COGNITO_CONFIG = {
-  region: import.meta.env.VITE_COGNITO_REGION as string | undefined,
-  clientId: import.meta.env.VITE_COGNITO_CLIENT_ID as string | undefined,
-};
-
-export const isLocalMode = (): boolean => {
-  return !COGNITO_CONFIG.region;
+  region: import.meta.env.VITE_COGNITO_REGION as string,
+  clientId: import.meta.env.VITE_COGNITO_CLIENT_ID as string,
 };
 
 export class CognitoError extends Error {

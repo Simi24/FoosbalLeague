@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
 import { apiFetch } from "@/api";
-import { isLocalMode, cognitoLogin } from "./cognito";
+import { cognitoLogin } from "./cognito";
 import { saveTokens, getIdToken, clearTokens, isTokenExpired } from "./tokenStorage";
 
 type UserInfo = {
@@ -36,10 +36,6 @@ const fetchMe = async (): Promise<UserInfo> => {
 export const initAuth = createAsyncThunk(
   "auth/initAuth",
   async () => {
-    if (isLocalMode()) {
-      return fetchMe();
-    }
-
     const token = getIdToken();
     if (!token || isTokenExpired(token)) {
       clearTokens();

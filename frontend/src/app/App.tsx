@@ -7,12 +7,14 @@ import { initAuth } from "@/features/auth";
 import { DashboardPage } from "@/pages/DashboardPage";
 import { LoginPage } from "@/pages/LoginPage";
 import { SignupPage } from "@/pages/SignupPage";
+import { SettingsPage } from "@/pages/SettingsPage";
 import { NotFoundPage } from "@/pages/NotFoundPage";
 import { LeagueListPage } from "@/projects/league/pages/LeagueListPage";
 import { LeagueDetailPage } from "@/projects/league/pages/LeagueDetailPage";
 import { MatchRecordPage } from "@/projects/league/pages/MatchRecordPage";
 import { LeaderboardPage } from "@/projects/league/pages/LeaderboardPage";
 import { PlayerProfilePage } from "@/projects/league/pages/PlayerProfilePage";
+import { PlayerListPage } from "@/projects/league/pages/PlayerListPage";
 import { useAppDispatch, useAppSelector } from "./hooks";
 
 export const App = () => {
@@ -47,7 +49,9 @@ export const App = () => {
                   element={<LeaderboardPage />}
                 />
                 <Route path="/leaderboard" element={<LeaderboardPage />} />
+                <Route path="/players" element={<PlayerListPage />} />
                 <Route path="/players/:id" element={<PlayerProfilePage />} />
+                <Route path="/settings" element={<SettingsPage />} />
                 <Route path="*" element={<NotFoundPage />} />
               </Routes>
             </AppShell>

@@ -45,14 +45,14 @@ export const EloHistoryChart = ({
                 y1={y}
                 x2={chartWidth}
                 y2={y}
-                stroke="#333333"
+                stroke="#e5e7eb"
                 strokeDasharray="4"
               />
               <text
                 x={-8}
                 y={y + 4}
                 textAnchor="end"
-                fill="#888888"
+                fill="#6b7280"
                 fontSize={10}
                 fontFamily="monospace"
               >
@@ -66,7 +66,7 @@ export const EloHistoryChart = ({
         <polyline
           points={points}
           fill="none"
-          stroke="#00ff41"
+          stroke="#f59e0b"
           strokeWidth={2}
           strokeLinejoin="round"
         />
@@ -78,7 +78,7 @@ export const EloHistoryChart = ({
             cx={xScale(i)}
             cy={yScale(d.elo)}
             r={3}
-            fill="#00ff41"
+            fill="#f59e0b"
           />
         ))}
       </g>
