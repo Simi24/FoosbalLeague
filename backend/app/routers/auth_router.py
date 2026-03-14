@@ -1,6 +1,6 @@
 from typing import Any
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 
 from dependencies.auth import get_current_user
 from dependencies.tenant import get_tenant_id
@@ -43,6 +43,10 @@ async def register(
 ) -> RegisterResponse:
     """Self-register as a player (creates player from Cognito user)."""
     from services.player_service import create_player
+
+    existing = get_player_by_cognito_sub(tenant_id, user.get("sub", ""))
+    if existing:
+        raise HTTPException(status_code=409, detail="Player already registered")
 
     player = create_player(
         tenant_id=tenant_id,

@@ -26,6 +26,8 @@ def create_league(
     league = LeagueModel(
         pk=f"TENANT#{tenant_id}",
         sk=f"LEAGUE#{league_id}",
+        gsi1_pk=f"LEAGUE#{league_id}",
+        gsi1_sk=f"LEAGUE#{league_id}",
         league_id=league_id,
         name=name,
         league_type=league_type,
@@ -73,7 +75,7 @@ def update_league(
 
     if updates:
         updates["updated_at"] = datetime.now(timezone.utc)
-        builder = league.update()
+        builder = LeagueModel.update(league.pk, league.sk)
         for field, value in updates.items():
             builder = builder.set(field, value)
         builder.execute()
@@ -130,9 +132,9 @@ def join_league(
     rating.save()
 
     # Increment member count
-    league.update().set("member_count", league.member_count + 1).set(
-        "updated_at", now
-    ).execute()
+    LeagueModel.update(league.pk, league.sk).set(
+        "member_count", league.member_count + 1
+    ).set("updated_at", now).execute()
 
     logger.info(f"Player {player_id} joined league {league_id}")
     return enrollment
@@ -146,14 +148,14 @@ def leave_league(tenant_id: str, league_id: str, player_id: str) -> bool:
     if not enrollment:
         return False
 
-    enrollment.delete()
+    EnrollmentModel.delete(enrollment.pk, enrollment.sk)
 
     league = get_league(tenant_id, league_id)
     if league:
         now = datetime.now(timezone.utc)
-        league.update().set("member_count", max(0, league.member_count - 1)).set(
-            "updated_at", now
-        ).execute()
+        LeagueModel.update(league.pk, league.sk).set(
+            "member_count", max(0, league.member_count - 1)
+        ).set("updated_at", now).execute()
 
     logger.info(f"Player {player_id} left league {league_id}")
     return True

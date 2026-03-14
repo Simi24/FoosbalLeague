@@ -37,9 +37,13 @@ logs-backend:
 logs-frontend:
     docker compose logs -f frontend
 
-# Run backend tests locally (inside devcontainer, no docker needed)
+# Run backend unit tests (no docker needed)
 test-backend:
-    cd backend && PYTHONPATH=app ENV=local LOCAL=true python -m pytest tests/ -v
+    cd backend && PYTHONPATH=app ENV=local LOCAL=true python -m pytest tests/ -v --ignore=tests/integration
+
+# Run integration tests (requires: docker compose up localstack -d)
+test-integration:
+    cd backend && PYTHONPATH=app ENV=local LOCAL=true DYNAMODB_TABLE=foosball-league python -m pytest tests/integration/ -v
 
 # Lint backend
 lint-backend:

@@ -47,9 +47,11 @@ def record_match(
     # Increment match count on league
     league = get_league(tenant_id, league_id)
     if league:
-        league.update().set("match_count", league.match_count + 1).set(
-            "updated_at", now
-        ).execute()
+        from models.league import LeagueModel
+
+        LeagueModel.update(league.pk, league.sk).set(
+            "match_count", league.match_count + 1
+        ).set("updated_at", now).execute()
 
     logger.info(f"Recorded match {match_id} in league {league_id}")
     return match
@@ -122,7 +124,9 @@ def confirm_match(
         pid: {"delta": delta} for pid, delta in elo_changes.items()
     }
 
-    match.update().set("status", "CONFIRMED").set("confirmed_by", confirmed_by).set(
+    MatchModel.update(match.pk, match.sk).set(
+        "status", "CONFIRMED"
+    ).set("confirmed_by", confirmed_by).set(
         "elo_changes", elo_changes_serializable
     ).set("updated_at", now).execute()
 
@@ -140,7 +144,9 @@ def dispute_match(
         return None
 
     now = datetime.now(timezone.utc)
-    match.update().set("status", "DISPUTED").set("updated_at", now).execute()
+    MatchModel.update(match.pk, match.sk).set(
+        "status", "DISPUTED"
+    ).set("updated_at", now).execute()
 
     logger.info(f"Disputed match {match_id}")
     return get_match(tenant_id, match_id)
@@ -188,7 +194,7 @@ def _update_rating(
     inverted_elo = str(9999 - new_elo).zfill(4)
 
     # Delete old and write new (GSI1 SK changes)
-    old_rating.delete()
+    RatingModel.delete(old_rating.pk, old_rating.sk)
 
     new_rating = RatingModel(
         pk=f"TENANT#{tenant_id}",
@@ -212,9 +218,11 @@ def _update_rating(
         f"TENANT#{tenant_id}", f"ENROLL#{league_id}#{player_id}"
     )
     if enrollment:
-        enrollment.update().set("current_elo", new_elo).set(
-            "updated_at", now
-        ).execute()
+        from models.enrollment import EnrollmentModel
+
+        EnrollmentModel.update(enrollment.pk, enrollment.sk).set(
+            "current_elo", new_elo
+        ).set("updated_at", now).execute()
 
 
 def _write_elo_history(

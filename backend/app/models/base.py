@@ -2,10 +2,15 @@
 
 import os
 from datetime import datetime
+from typing import Any
+
+from pydantic import model_validator
 
 from dynantic import Discriminator, DynamoModel, GSIKey, GSISortKey, Key, SortKey
 
 TABLE_NAME = os.getenv("DYNAMODB_TABLE", "foosball-league")
+
+_GSI_FIELDS = ("gsi1_pk", "gsi1_sk", "gsi3_pk", "gsi3_sk")
 
 
 class BaseEntity(DynamoModel):
@@ -27,6 +32,19 @@ class BaseEntity(DynamoModel):
 
     created_at: datetime
     updated_at: datetime
+
+    @model_validator(mode="before")
+    @classmethod
+    def _default_gsi_fields(cls, data: Any) -> Any:
+        """Ensure GSI fields default to None when not provided.
+
+        Workaround for dynantic returning Attr descriptors instead of None.
+        """
+        if isinstance(data, dict):
+            for field in _GSI_FIELDS:
+                if field not in data:
+                    data[field] = None
+        return data
 
     class Meta:
         table_name = TABLE_NAME
