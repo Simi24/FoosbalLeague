@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 
 import { apiFetch } from "@/api";
 import { useAppSelector } from "@/app/hooks";
+import { Avatar } from "@/components/Avatar";
 import { AchievementBadge, EloHistoryChart, StatCard } from "@/projects/league/components";
 import type { Achievement, EloHistoryPoint, Leaderboard, MyLeague, RankingEntry } from "@/projects/league/types";
 
@@ -69,9 +70,12 @@ export const ProfilePage = () => {
   return (
     <div>
       <div className="mb-6 flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-text-primary">{user.name}</h1>
-          <p className="text-sm text-text-secondary">{user.email}</p>
+        <div className="flex items-center gap-4">
+          <Avatar name={user.name} size="lg" />
+          <div>
+            <h1 className="text-2xl font-bold text-text-primary">{user.name}</h1>
+            <p className="text-sm text-text-secondary">{user.email}</p>
+          </div>
         </div>
         {leagues.length > 0 && (
           <select

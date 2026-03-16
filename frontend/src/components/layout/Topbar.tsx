@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 
 import { useAppSelector } from "@/app/hooks";
-import { MdPerson } from "react-icons/md";
+import { Avatar } from "@/components/Avatar";
 
 export const Topbar = () => {
   const user = useAppSelector((state) => state.auth.user);
@@ -13,9 +13,7 @@ export const Topbar = () => {
         <span className="text-sm text-text-secondary">
           {user?.name ?? "Guest"}
         </span>
-        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent-light">
-          <MdPerson size={16} className="text-accent" />
-        </div>
+        <Avatar name={user?.name ?? "?"} />
       </Link>
     </header>
   );

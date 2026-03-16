@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
 import { apiFetch } from "@/api";
+import { Avatar } from "@/components/Avatar";
 import type { Leaderboard, MyLeague } from "../types";
 
 const getRankStyle = (rank: number): string => {
@@ -95,8 +96,9 @@ export const LeaderboardPage = () => {
                     <td className="px-4 py-3">
                       <Link
                         to={`/players/${entry.player_id}`}
-                        className="text-sm font-medium text-text-primary hover:text-accent"
+                        className="flex items-center gap-2 text-sm font-medium text-text-primary hover:text-accent"
                       >
+                        <Avatar name={entry.display_name} size="sm" />
                         {entry.display_name}
                       </Link>
                     </td>

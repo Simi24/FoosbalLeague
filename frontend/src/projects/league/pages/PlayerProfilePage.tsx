@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
 import { apiFetch } from "@/api";
+import { Avatar } from "@/components/Avatar";
 import { AchievementBadge, EloHistoryChart, StatCard } from "../components";
 import type { Achievement, EloHistoryPoint, Leaderboard, MyLeague, Player, RankingEntry } from "../types";
 
@@ -81,11 +82,14 @@ export const PlayerProfilePage = () => {
   return (
     <div>
       <div className="mb-6 flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-text-primary">
-            {player.display_name}
-          </h1>
-          <p className="text-sm text-text-secondary">{player.email}</p>
+        <div className="flex items-center gap-4">
+          <Avatar name={player.display_name} size="lg" />
+          <div>
+            <h1 className="text-2xl font-bold text-text-primary">
+              {player.display_name}
+            </h1>
+            <p className="text-sm text-text-secondary">{player.email}</p>
+          </div>
         </div>
         {leagues.length > 0 && (
           <select

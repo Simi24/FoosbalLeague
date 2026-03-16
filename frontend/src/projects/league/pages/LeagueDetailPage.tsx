@@ -4,6 +4,7 @@ import { MdAdd, MdCheck, MdClose, MdHistory, MdLeaderboard, MdLogout, MdSettings
 
 import { apiFetch } from "@/api";
 import { useAppSelector } from "@/app/hooks";
+import { Avatar } from "@/components/Avatar";
 import type { League, LeagueMember, Match } from "../types";
 
 export const LeagueDetailPage = () => {
@@ -132,12 +133,15 @@ export const LeagueDetailPage = () => {
                   to={`/players/${m.player_id}`}
                   className="flex items-center justify-between rounded-lg px-3 py-2 transition-colors hover:bg-bg-tertiary"
                 >
-                  <span className="text-sm text-text-primary">
-                    {m.display_name}
-                    {m.role === "admin" && (
-                      <span className="ml-2 rounded-full bg-accent-light px-2 py-0.5 text-xs font-medium text-accent">admin</span>
-                    )}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <Avatar name={m.display_name} size="sm" />
+                    <span className="text-sm text-text-primary">
+                      {m.display_name}
+                      {m.role === "admin" && (
+                        <span className="ml-2 rounded-full bg-accent-light px-2 py-0.5 text-xs font-medium text-accent">admin</span>
+                      )}
+                    </span>
+                  </div>
                   <span className="text-sm font-mono font-semibold text-accent">
                     {m.current_elo}
                   </span>
