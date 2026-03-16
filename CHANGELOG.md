@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.1](https://github.com/Simi24/FoosbalLeague/compare/foosball-league-v0.4.0...foosball-league-v0.4.1) (2026-03-16)
+
+
+### Bug Fixes
+
+* 🐛 add CloudFront 403 error redirect for SPA routing ([5de4a2d](https://github.com/Simi24/FoosbalLeague/commit/5de4a2d1ce7ce85c8e8c6c9c1526b26c4c1f6c7c))
+
 ## [0.4.0](https://github.com/Simi24/FoosbalLeague/compare/foosball-league-v0.3.0...foosball-league-v0.4.0) (2026-03-16)
 
 
