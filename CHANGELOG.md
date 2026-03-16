@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.4.0](https://github.com/Simi24/FoosbalLeague/compare/foosball-league-v0.3.0...foosball-league-v0.4.0) (2026-03-16)
+
+
+### Features
+
+* ✨ add forgot password flow via Cognito ([3e74137](https://github.com/Simi24/FoosbalLeague/commit/3e74137260b2b2ca2b61ead88d48112434664f53))
+* ✨ add generated avatar with colored initials ([aa02f72](https://github.com/Simi24/FoosbalLeague/commit/aa02f729b18731015b99ac24db73e565a841baa8))
+* ✨ password toggle, signup validation, edit display name, topbar link ([ecaecdc](https://github.com/Simi24/FoosbalLeague/commit/ecaecdc1b78b46bf80c91c44e058f59f978ee1a5))
+
+
+### Bug Fixes
+
+* 🐛 members endpoint uses RATING elo instead of stale ENROLLMENT elo ([5976191](https://github.com/Simi24/FoosbalLeague/commit/59761917f9404178518223b68d16eb371fb14eb7))
+* 🔧 rewrite init-aws.sh with rich seed data and invite code ([38266da](https://github.com/Simi24/FoosbalLeague/commit/38266da75fd1cae98e2951680803f06b7254f0de))
+
 ## [0.3.0](https://github.com/Simi24/FoosbalLeague/compare/foosball-league-v0.2.5...foosball-league-v0.3.0) (2026-03-14)
 
 
