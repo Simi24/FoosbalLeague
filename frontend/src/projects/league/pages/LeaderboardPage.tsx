@@ -48,7 +48,7 @@ export const LeaderboardPage = () => {
 
   return (
     <div>
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-2xl font-bold text-text-primary">Leaderboard</h1>
         <select
           value={selectedLeague}
@@ -70,16 +70,16 @@ export const LeaderboardPage = () => {
       ) : !leaderboard || leaderboard.entries.length === 0 ? (
         <p className="text-text-muted">No rankings yet.</p>
       ) : (
-        <div className="overflow-hidden rounded-xl border border-border bg-bg-secondary shadow-sm">
+        <div className="overflow-x-auto rounded-xl border border-border bg-bg-secondary shadow-sm">
           <table className="w-full">
             <thead>
               <tr className="border-b border-border text-left text-sm text-text-secondary">
                 <th className="px-4 py-3 w-12">#</th>
                 <th className="px-4 py-3">Player</th>
                 <th className="px-4 py-3 text-right">ELO</th>
-                <th className="px-4 py-3 text-right">W</th>
-                <th className="px-4 py-3 text-right">L</th>
-                <th className="px-4 py-3 text-right">Win %</th>
+                <th className="hidden px-4 py-3 text-right sm:table-cell">W</th>
+                <th className="hidden px-4 py-3 text-right sm:table-cell">L</th>
+                <th className="hidden px-4 py-3 text-right sm:table-cell">Win %</th>
               </tr>
             </thead>
             <tbody>
@@ -105,13 +105,13 @@ export const LeaderboardPage = () => {
                     <td className="px-4 py-3 text-right font-mono text-sm font-semibold text-accent">
                       {entry.elo}
                     </td>
-                    <td className="px-4 py-3 text-right text-sm text-success">
+                    <td className="hidden px-4 py-3 text-right text-sm text-success sm:table-cell">
                       {entry.wins}
                     </td>
-                    <td className="px-4 py-3 text-right text-sm text-danger">
+                    <td className="hidden px-4 py-3 text-right text-sm text-danger sm:table-cell">
                       {entry.losses}
                     </td>
-                    <td className="px-4 py-3 text-right text-sm text-text-secondary">
+                    <td className="hidden px-4 py-3 text-right text-sm text-text-secondary sm:table-cell">
                       {(entry.win_rate * 100).toFixed(0)}%
                     </td>
                   </tr>

@@ -14,41 +14,62 @@ const navItems = [
   { to: "/profile", icon: MdPerson, label: "Profile" },
 ];
 
-export const Sidebar = () => {
+type SidebarProps = {
+  open: boolean;
+  onClose: () => void;
+};
+
+export const Sidebar = ({ open, onClose }: SidebarProps) => {
   return (
-    <aside className="fixed left-0 top-0 flex h-full w-56 flex-col border-r border-border bg-bg-secondary">
-      <div className="flex h-14 items-center border-b border-border px-4">
-        <span className="text-lg font-bold text-accent">FoosLeague</span>
-      </div>
+    <>
+      {/* Mobile backdrop */}
+      {open && (
+        <div
+          className="fixed inset-0 z-30 bg-black/50 md:hidden"
+          onClick={onClose}
+        />
+      )}
 
-      <nav className="flex-1 space-y-1 p-3">
-        {navItems.map(({ to, icon: Icon, label }) => (
+      <aside
+        className={`fixed left-0 top-0 z-40 flex h-full w-56 flex-col border-r border-border bg-bg-secondary transition-transform duration-200 ${
+          open ? "translate-x-0" : "-translate-x-full"
+        } md:translate-x-0`}
+      >
+        <div className="flex h-14 items-center border-b border-border px-4">
+          <span className="text-lg font-bold text-accent">FoosLeague</span>
+        </div>
+
+        <nav className="flex-1 space-y-1 p-3">
+          {navItems.map(({ to, icon: Icon, label }) => (
+            <NavLink
+              key={to}
+              to={to}
+              onClick={onClose}
+              className={({ isActive }) =>
+                `flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors ${
+                  isActive
+                    ? "bg-accent-light text-accent font-medium"
+                    : "text-text-secondary hover:bg-bg-tertiary hover:text-text-primary"
+                }`
+              }
+            >
+              <Icon size={18} />
+              <span>{label}</span>
+            </NavLink>
+          ))}
+        </nav>
+
+        <div className="border-t border-border p-3">
           <NavLink
-            key={to}
-            to={to}
-            className={({ isActive }) =>
-              `flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors ${
-                isActive
-                  ? "bg-accent-light text-accent font-medium"
-                  : "text-text-secondary hover:bg-bg-tertiary hover:text-text-primary"
-              }`
-            }
+            to="/settings"
+            onClick={onClose}
+            className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-text-secondary transition-colors hover:bg-bg-tertiary hover:text-text-primary"
           >
-            <Icon size={18} />
-            <span>{label}</span>
+            <MdSettings size={18} />
+            <span>Settings</span>
           </NavLink>
-        ))}
-      </nav>
-
-      <div className="border-t border-border p-3">
-        <NavLink
-          to="/settings"
-          className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-text-secondary transition-colors hover:bg-bg-tertiary hover:text-text-primary"
-        >
-          <MdSettings size={18} />
-          <span>Settings</span>
-        </NavLink>
-      </div>
-    </aside>
+        </div>
+      </aside>
+    </>
   );
 };

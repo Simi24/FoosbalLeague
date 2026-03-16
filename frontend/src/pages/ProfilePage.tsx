@@ -69,7 +69,7 @@ export const ProfilePage = () => {
 
   return (
     <div>
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-4">
           <Avatar name={user.name} size="lg" />
           <div>
@@ -93,7 +93,7 @@ export const ProfilePage = () => {
       </div>
 
       {rankingEntry ? (
-        <div className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-5">
+        <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-5">
           <StatCard label="ELO" value={rankingEntry.elo} color="text-accent" />
           <StatCard label="Rank" value={`#${rankingEntry.rank}`} />
           <StatCard label="Wins" value={rankingEntry.wins} color="text-success" />

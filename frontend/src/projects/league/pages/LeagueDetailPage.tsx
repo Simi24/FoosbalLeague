@@ -75,7 +75,7 @@ export const LeagueDetailPage = () => {
 
   return (
     <div>
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-text-primary">
             {league.name}
@@ -85,7 +85,7 @@ export const LeagueDetailPage = () => {
             {league.match_count} matches
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           {currentMember && !isAdmin && (
             <button
               onClick={handleLeave}

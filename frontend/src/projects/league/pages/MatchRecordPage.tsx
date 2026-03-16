@@ -234,9 +234,9 @@ export const MatchRecordPage = () => {
         )}
 
         {/* Two-column teams */}
-        <div className="mb-6 flex gap-4">
+        <div className="mb-6 flex flex-col gap-4 sm:flex-row">
           <TeamSlot team={1} label="Team 1" />
-          <div className="flex items-center pt-6">
+          <div className="flex items-center justify-center sm:pt-6">
             <span className="text-lg font-bold text-text-muted">vs</span>
           </div>
           <TeamSlot team={2} label="Team 2" />

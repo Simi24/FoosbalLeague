@@ -85,7 +85,7 @@ export const MatchHistoryPage = () => {
       {matches.length === 0 ? (
         <p className="text-sm text-text-muted">No matches yet.</p>
       ) : (
-        <div className="overflow-hidden rounded-xl border border-border bg-bg-secondary shadow-sm">
+        <div className="overflow-x-auto rounded-xl border border-border bg-bg-secondary shadow-sm">
           <table className="w-full">
             <thead>
               <tr className="border-b border-border text-left text-sm text-text-secondary">
@@ -93,7 +93,7 @@ export const MatchHistoryPage = () => {
                 <th className="px-4 py-3 text-center">Score</th>
                 <th className="px-4 py-3">Team 2</th>
                 <th className="px-4 py-3 text-center">Status</th>
-                <th className="px-4 py-3 text-right">Date</th>
+                <th className="hidden px-4 py-3 text-right sm:table-cell">Date</th>
               </tr>
             </thead>
             <tbody>
@@ -146,7 +146,7 @@ export const MatchHistoryPage = () => {
                         </span>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-right text-xs text-text-muted">
+                    <td className="hidden px-4 py-3 text-right text-xs text-text-muted sm:table-cell">
                       {date.toLocaleDateString()}
                     </td>
                   </tr>
