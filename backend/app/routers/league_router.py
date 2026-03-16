@@ -30,6 +30,7 @@ from services.league_service import (
     update_league,
 )
 from services.player_service import get_player, get_player_by_cognito_sub
+from services.ranking_service import get_leaderboard
 
 router = APIRouter(
     prefix="/api/v1/leagues",
@@ -234,12 +235,17 @@ async def read_league_members(
 ) -> list[LeagueMemberResponse]:
     """Get all members of a league."""
     members = get_league_members(league_id)
+
+    # Use RATING as source of truth for ELO (enrollment current_elo can be stale)
+    ratings = get_leaderboard(league_id)
+    elo_map = {r.player_id: r.elo for r in ratings}
+
     return [
         LeagueMemberResponse(
             player_id=m.player_id,
             display_name=m.display_name,
             role=m.role,
-            current_elo=m.current_elo,
+            current_elo=elo_map.get(m.player_id, m.current_elo),
         )
         for m in members
     ]
