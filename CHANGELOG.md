@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.0](https://github.com/Simi24/FoosbalLeague/compare/foosball-league-v0.5.0...foosball-league-v0.6.0) (2026-03-16)
+
+
+### Features
+
+* ✨ enhance layout components with responsive design and sidebar functionality ([ada1c49](https://github.com/Simi24/FoosbalLeague/commit/ada1c49dd4d99738376ba92dd832f79b23880ce1))
+
 ## [0.5.0](https://github.com/Simi24/FoosbalLeague/compare/foosball-league-v0.4.1...foosball-league-v0.5.0) (2026-03-16)
 
 
