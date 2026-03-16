@@ -6,7 +6,10 @@ echo "============================================"
 echo "  Foosball League - LocalStack Init"
 echo "============================================"
 
-# Create DynamoDB table with single-table design
+# --------------------------------------------------
+# DynamoDB Table
+# --------------------------------------------------
+
 awslocal dynamodb create-table \
     --table-name foosball-league \
     --attribute-definitions \
@@ -40,9 +43,20 @@ awslocal dynamodb create-table \
         ]' \
     --billing-mode PAY_PER_REQUEST
 
-echo "DynamoDB table 'foosball-league' created."
+echo "[OK] DynamoDB table created"
 
-# Seed default tenant
+# --------------------------------------------------
+# Constants
+# --------------------------------------------------
+
+TENANT="TENANT#default"
+NOW="2026-03-01T12:00:00Z"
+INVITE_CODE="FOOS42"
+
+# --------------------------------------------------
+# Tenant
+# --------------------------------------------------
+
 awslocal dynamodb put-item \
     --table-name foosball-league \
     --item '{
@@ -55,95 +69,44 @@ awslocal dynamodb put-item \
         "updated_at": {"S": "2026-01-01T00:00:00Z"}
     }'
 
-echo "Default tenant seeded."
+echo "[OK] Tenant seeded"
 
 # --------------------------------------------------
-# Seed Players
+# Players (4 bots - your player is created at login)
 # --------------------------------------------------
 
-TENANT="TENANT#default"
-NOW="2026-03-01T12:00:00Z"
+declare -A PLAYERS
+PLAYERS[001]="Marco Rossi:marco@foosball.local"
+PLAYERS[002]="Luca Bianchi:luca@foosball.local"
+PLAYERS[003]="Giulia Verdi:giulia@foosball.local"
+PLAYERS[004]="Chiara Neri:chiara@foosball.local"
 
-awslocal dynamodb put-item \
-    --table-name foosball-league \
-    --item "{
-        \"pk\": {\"S\": \"$TENANT\"},
-        \"sk\": {\"S\": \"PLAYER#player-001\"},
-        \"entity_type\": {\"S\": \"PLAYER\"},
-        \"player_id\": {\"S\": \"player-001\"},
-        \"cognito_sub\": {\"S\": \"local-dev-user-001\"},
-        \"display_name\": {\"S\": \"Local Dev\"},
-        \"email\": {\"S\": \"dev@foosball.local\"},
-        \"total_matches\": {\"N\": \"6\"},
-        \"total_wins\": {\"N\": \"4\"},
-        \"total_losses\": {\"N\": \"2\"},
-        \"gsi3_pk\": {\"S\": \"EMAIL#dev@foosball.local\"},
-        \"gsi3_sk\": {\"S\": \"PLAYER#player-001\"},
-        \"created_at\": {\"S\": \"$NOW\"},
-        \"updated_at\": {\"S\": \"$NOW\"}
-    }"
+for ID in 001 002 003 004; do
+    IFS=':' read -r DNAME EMAIL <<< "${PLAYERS[$ID]}"
+    awslocal dynamodb put-item \
+        --table-name foosball-league \
+        --item "{
+            \"pk\": {\"S\": \"$TENANT\"},
+            \"sk\": {\"S\": \"PLAYER#player-$ID\"},
+            \"entity_type\": {\"S\": \"PLAYER\"},
+            \"player_id\": {\"S\": \"player-$ID\"},
+            \"cognito_sub\": {\"S\": \"bot-sub-$ID\"},
+            \"display_name\": {\"S\": \"$DNAME\"},
+            \"email\": {\"S\": \"$EMAIL\"},
+            \"total_matches\": {\"N\": \"0\"},
+            \"total_wins\": {\"N\": \"0\"},
+            \"total_losses\": {\"N\": \"0\"},
+            \"gsi3_pk\": {\"S\": \"$EMAIL\"},
+            \"gsi3_sk\": {\"S\": \"PLAYER#player-$ID\"},
+            \"created_at\": {\"S\": \"$NOW\"},
+            \"updated_at\": {\"S\": \"$NOW\"}
+        }"
+done
 
-awslocal dynamodb put-item \
-    --table-name foosball-league \
-    --item "{
-        \"pk\": {\"S\": \"$TENANT\"},
-        \"sk\": {\"S\": \"PLAYER#player-002\"},
-        \"entity_type\": {\"S\": \"PLAYER\"},
-        \"player_id\": {\"S\": \"player-002\"},
-        \"cognito_sub\": {\"S\": \"cognito-sub-002\"},
-        \"display_name\": {\"S\": \"Alice Spin\"},
-        \"email\": {\"S\": \"alice@foosball.local\"},
-        \"total_matches\": {\"N\": \"6\"},
-        \"total_wins\": {\"N\": \"3\"},
-        \"total_losses\": {\"N\": \"3\"},
-        \"gsi3_pk\": {\"S\": \"EMAIL#alice@foosball.local\"},
-        \"gsi3_sk\": {\"S\": \"PLAYER#player-002\"},
-        \"created_at\": {\"S\": \"$NOW\"},
-        \"updated_at\": {\"S\": \"$NOW\"}
-    }"
-
-awslocal dynamodb put-item \
-    --table-name foosball-league \
-    --item "{
-        \"pk\": {\"S\": \"$TENANT\"},
-        \"sk\": {\"S\": \"PLAYER#player-003\"},
-        \"entity_type\": {\"S\": \"PLAYER\"},
-        \"player_id\": {\"S\": \"player-003\"},
-        \"cognito_sub\": {\"S\": \"cognito-sub-003\"},
-        \"display_name\": {\"S\": \"Bob Striker\"},
-        \"email\": {\"S\": \"bob@foosball.local\"},
-        \"total_matches\": {\"N\": \"4\"},
-        \"total_wins\": {\"N\": \"1\"},
-        \"total_losses\": {\"N\": \"3\"},
-        \"gsi3_pk\": {\"S\": \"EMAIL#bob@foosball.local\"},
-        \"gsi3_sk\": {\"S\": \"PLAYER#player-003\"},
-        \"created_at\": {\"S\": \"$NOW\"},
-        \"updated_at\": {\"S\": \"$NOW\"}
-    }"
-
-awslocal dynamodb put-item \
-    --table-name foosball-league \
-    --item "{
-        \"pk\": {\"S\": \"$TENANT\"},
-        \"sk\": {\"S\": \"PLAYER#player-004\"},
-        \"entity_type\": {\"S\": \"PLAYER\"},
-        \"player_id\": {\"S\": \"player-004\"},
-        \"cognito_sub\": {\"S\": \"cognito-sub-004\"},
-        \"display_name\": {\"S\": \"Carol Goalie\"},
-        \"email\": {\"S\": \"carol@foosball.local\"},
-        \"total_matches\": {\"N\": \"4\"},
-        \"total_wins\": {\"N\": \"2\"},
-        \"total_losses\": {\"N\": \"2\"},
-        \"gsi3_pk\": {\"S\": \"EMAIL#carol@foosball.local\"},
-        \"gsi3_sk\": {\"S\": \"PLAYER#player-004\"},
-        \"created_at\": {\"S\": \"$NOW\"},
-        \"updated_at\": {\"S\": \"$NOW\"}
-    }"
-
-echo "4 players seeded."
+echo "[OK] 4 players seeded"
 
 # --------------------------------------------------
-# Seed Leagues
+# League
 # --------------------------------------------------
 
 awslocal dynamodb put-item \
@@ -156,9 +119,9 @@ awslocal dynamodb put-item \
         \"name\": {\"S\": \"Office Champions 2v2\"},
         \"league_type\": {\"S\": \"2v2\"},
         \"initial_elo\": {\"N\": \"1200\"},
-        \"description\": {\"S\": \"The main office 2v2 league\"},
+        \"description\": {\"S\": \"La lega ufficiale del biliardino\"},
         \"created_by\": {\"S\": \"player-001\"},
-        \"invite_code\": {\"S\": \"OFF2V2\"},
+        \"invite_code\": {\"S\": \"$INVITE_CODE\"},
         \"member_count\": {\"N\": \"4\"},
         \"match_count\": {\"N\": \"4\"},
         \"gsi1_pk\": {\"S\": \"LEAGUE#league-001\"},
@@ -167,359 +130,176 @@ awslocal dynamodb put-item \
         \"updated_at\": {\"S\": \"$NOW\"}
     }"
 
-awslocal dynamodb put-item \
-    --table-name foosball-league \
-    --item "{
-        \"pk\": {\"S\": \"$TENANT\"},
-        \"sk\": {\"S\": \"LEAGUE#league-002\"},
-        \"entity_type\": {\"S\": \"LEAGUE\"},
-        \"league_id\": {\"S\": \"league-002\"},
-        \"name\": {\"S\": \"1v1 Quick Matches\"},
-        \"league_type\": {\"S\": \"1v1\"},
-        \"initial_elo\": {\"N\": \"1200\"},
-        \"description\": {\"S\": \"Fast 1v1 games during lunch\"},
-        \"created_by\": {\"S\": \"player-002\"},
-        \"invite_code\": {\"S\": \"QCK1V1\"},
-        \"member_count\": {\"N\": \"2\"},
-        \"match_count\": {\"N\": \"2\"},
-        \"gsi1_pk\": {\"S\": \"LEAGUE#league-002\"},
-        \"gsi1_sk\": {\"S\": \"LEAGUE#league-002\"},
-        \"created_at\": {\"S\": \"$NOW\"},
-        \"updated_at\": {\"S\": \"$NOW\"}
-    }"
-
-echo "2 leagues seeded."
+echo "[OK] League seeded (invite code: $INVITE_CODE)"
 
 # --------------------------------------------------
-# Seed Enrollments (league members)
+# Enrollments
 # --------------------------------------------------
 
-# League 1: all 4 players
-for i in 001 002 003 004; do
-    DISPLAY_NAMES_001="Local Dev"
-    DISPLAY_NAMES_002="Alice Spin"
-    DISPLAY_NAMES_003="Bob Striker"
-    DISPLAY_NAMES_004="Carol Goalie"
-    eval "DNAME=\$DISPLAY_NAMES_$i"
+declare -A DNAMES
+DNAMES[001]="Marco Rossi"
+DNAMES[002]="Luca Bianchi"
+DNAMES[003]="Giulia Verdi"
+DNAMES[004]="Chiara Neri"
+
+for ID in 001 002 003 004; do
     ROLE="player"
-    if [ "$i" = "001" ]; then ROLE="admin"; fi
+    if [ "$ID" = "001" ]; then ROLE="admin"; fi
 
     awslocal dynamodb put-item \
         --table-name foosball-league \
         --item "{
             \"pk\": {\"S\": \"$TENANT\"},
-            \"sk\": {\"S\": \"ENROLL#league-001#player-$i\"},
+            \"sk\": {\"S\": \"ENROLL#league-001#player-$ID\"},
             \"entity_type\": {\"S\": \"ENROLLMENT\"},
             \"league_id\": {\"S\": \"league-001\"},
-            \"player_id\": {\"S\": \"player-$i\"},
-            \"display_name\": {\"S\": \"$DNAME\"},
+            \"player_id\": {\"S\": \"player-$ID\"},
+            \"display_name\": {\"S\": \"${DNAMES[$ID]}\"},
             \"role\": {\"S\": \"$ROLE\"},
             \"current_elo\": {\"N\": \"1200\"},
             \"gsi1_pk\": {\"S\": \"LEAGUE#league-001\"},
-            \"gsi1_sk\": {\"S\": \"ENROLL#player-$i\"},
+            \"gsi1_sk\": {\"S\": \"ENROLL#player-$ID\"},
             \"created_at\": {\"S\": \"$NOW\"},
             \"updated_at\": {\"S\": \"$NOW\"}
         }"
 done
 
-# League 2: players 001 and 002
-for i in 001 002; do
-    eval "DNAME=\$DISPLAY_NAMES_$i"
-    ROLE="player"
-    if [ "$i" = "001" ]; then ROLE="admin"; fi
+echo "[OK] Enrollments seeded"
+
+# --------------------------------------------------
+# Ratings
+# --------------------------------------------------
+
+declare -A ELOS WINS LOSSES PLAYED
+ELOS[001]=1280; WINS[001]=4; LOSSES[001]=2; PLAYED[001]=6
+ELOS[002]=1220; WINS[002]=3; LOSSES[002]=3; PLAYED[002]=6
+ELOS[003]=1140; WINS[003]=1; LOSSES[003]=3; PLAYED[003]=4
+ELOS[004]=1160; WINS[004]=2; LOSSES[004]=2; PLAYED[004]=4
+
+for ID in 001 002 003 004; do
+    INV_ELO=$(printf "%04d" $((9999 - ${ELOS[$ID]})))
+    awslocal dynamodb put-item \
+        --table-name foosball-league \
+        --item "{
+            \"pk\": {\"S\": \"$TENANT\"},
+            \"sk\": {\"S\": \"RATING#league-001#player-$ID\"},
+            \"entity_type\": {\"S\": \"RATING\"},
+            \"league_id\": {\"S\": \"league-001\"},
+            \"player_id\": {\"S\": \"player-$ID\"},
+            \"display_name\": {\"S\": \"${DNAMES[$ID]}\"},
+            \"elo\": {\"N\": \"${ELOS[$ID]}\"},
+            \"matches_played\": {\"N\": \"${PLAYED[$ID]}\"},
+            \"wins\": {\"N\": \"${WINS[$ID]}\"},
+            \"losses\": {\"N\": \"${LOSSES[$ID]}\"},
+            \"gsi1_pk\": {\"S\": \"LEAGUE#league-001\"},
+            \"gsi1_sk\": {\"S\": \"RATING#${INV_ELO}#player-$ID\"},
+            \"created_at\": {\"S\": \"$NOW\"},
+            \"updated_at\": {\"S\": \"$NOW\"}
+        }"
+done
+
+echo "[OK] Ratings seeded"
+
+# --------------------------------------------------
+# Matches (4 confirmed)
+# --------------------------------------------------
+
+declare -A MATCHES
+# format: "t1p1,t1p2:t2p1,t2p2:score1:score2:date"
+MATCHES[001]="player-001,player-002:player-003,player-004:10:7:2026-03-05T14:00:00Z"
+MATCHES[002]="player-003,player-001:player-002,player-004:10:8:2026-03-07T10:30:00Z"
+MATCHES[003]="player-001,player-004:player-002,player-003:10:6:2026-03-09T16:00:00Z"
+MATCHES[004]="player-002,player-004:player-001,player-003:10:9:2026-03-11T13:00:00Z"
+
+for MID in 001 002 003 004; do
+    IFS=':' read -r T1 T2 S1 S2 DATE <<< "${MATCHES[$MID]}"
+    IFS=',' read -r T1P1 T1P2 <<< "$T1"
+    IFS=',' read -r T2P1 T2P2 <<< "$T2"
 
     awslocal dynamodb put-item \
         --table-name foosball-league \
         --item "{
             \"pk\": {\"S\": \"$TENANT\"},
-            \"sk\": {\"S\": \"ENROLL#league-002#player-$i\"},
-            \"entity_type\": {\"S\": \"ENROLLMENT\"},
-            \"league_id\": {\"S\": \"league-002\"},
-            \"player_id\": {\"S\": \"player-$i\"},
-            \"display_name\": {\"S\": \"$DNAME\"},
-            \"role\": {\"S\": \"$ROLE\"},
-            \"current_elo\": {\"N\": \"1200\"},
-            \"gsi1_pk\": {\"S\": \"LEAGUE#league-002\"},
-            \"gsi1_sk\": {\"S\": \"ENROLL#player-$i\"},
-            \"created_at\": {\"S\": \"$NOW\"},
-            \"updated_at\": {\"S\": \"$NOW\"}
+            \"sk\": {\"S\": \"MATCH#match-$MID\"},
+            \"entity_type\": {\"S\": \"MATCH\"},
+            \"match_id\": {\"S\": \"match-$MID\"},
+            \"league_id\": {\"S\": \"league-001\"},
+            \"team1_player_ids\": {\"L\": [{\"S\": \"$T1P1\"}, {\"S\": \"$T1P2\"}]},
+            \"team2_player_ids\": {\"L\": [{\"S\": \"$T2P1\"}, {\"S\": \"$T2P2\"}]},
+            \"team1_score\": {\"N\": \"$S1\"},
+            \"team2_score\": {\"N\": \"$S2\"},
+            \"status\": {\"S\": \"CONFIRMED\"},
+            \"submitted_by\": {\"S\": \"$T1P1\"},
+            \"confirmed_by\": {\"S\": \"$T2P1\"},
+            \"elo_changes\": {\"M\": {}},
+            \"gsi1_pk\": {\"S\": \"LEAGUE#league-001\"},
+            \"gsi1_sk\": {\"S\": \"MATCH#${DATE}#match-$MID\"},
+            \"created_at\": {\"S\": \"$DATE\"},
+            \"updated_at\": {\"S\": \"$DATE\"}
         }"
 done
 
-echo "Enrollments seeded."
+echo "[OK] 4 matches seeded"
 
 # --------------------------------------------------
-# Seed Ratings (ELO per player per league)
+# ELO History (15 points per player for chart)
 # --------------------------------------------------
 
-# League 1 ratings (varied ELO for interesting leaderboard)
-# Player 001: 1280 ELO, 4W 2L  -> inverted: 9999-1280 = 8719
-awslocal dynamodb put-item \
-    --table-name foosball-league \
-    --item "{
-        \"pk\": {\"S\": \"$TENANT\"},
-        \"sk\": {\"S\": \"RATING#league-001#player-001\"},
-        \"entity_type\": {\"S\": \"RATING\"},
-        \"league_id\": {\"S\": \"league-001\"},
-        \"player_id\": {\"S\": \"player-001\"},
-        \"display_name\": {\"S\": \"Local Dev\"},
-        \"elo\": {\"N\": \"1280\"},
-        \"matches_played\": {\"N\": \"6\"},
-        \"wins\": {\"N\": \"4\"},
-        \"losses\": {\"N\": \"2\"},
-        \"gsi1_pk\": {\"S\": \"LEAGUE#league-001\"},
-        \"gsi1_sk\": {\"S\": \"RATING#8719#player-001\"},
-        \"created_at\": {\"S\": \"$NOW\"},
-        \"updated_at\": {\"S\": \"$NOW\"}
-    }"
+declare -A TRAJECTORIES
+TRAJECTORIES[001]="1200 1220 1210 1240 1230 1255 1245 1270 1260 1275 1265 1280 1270 1285 1280"
+TRAJECTORIES[002]="1200 1215 1225 1210 1230 1220 1235 1225 1240 1230 1225 1235 1220 1230 1220"
+TRAJECTORIES[003]="1200 1185 1175 1190 1170 1160 1175 1155 1145 1155 1140 1130 1125 1135 1140"
+TRAJECTORIES[004]="1200 1190 1200 1185 1175 1190 1170 1165 1175 1160 1155 1165 1150 1145 1160"
 
-# Player 002: 1220 ELO, 3W 3L -> inverted: 8779
-awslocal dynamodb put-item \
-    --table-name foosball-league \
-    --item "{
-        \"pk\": {\"S\": \"$TENANT\"},
-        \"sk\": {\"S\": \"RATING#league-001#player-002\"},
-        \"entity_type\": {\"S\": \"RATING\"},
-        \"league_id\": {\"S\": \"league-001\"},
-        \"player_id\": {\"S\": \"player-002\"},
-        \"display_name\": {\"S\": \"Alice Spin\"},
-        \"elo\": {\"N\": \"1220\"},
-        \"matches_played\": {\"N\": \"6\"},
-        \"wins\": {\"N\": \"3\"},
-        \"losses\": {\"N\": \"3\"},
-        \"gsi1_pk\": {\"S\": \"LEAGUE#league-001\"},
-        \"gsi1_sk\": {\"S\": \"RATING#8779#player-002\"},
-        \"created_at\": {\"S\": \"$NOW\"},
-        \"updated_at\": {\"S\": \"$NOW\"}
-    }"
+for ID in 001 002 003 004; do
+    read -ra TRAJ <<< "${TRAJECTORIES[$ID]}"
+    PREV=${TRAJ[0]}
+    for i in $(seq 1 $((${#TRAJ[@]} - 1))); do
+        ELO=${TRAJ[$i]}
+        DELTA=$((ELO - PREV))
+        PREV=$ELO
+        DAY=$((i * 2))
+        TS=$(printf "2026-02-%02dT%02d:00:00Z" $((DAY % 28 + 1)) $((10 + i % 8)))
+        MATCH_ID=$(printf "seed%04x" $((RANDOM)))
 
-# Player 003: 1140 ELO, 1W 3L -> inverted: 8859
-awslocal dynamodb put-item \
-    --table-name foosball-league \
-    --item "{
-        \"pk\": {\"S\": \"$TENANT\"},
-        \"sk\": {\"S\": \"RATING#league-001#player-003\"},
-        \"entity_type\": {\"S\": \"RATING\"},
-        \"league_id\": {\"S\": \"league-001\"},
-        \"player_id\": {\"S\": \"player-003\"},
-        \"display_name\": {\"S\": \"Bob Striker\"},
-        \"elo\": {\"N\": \"1140\"},
-        \"matches_played\": {\"N\": \"4\"},
-        \"wins\": {\"N\": \"1\"},
-        \"losses\": {\"N\": \"3\"},
-        \"gsi1_pk\": {\"S\": \"LEAGUE#league-001\"},
-        \"gsi1_sk\": {\"S\": \"RATING#8859#player-003\"},
-        \"created_at\": {\"S\": \"$NOW\"},
-        \"updated_at\": {\"S\": \"$NOW\"}
-    }"
+        awslocal dynamodb put-item \
+            --table-name foosball-league \
+            --item "{
+                \"pk\": {\"S\": \"$TENANT\"},
+                \"sk\": {\"S\": \"ELOHIST#league-001#player-$ID#$TS\"},
+                \"entity_type\": {\"S\": \"ELO_HISTORY\"},
+                \"league_id\": {\"S\": \"league-001\"},
+                \"player_id\": {\"S\": \"player-$ID\"},
+                \"match_id\": {\"S\": \"$MATCH_ID\"},
+                \"elo\": {\"N\": \"$ELO\"},
+                \"delta\": {\"N\": \"$DELTA\"},
+                \"created_at\": {\"S\": \"$TS\"},
+                \"updated_at\": {\"S\": \"$TS\"}
+            }"
+    done
+done
 
-# Player 004: 1160 ELO, 2W 2L -> inverted: 8839
-awslocal dynamodb put-item \
-    --table-name foosball-league \
-    --item "{
-        \"pk\": {\"S\": \"$TENANT\"},
-        \"sk\": {\"S\": \"RATING#league-001#player-004\"},
-        \"entity_type\": {\"S\": \"RATING\"},
-        \"league_id\": {\"S\": \"league-001\"},
-        \"player_id\": {\"S\": \"player-004\"},
-        \"display_name\": {\"S\": \"Carol Goalie\"},
-        \"elo\": {\"N\": \"1160\"},
-        \"matches_played\": {\"N\": \"4\"},
-        \"wins\": {\"N\": \"2\"},
-        \"losses\": {\"N\": \"2\"},
-        \"gsi1_pk\": {\"S\": \"LEAGUE#league-001\"},
-        \"gsi1_sk\": {\"S\": \"RATING#8839#player-004\"},
-        \"created_at\": {\"S\": \"$NOW\"},
-        \"updated_at\": {\"S\": \"$NOW\"}
-    }"
-
-# League 2 ratings
-# Player 001: 1250 ELO, 2W 0L -> inverted: 8749
-awslocal dynamodb put-item \
-    --table-name foosball-league \
-    --item "{
-        \"pk\": {\"S\": \"$TENANT\"},
-        \"sk\": {\"S\": \"RATING#league-002#player-001\"},
-        \"entity_type\": {\"S\": \"RATING\"},
-        \"league_id\": {\"S\": \"league-002\"},
-        \"player_id\": {\"S\": \"player-001\"},
-        \"display_name\": {\"S\": \"Local Dev\"},
-        \"elo\": {\"N\": \"1250\"},
-        \"matches_played\": {\"N\": \"2\"},
-        \"wins\": {\"N\": \"2\"},
-        \"losses\": {\"N\": \"0\"},
-        \"gsi1_pk\": {\"S\": \"LEAGUE#league-002\"},
-        \"gsi1_sk\": {\"S\": \"RATING#8749#player-001\"},
-        \"created_at\": {\"S\": \"$NOW\"},
-        \"updated_at\": {\"S\": \"$NOW\"}
-    }"
-
-# Player 002: 1150 ELO, 0W 2L -> inverted: 8849
-awslocal dynamodb put-item \
-    --table-name foosball-league \
-    --item "{
-        \"pk\": {\"S\": \"$TENANT\"},
-        \"sk\": {\"S\": \"RATING#league-002#player-002\"},
-        \"entity_type\": {\"S\": \"RATING\"},
-        \"league_id\": {\"S\": \"league-002\"},
-        \"player_id\": {\"S\": \"player-002\"},
-        \"display_name\": {\"S\": \"Alice Spin\"},
-        \"elo\": {\"N\": \"1150\"},
-        \"matches_played\": {\"N\": \"2\"},
-        \"wins\": {\"N\": \"0\"},
-        \"losses\": {\"N\": \"2\"},
-        \"gsi1_pk\": {\"S\": \"LEAGUE#league-002\"},
-        \"gsi1_sk\": {\"S\": \"RATING#8849#player-002\"},
-        \"created_at\": {\"S\": \"$NOW\"},
-        \"updated_at\": {\"S\": \"$NOW\"}
-    }"
-
-echo "Ratings seeded."
+echo "[OK] ELO history seeded (15 points per player)"
 
 # --------------------------------------------------
-# Seed Matches (league 1: 4 matches, league 2: 2 matches)
+# Done
 # --------------------------------------------------
 
-# League 1, Match 1: Team(001,002) 10 vs Team(003,004) 7 - CONFIRMED
-awslocal dynamodb put-item \
-    --table-name foosball-league \
-    --item "{
-        \"pk\": {\"S\": \"$TENANT\"},
-        \"sk\": {\"S\": \"MATCH#match-001\"},
-        \"entity_type\": {\"S\": \"MATCH\"},
-        \"match_id\": {\"S\": \"match-001\"},
-        \"league_id\": {\"S\": \"league-001\"},
-        \"team1_player_ids\": {\"L\": [{\"S\": \"player-001\"}, {\"S\": \"player-002\"}]},
-        \"team2_player_ids\": {\"L\": [{\"S\": \"player-003\"}, {\"S\": \"player-004\"}]},
-        \"team1_score\": {\"N\": \"10\"},
-        \"team2_score\": {\"N\": \"7\"},
-        \"status\": {\"S\": \"CONFIRMED\"},
-        \"submitted_by\": {\"S\": \"player-001\"},
-        \"confirmed_by\": {\"S\": \"player-003\"},
-        \"elo_changes\": {\"M\": {}},
-        \"gsi1_pk\": {\"S\": \"LEAGUE#league-001\"},
-        \"gsi1_sk\": {\"S\": \"MATCH#2026-03-05T14:00:00Z#match-001\"},
-        \"created_at\": {\"S\": \"2026-03-05T14:00:00Z\"},
-        \"updated_at\": {\"S\": \"2026-03-05T14:00:00Z\"}
-    }"
-
-# League 1, Match 2: Team(003,001) 10 vs Team(002,004) 8 - CONFIRMED
-awslocal dynamodb put-item \
-    --table-name foosball-league \
-    --item "{
-        \"pk\": {\"S\": \"$TENANT\"},
-        \"sk\": {\"S\": \"MATCH#match-002\"},
-        \"entity_type\": {\"S\": \"MATCH\"},
-        \"match_id\": {\"S\": \"match-002\"},
-        \"league_id\": {\"S\": \"league-001\"},
-        \"team1_player_ids\": {\"L\": [{\"S\": \"player-003\"}, {\"S\": \"player-001\"}]},
-        \"team2_player_ids\": {\"L\": [{\"S\": \"player-002\"}, {\"S\": \"player-004\"}]},
-        \"team1_score\": {\"N\": \"10\"},
-        \"team2_score\": {\"N\": \"8\"},
-        \"status\": {\"S\": \"CONFIRMED\"},
-        \"submitted_by\": {\"S\": \"player-003\"},
-        \"confirmed_by\": {\"S\": \"player-002\"},
-        \"elo_changes\": {\"M\": {}},
-        \"gsi1_pk\": {\"S\": \"LEAGUE#league-001\"},
-        \"gsi1_sk\": {\"S\": \"MATCH#2026-03-07T10:30:00Z#match-002\"},
-        \"created_at\": {\"S\": \"2026-03-07T10:30:00Z\"},
-        \"updated_at\": {\"S\": \"2026-03-07T10:30:00Z\"}
-    }"
-
-# League 1, Match 3: Team(001,004) 10 vs Team(002,003) 6 - CONFIRMED
-awslocal dynamodb put-item \
-    --table-name foosball-league \
-    --item "{
-        \"pk\": {\"S\": \"$TENANT\"},
-        \"sk\": {\"S\": \"MATCH#match-003\"},
-        \"entity_type\": {\"S\": \"MATCH\"},
-        \"match_id\": {\"S\": \"match-003\"},
-        \"league_id\": {\"S\": \"league-001\"},
-        \"team1_player_ids\": {\"L\": [{\"S\": \"player-001\"}, {\"S\": \"player-004\"}]},
-        \"team2_player_ids\": {\"L\": [{\"S\": \"player-002\"}, {\"S\": \"player-003\"}]},
-        \"team1_score\": {\"N\": \"10\"},
-        \"team2_score\": {\"N\": \"6\"},
-        \"status\": {\"S\": \"CONFIRMED\"},
-        \"submitted_by\": {\"S\": \"player-001\"},
-        \"confirmed_by\": {\"S\": \"player-004\"},
-        \"elo_changes\": {\"M\": {}},
-        \"gsi1_pk\": {\"S\": \"LEAGUE#league-001\"},
-        \"gsi1_sk\": {\"S\": \"MATCH#2026-03-09T16:00:00Z#match-003\"},
-        \"created_at\": {\"S\": \"2026-03-09T16:00:00Z\"},
-        \"updated_at\": {\"S\": \"2026-03-09T16:00:00Z\"}
-    }"
-
-# League 1, Match 4: Team(002,004) 10 vs Team(001,003) 9 - CONFIRMED
-awslocal dynamodb put-item \
-    --table-name foosball-league \
-    --item "{
-        \"pk\": {\"S\": \"$TENANT\"},
-        \"sk\": {\"S\": \"MATCH#match-004\"},
-        \"entity_type\": {\"S\": \"MATCH\"},
-        \"match_id\": {\"S\": \"match-004\"},
-        \"league_id\": {\"S\": \"league-001\"},
-        \"team1_player_ids\": {\"L\": [{\"S\": \"player-002\"}, {\"S\": \"player-004\"}]},
-        \"team2_player_ids\": {\"L\": [{\"S\": \"player-001\"}, {\"S\": \"player-003\"}]},
-        \"team1_score\": {\"N\": \"10\"},
-        \"team2_score\": {\"N\": \"9\"},
-        \"status\": {\"S\": \"CONFIRMED\"},
-        \"submitted_by\": {\"S\": \"player-002\"},
-        \"confirmed_by\": {\"S\": \"player-001\"},
-        \"elo_changes\": {\"M\": {}},
-        \"gsi1_pk\": {\"S\": \"LEAGUE#league-001\"},
-        \"gsi1_sk\": {\"S\": \"MATCH#2026-03-11T13:00:00Z#match-004\"},
-        \"created_at\": {\"S\": \"2026-03-11T13:00:00Z\"},
-        \"updated_at\": {\"S\": \"2026-03-11T13:00:00Z\"}
-    }"
-
-# League 2, Match 5: 001 vs 002, 10-5 - CONFIRMED
-awslocal dynamodb put-item \
-    --table-name foosball-league \
-    --item "{
-        \"pk\": {\"S\": \"$TENANT\"},
-        \"sk\": {\"S\": \"MATCH#match-005\"},
-        \"entity_type\": {\"S\": \"MATCH\"},
-        \"match_id\": {\"S\": \"match-005\"},
-        \"league_id\": {\"S\": \"league-002\"},
-        \"team1_player_ids\": {\"L\": [{\"S\": \"player-001\"}]},
-        \"team2_player_ids\": {\"L\": [{\"S\": \"player-002\"}]},
-        \"team1_score\": {\"N\": \"10\"},
-        \"team2_score\": {\"N\": \"5\"},
-        \"status\": {\"S\": \"CONFIRMED\"},
-        \"submitted_by\": {\"S\": \"player-001\"},
-        \"confirmed_by\": {\"S\": \"player-002\"},
-        \"elo_changes\": {\"M\": {}},
-        \"gsi1_pk\": {\"S\": \"LEAGUE#league-002\"},
-        \"gsi1_sk\": {\"S\": \"MATCH#2026-03-06T12:00:00Z#match-005\"},
-        \"created_at\": {\"S\": \"2026-03-06T12:00:00Z\"},
-        \"updated_at\": {\"S\": \"2026-03-06T12:00:00Z\"}
-    }"
-
-# League 2, Match 6: 001 vs 002, 10-8 - CONFIRMED
-awslocal dynamodb put-item \
-    --table-name foosball-league \
-    --item "{
-        \"pk\": {\"S\": \"$TENANT\"},
-        \"sk\": {\"S\": \"MATCH#match-006\"},
-        \"entity_type\": {\"S\": \"MATCH\"},
-        \"match_id\": {\"S\": \"match-006\"},
-        \"league_id\": {\"S\": \"league-002\"},
-        \"team1_player_ids\": {\"L\": [{\"S\": \"player-001\"}]},
-        \"team2_player_ids\": {\"L\": [{\"S\": \"player-002\"}]},
-        \"team1_score\": {\"N\": \"10\"},
-        \"team2_score\": {\"N\": \"8\"},
-        \"status\": {\"S\": \"CONFIRMED\"},
-        \"submitted_by\": {\"S\": \"player-001\"},
-        \"confirmed_by\": {\"S\": \"player-002\"},
-        \"elo_changes\": {\"M\": {}},
-        \"gsi1_pk\": {\"S\": \"LEAGUE#league-002\"},
-        \"gsi1_sk\": {\"S\": \"MATCH#2026-03-10T12:30:00Z#match-006\"},
-        \"created_at\": {\"S\": \"2026-03-10T12:30:00Z\"},
-        \"updated_at\": {\"S\": \"2026-03-10T12:30:00Z\"}
-    }"
-
-echo "6 matches seeded."
-
+echo ""
 echo "============================================"
-echo "  LocalStack Init Complete"
+echo "  LocalStack Init Complete!"
 echo "============================================"
+echo ""
+echo "  League: Office Champions 2v2"
+echo "  Players: Marco, Luca, Giulia, Chiara"
+echo ""
+echo "  ┌──────────────────────────────────┐"
+echo "  │  INVITE CODE:  $INVITE_CODE            │"
+echo "  └──────────────────────────────────┘"
+echo ""
+echo "  1. Login with your Cognito account"
+echo "  2. Register as 'Simi25'"
+echo "  3. Click 'Join League' on Dashboard"
+echo "  4. Enter code: $INVITE_CODE"
+echo "  5. Play!"
+echo ""
