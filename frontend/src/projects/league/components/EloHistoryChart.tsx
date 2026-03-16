@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import type { EloHistoryPoint } from "../types";
 
@@ -23,7 +23,6 @@ const bezierPath = (points: [number, number][]): string => {
     const curr = points[i]!;
     const tension = 0.3;
     const dx = (curr[0] - prev[0]) * tension;
-
     d += ` C ${prev[0] + dx},${prev[1]} ${curr[0] - dx},${curr[1]} ${curr[0]},${curr[1]}`;
   }
 
@@ -35,6 +34,7 @@ export const EloHistoryChart = ({
   width = 600,
   height = 240,
 }: EloHistoryChartProps) => {
+  const svgRef = useRef<SVGSVGElement>(null);
   const [hovered, setHovered] = useState<number | null>(null);
 
   if (data.length === 0) return null;
@@ -56,13 +56,12 @@ export const EloHistoryChart = ({
   const points: [number, number][] = data.map((d, i) => [xScale(i), yScale(d.elo)]);
 
   const linePath = bezierPath(points);
-
   const areaPath =
     linePath +
     ` L ${points[points.length - 1]![0]},${chartHeight}` +
     ` L ${points[0]![0]},${chartHeight} Z`;
 
-  // X-axis labels (show ~5 evenly spaced)
+  // X-axis labels
   const xLabelCount = Math.min(data.length, 5);
   const xLabels: { i: number; label: string }[] = [];
   for (let j = 0; j < xLabelCount; j++) {
@@ -70,25 +69,48 @@ export const EloHistoryChart = ({
       ? j
       : Math.round((j / (xLabelCount - 1)) * (data.length - 1));
     const point = data[i];
-    if (point) {
-      xLabels.push({ i, label: formatDate(point.timestamp) });
-    }
+    if (point) xLabels.push({ i, label: formatDate(point.timestamp) });
   }
 
-  // Y-axis labels (5 ticks)
+  // Y-axis ticks
   const yTicks = [0, 0.25, 0.5, 0.75, 1].map((pct) => ({
     y: pct * chartHeight,
     elo: Math.round(maxElo - pct * range),
   }));
 
   const gradientId = "elo-gradient";
+
+  // Find closest point to mouse X position
+  const handleMouseMove = (e: React.MouseEvent<SVGSVGElement>) => {
+    const svg = svgRef.current;
+    if (!svg || data.length < 2) return;
+
+    const rect = svg.getBoundingClientRect();
+    const svgX = ((e.clientX - rect.left) / rect.width) * width - padding.left;
+
+    let closest = 0;
+    let closestDist = Infinity;
+    for (let i = 0; i < points.length; i++) {
+      const dist = Math.abs(points[i]![0] - svgX);
+      if (dist < closestDist) {
+        closestDist = dist;
+        closest = i;
+      }
+    }
+    setHovered(closest);
+  };
+
   const hoveredPoint = hovered !== null ? data[hovered] : null;
 
   return (
     <svg
+      ref={svgRef}
       viewBox={`0 0 ${width} ${height}`}
       className="w-full"
       preserveAspectRatio="xMidYMid meet"
+      onMouseMove={handleMouseMove}
+      onMouseLeave={() => setHovered(null)}
+      style={{ cursor: data.length > 1 ? "crosshair" : "default" }}
     >
       <defs>
         <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
@@ -101,31 +123,15 @@ export const EloHistoryChart = ({
         {/* Grid lines */}
         {yTicks.map(({ y, elo }) => (
           <g key={elo}>
-            <line
-              x1={0}
-              y1={y}
-              x2={chartWidth}
-              y2={y}
-              stroke="#e5e7eb"
-              strokeDasharray="4"
-            />
-            <text
-              x={-10}
-              y={y + 4}
-              textAnchor="end"
-              fill="#9ca3af"
-              fontSize={10}
-              fontFamily="monospace"
-            >
+            <line x1={0} y1={y} x2={chartWidth} y2={y} stroke="#e5e7eb" strokeDasharray="4" />
+            <text x={-10} y={y + 4} textAnchor="end" fill="#9ca3af" fontSize={10} fontFamily="monospace">
               {elo}
             </text>
           </g>
         ))}
 
         {/* Area fill */}
-        {data.length > 1 && (
-          <path d={areaPath} fill={`url(#${gradientId})`} />
-        )}
+        {data.length > 1 && <path d={areaPath} fill={`url(#${gradientId})`} />}
 
         {/* Line */}
         {data.length > 1 ? (
@@ -138,59 +144,35 @@ export const EloHistoryChart = ({
             strokeLinejoin="round"
           />
         ) : (
-          <circle
-            cx={points[0]![0]}
-            cy={points[0]![1]}
-            r={5}
-            fill="#f59e0b"
-          />
+          <circle cx={points[0]![0]} cy={points[0]![1]} r={5} fill="#f59e0b" />
         )}
 
         {/* Dots */}
         {data.length > 1 &&
           points.map(([x, y], i) => {
             const isLast = i === points.length - 1;
-            const isHovered = hovered === i;
+            const isActive = hovered === i;
 
             return (
               <g key={data[i]!.match_id}>
-                {/* Invisible hit area */}
-                <circle
-                  cx={x}
-                  cy={y}
-                  r={12}
-                  fill="transparent"
-                  onMouseEnter={() => setHovered(i)}
-                  onMouseLeave={() => setHovered(null)}
-                  style={{ cursor: "pointer" }}
-                />
-                {/* Glow for last/hovered */}
-                {(isLast || isHovered) && (
-                  <circle
-                    cx={x}
-                    cy={y}
-                    r={8}
-                    fill="#f59e0b"
-                    opacity={0.15}
-                  />
+                {(isLast || isActive) && (
+                  <circle cx={x} cy={y} r={8} fill="#f59e0b" opacity={0.15} />
                 )}
-                {/* Dot */}
                 <circle
                   cx={x}
                   cy={y}
-                  r={isLast ? 4.5 : isHovered ? 4 : 3}
-                  fill={isLast ? "#f59e0b" : isHovered ? "#f59e0b" : "#fbbf24"}
+                  r={isActive ? 5 : isLast ? 4.5 : 3}
+                  fill="#f59e0b"
                   stroke="white"
-                  strokeWidth={isLast || isHovered ? 2 : 0}
+                  strokeWidth={isActive || isLast ? 2 : 0}
                 />
               </g>
             );
           })}
 
-        {/* Tooltip */}
-        {hoveredPoint && hovered !== null && (
+        {/* Hover indicator */}
+        {hoveredPoint && hovered !== null && points[hovered] && (
           <g>
-            {/* Vertical line */}
             <line
               x1={points[hovered]![0]}
               y1={0}
@@ -199,46 +181,44 @@ export const EloHistoryChart = ({
               stroke="#f59e0b"
               strokeWidth={1}
               strokeDasharray="3"
-              opacity={0.4}
+              opacity={0.5}
             />
-            {/* Tooltip box */}
-            <g
-              transform={`translate(${
-                points[hovered]![0] > chartWidth - 100
-                  ? points[hovered]![0] - 110
-                  : points[hovered]![0] + 10
-              }, ${Math.max(0, points[hovered]![1] - 40)})`}
-            >
-              <rect
-                width={100}
-                height={48}
-                rx={6}
-                fill="#1f2937"
-                opacity={0.95}
-              />
-              <text x={10} y={18} fill="white" fontSize={12} fontWeight="bold" fontFamily="monospace">
-                {hoveredPoint.elo}
-              </text>
-              <text x={10} y={33} fill={hoveredPoint.delta >= 0 ? "#4ade80" : "#f87171"} fontSize={11} fontFamily="monospace">
-                {hoveredPoint.delta >= 0 ? "+" : ""}{hoveredPoint.delta}
-              </text>
-              <text x={50} y={33} fill="#9ca3af" fontSize={9}>
-                {formatDate(hoveredPoint.timestamp)}
-              </text>
-            </g>
+
+            {/* Tooltip */}
+            {(() => {
+              const tx = points[hovered]![0];
+              const flipLeft = tx > chartWidth - 120;
+              const tooltipX = flipLeft ? tx - 118 : tx + 10;
+              const tooltipY = Math.max(0, Math.min(points[hovered]![1] - 28, chartHeight - 56));
+
+              return (
+                <g transform={`translate(${tooltipX}, ${tooltipY})`}>
+                  <rect width={108} height={52} rx={8} fill="#1f2937" />
+                  <text x={12} y={20} fill="white" fontSize={14} fontWeight="bold" fontFamily="monospace">
+                    {hoveredPoint.elo}
+                  </text>
+                  <text
+                    x={12}
+                    y={38}
+                    fill={hoveredPoint.delta >= 0 ? "#4ade80" : "#f87171"}
+                    fontSize={12}
+                    fontWeight="bold"
+                    fontFamily="monospace"
+                  >
+                    {hoveredPoint.delta >= 0 ? "+" : ""}{hoveredPoint.delta}
+                  </text>
+                  <text x={52} y={38} fill="#9ca3af" fontSize={10}>
+                    {formatDate(hoveredPoint.timestamp)}
+                  </text>
+                </g>
+              );
+            })()}
           </g>
         )}
 
         {/* X-axis labels */}
         {xLabels.map(({ i, label }) => (
-          <text
-            key={i}
-            x={xScale(i)}
-            y={chartHeight + 20}
-            textAnchor="middle"
-            fill="#9ca3af"
-            fontSize={9}
-          >
+          <text key={i} x={xScale(i)} y={chartHeight + 20} textAnchor="middle" fill="#9ca3af" fontSize={9}>
             {label}
           </text>
         ))}
