@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.5.0](https://github.com/Simi24/FoosbalLeague/compare/foosball-league-v0.4.1...foosball-league-v0.5.0) (2026-03-16)
+
+
+### Features
+
+* ✨ redesign ELO history chart with gradient, bezier, tooltips ([256c8e8](https://github.com/Simi24/FoosbalLeague/commit/256c8e8530bd6cd0cb107e2fd5f08b6ee40d4843))
+
+
+### Bug Fixes
+
+* 🎨 replace dot-hover with full-area mouse tracking on ELO chart ([fc7f12e](https://github.com/Simi24/FoosbalLeague/commit/fc7f12ecf96303aa4745661bfff0ba955540ea49))
+
 ## [0.4.1](https://github.com/Simi24/FoosbalLeague/compare/foosball-league-v0.4.0...foosball-league-v0.4.1) (2026-03-16)
 
 
