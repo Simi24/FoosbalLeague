@@ -56,7 +56,12 @@ export const LoginPage = () => {
             />
           </div>
           <div className="mb-6">
-            <label className="mb-1 block text-sm font-medium text-text-secondary">Password</label>
+            <div className="mb-1 flex items-center justify-between">
+              <label className="text-sm font-medium text-text-secondary">Password</label>
+              <Link to="/forgot-password" className="text-xs text-accent hover:text-accent-hover">
+                Forgot password?
+              </Link>
+            </div>
             <input
               type="password"
               value={password}

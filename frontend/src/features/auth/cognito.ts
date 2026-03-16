@@ -85,3 +85,23 @@ export const cognitoConfirmSignUp = async (
     ConfirmationCode: code,
   });
 };
+
+export const cognitoForgotPassword = async (email: string): Promise<void> => {
+  await cognitoRequest("ForgotPassword", {
+    ClientId: COGNITO_CONFIG.clientId,
+    Username: email,
+  });
+};
+
+export const cognitoConfirmForgotPassword = async (
+  email: string,
+  code: string,
+  newPassword: string,
+): Promise<void> => {
+  await cognitoRequest("ConfirmForgotPassword", {
+    ClientId: COGNITO_CONFIG.clientId,
+    Username: email,
+    ConfirmationCode: code,
+    Password: newPassword,
+  });
+};

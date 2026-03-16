@@ -8,6 +8,7 @@ import { DashboardPage } from "@/pages/DashboardPage";
 import { LoginPage } from "@/pages/LoginPage";
 import { SignupPage } from "@/pages/SignupPage";
 import { SettingsPage } from "@/pages/SettingsPage";
+import { ForgotPasswordPage } from "@/pages/ForgotPasswordPage";
 import { NotFoundPage } from "@/pages/NotFoundPage";
 import { ProfilePage } from "@/pages/ProfilePage";
 import { LeagueListPage } from "@/projects/league/pages/LeagueListPage";
@@ -33,6 +34,7 @@ export const App = () => {
     <Routes>
       <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<SignupPage />} />
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route
         path="*"
         element={
