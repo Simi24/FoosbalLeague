@@ -15,6 +15,14 @@ class PlayerResponse(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
+class UpdatePlayerRequest(BaseModel):
+    """Update player profile."""
+
+    display_name: str = Field(..., min_length=2, max_length=50)
+
+    model_config = ConfigDict(extra="forbid")
+
+
 class PlayerStatsResponse(BaseModel):
     """Aggregated player stats."""
 

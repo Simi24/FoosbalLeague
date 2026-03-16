@@ -61,6 +61,25 @@ def get_player_by_cognito_sub(tenant_id: str, cognito_sub: str) -> PlayerModel |
     return None
 
 
+def update_display_name(
+    tenant_id: str,
+    player_id: str,
+    display_name: str,
+) -> PlayerModel | None:
+    """Update a player's display name."""
+    player = get_player(tenant_id, player_id)
+    if not player:
+        return None
+
+    now = datetime.now(timezone.utc)
+    PlayerModel.update(player.pk, player.sk).set(
+        "display_name", display_name
+    ).set("updated_at", now).execute()
+
+    logger.info(f"Updated display name for {player_id} to '{display_name}'")
+    return get_player(tenant_id, player_id)
+
+
 def list_players(tenant_id: str) -> list[PlayerModel]:
     """List all players in a tenant."""
     results = BaseEntity.query(f"TENANT#{tenant_id}").starts_with("PLAYER#").all()

@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 import { CognitoError, cognitoConfirmForgotPassword, cognitoForgotPassword } from "@/features/auth/cognito";
+import { PasswordInput } from "@/components/inputs/PasswordInput";
+import { PasswordRules, isPasswordValid } from "@/components/inputs/PasswordRules";
 
 type Step = "email" | "reset";
 
@@ -113,32 +115,30 @@ export const ForgotPasswordPage = () => {
               />
             </div>
             <div className="mb-4">
-              <label className="mb-1 block text-sm font-medium text-text-secondary">New Password</label>
-              <input
-                type="password"
+              <PasswordInput
                 value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                className={inputClass}
-                required
+                onChange={setNewPassword}
+                label="New Password"
                 autoComplete="new-password"
                 minLength={8}
               />
+              <PasswordRules password={newPassword} />
             </div>
             <div className="mb-6">
-              <label className="mb-1 block text-sm font-medium text-text-secondary">Confirm Password</label>
-              <input
-                type="password"
+              <PasswordInput
                 value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className={inputClass}
-                required
+                onChange={setConfirmPassword}
+                label="Confirm Password"
                 autoComplete="new-password"
                 minLength={8}
               />
+              {confirmPassword && newPassword !== confirmPassword && (
+                <p className="mt-1 text-xs text-danger">Passwords do not match</p>
+              )}
             </div>
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || !isPasswordValid(newPassword)}
               className="w-full rounded-lg bg-accent px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-hover disabled:opacity-50"
             >
               {loading ? "Resetting..." : "Reset password"}

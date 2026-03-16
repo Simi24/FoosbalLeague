@@ -11,6 +11,8 @@ import {
   saveTokens,
   initAuth,
 } from "@/features/auth";
+import { PasswordInput } from "@/components/inputs/PasswordInput";
+import { PasswordRules, isPasswordValid } from "@/components/inputs/PasswordRules";
 
 type Step = "register" | "verify";
 
@@ -27,11 +29,18 @@ export const SignupPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  const passwordValid = isPasswordValid(password);
+  const passwordsMatch = password === confirmPassword;
+
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
-    if (password !== confirmPassword) {
+    if (!passwordValid) {
+      setError("Password does not meet the requirements");
+      return;
+    }
+    if (!passwordsMatch) {
       setError("Passwords do not match");
       return;
     }
@@ -117,32 +126,30 @@ export const SignupPage = () => {
               />
             </div>
             <div className="mb-4">
-              <label className="mb-1 block text-sm font-medium text-text-secondary">Password</label>
-              <input
-                type="password"
+              <PasswordInput
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className={inputClass}
-                required
-                minLength={8}
+                onChange={setPassword}
+                label="Password"
                 autoComplete="new-password"
+                minLength={8}
               />
+              <PasswordRules password={password} />
             </div>
             <div className="mb-6">
-              <label className="mb-1 block text-sm font-medium text-text-secondary">Confirm Password</label>
-              <input
-                type="password"
+              <PasswordInput
                 value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className={inputClass}
-                required
-                minLength={8}
+                onChange={setConfirmPassword}
+                label="Confirm Password"
                 autoComplete="new-password"
+                minLength={8}
               />
+              {confirmPassword && !passwordsMatch && (
+                <p className="mt-1 text-xs text-danger">Passwords do not match</p>
+              )}
             </div>
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || !passwordValid}
               className="w-full rounded-lg bg-accent px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-hover disabled:opacity-50"
             >
               {loading ? "Creating account..." : "Sign up"}

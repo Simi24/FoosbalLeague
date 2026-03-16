@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 
 import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import { loginWithCredentials } from "@/features/auth";
+import { PasswordInput } from "@/components/inputs/PasswordInput";
 
 export const LoginPage = () => {
   const dispatch = useAppDispatch();
@@ -56,19 +57,15 @@ export const LoginPage = () => {
             />
           </div>
           <div className="mb-6">
-            <div className="mb-1 flex items-center justify-between">
-              <label className="text-sm font-medium text-text-secondary">Password</label>
-              <Link to="/forgot-password" className="text-xs text-accent hover:text-accent-hover">
-                Forgot password?
-              </Link>
-            </div>
-            <input
-              type="password"
+            <PasswordInput
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-lg border border-border bg-bg-tertiary px-3 py-2.5 text-sm text-text-primary outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
-              required
-              autoComplete="current-password"
+              onChange={setPassword}
+              label="Password"
+              labelRight={
+                <Link to="/forgot-password" className="text-xs text-accent hover:text-accent-hover">
+                  Forgot password?
+                </Link>
+              }
             />
           </div>
           <button

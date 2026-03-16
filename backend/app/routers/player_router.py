@@ -4,8 +4,8 @@ from fastapi import APIRouter, Depends, HTTPException
 
 from dependencies.auth import get_current_user
 from dependencies.tenant import get_tenant_id
-from schemas.player import PlayerResponse, PlayerStatsResponse
-from services.player_service import get_player, list_players
+from schemas.player import PlayerResponse, PlayerStatsResponse, UpdatePlayerRequest
+from services.player_service import get_player, get_player_by_cognito_sub, list_players, update_display_name
 
 router = APIRouter(
     prefix="/api/v1/players",
@@ -51,6 +51,32 @@ async def read_player(
         total_matches=player.total_matches,
         total_wins=player.total_wins,
         total_losses=player.total_losses,
+    )
+
+
+@router.patch("/me", response_model=PlayerResponse)
+async def update_me(
+    body: UpdatePlayerRequest,
+    user: dict[str, Any] = Depends(get_current_user),
+    tenant_id: str = Depends(get_tenant_id),
+) -> PlayerResponse:
+    """Update the current player's display name."""
+    player = get_player_by_cognito_sub(tenant_id, user.get("sub", ""))
+    if not player:
+        raise HTTPException(status_code=400, detail="Player not registered")
+
+    updated = update_display_name(tenant_id, player.player_id, body.display_name)
+    if not updated:
+        raise HTTPException(status_code=500, detail="Failed to update")
+
+    return PlayerResponse(
+        player_id=updated.player_id,
+        display_name=updated.display_name,
+        email=updated.email,
+        tenant_id=tenant_id,
+        total_matches=updated.total_matches,
+        total_wins=updated.total_wins,
+        total_losses=updated.total_losses,
     )
 
 
