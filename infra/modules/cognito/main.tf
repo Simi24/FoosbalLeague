@@ -41,6 +41,7 @@ resource "aws_cognito_user_pool" "main" {
 resource "aws_cognito_user_pool_client" "web" {
   name         = "${var.project}-${var.environment}-web"
   user_pool_id = aws_cognito_user_pool.main.id
+  prevent_user_existence_errors = "ENABLED"
 
   explicit_auth_flows = [
     "ALLOW_USER_PASSWORD_AUTH",
