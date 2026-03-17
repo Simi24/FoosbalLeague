@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.7.0](https://github.com/Simi24/FoosbalLeague/compare/foosball-league-v0.6.0...foosball-league-v0.7.0) (2026-03-17)
+
+
+### Features
+
+* ✨ enable user existence error prevention in Cognito user pool client ([8fd712b](https://github.com/Simi24/FoosbalLeague/commit/8fd712b15d5810e0ee09e20ba373c31640b21c06))
+* ✨ mobile-native UX redesign with bottom tab bar and custom dropdowns ([55af855](https://github.com/Simi24/FoosbalLeague/commit/55af8555925d0b9e155645e3c45b13a02647929e))
+
 ## [0.6.0](https://github.com/Simi24/FoosbalLeague/compare/foosball-league-v0.5.0...foosball-league-v0.6.0) (2026-03-16)
 
 
