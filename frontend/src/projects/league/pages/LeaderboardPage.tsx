@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 
 import { apiFetch } from "@/api";
 import { Avatar } from "@/components/Avatar";
+import { Dropdown } from "@/components/inputs";
 import type { Leaderboard, MyLeague } from "../types";
 
 const getRankStyle = (rank: number): string => {
@@ -50,17 +51,12 @@ export const LeaderboardPage = () => {
     <div>
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-2xl font-bold text-text-primary">Leaderboard</h1>
-        <select
+        <Dropdown
           value={selectedLeague}
-          onChange={(e) => setSelectedLeague(e.target.value)}
-          className="rounded-lg border border-border bg-bg-tertiary px-3 py-2.5 text-sm text-text-primary outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
-        >
-          {leagues.map((lg) => (
-            <option key={lg.league_id} value={lg.league_id}>
-              {lg.name}
-            </option>
-          ))}
-        </select>
+          onChange={setSelectedLeague}
+          options={leagues.map((lg) => ({ value: lg.league_id, label: lg.name }))}
+          className="w-full sm:w-48"
+        />
       </div>
 
       {loading ? (

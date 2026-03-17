@@ -120,7 +120,7 @@ export const LeagueSettingsPage = () => {
           </div>
           <button
             onClick={handleSave}
-            className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-accent-hover"
+            className="w-full rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-accent-hover sm:w-auto"
           >
             Save
           </button>
@@ -134,30 +134,32 @@ export const LeagueSettingsPage = () => {
           <p className="mb-3 text-sm text-text-secondary">
             Share this code with others so they can join your league.
           </p>
-          <div className="flex items-center gap-2">
-            <div className="flex-1 rounded-lg border border-accent/30 bg-accent-light/30 px-4 py-3 text-center font-mono text-2xl font-bold tracking-[0.3em] text-accent">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <div className="flex-1 rounded-lg border border-accent/30 bg-accent-light/30 px-4 py-3 text-center font-mono text-xl font-bold tracking-[0.2em] text-accent sm:text-2xl sm:tracking-[0.3em]">
               {inviteCode}
             </div>
-            <button
-              onClick={() => navigator.clipboard.writeText(inviteCode)}
-              className="rounded-lg border border-border p-3 text-text-secondary transition-colors hover:bg-bg-tertiary hover:text-text-primary"
-              title="Copy code"
-            >
-              <MdContentCopy size={18} />
-            </button>
-            <button
-              onClick={async () => {
-                const res = await apiFetch(`/leagues/${id}/regenerate-code`, { method: "POST" });
-                if (res.ok) {
-                  const data = await res.json();
-                  setInviteCode(data.invite_code);
-                }
-              }}
-              className="rounded-lg border border-border p-3 text-text-secondary transition-colors hover:bg-bg-tertiary hover:text-text-primary"
-              title="Generate new code"
-            >
-              <MdRefresh size={18} />
-            </button>
+            <div className="flex justify-center gap-2">
+              <button
+                onClick={() => navigator.clipboard.writeText(inviteCode)}
+                className="rounded-lg border border-border p-3 text-text-secondary transition-colors hover:bg-bg-tertiary hover:text-text-primary"
+                title="Copy code"
+              >
+                <MdContentCopy size={18} />
+              </button>
+              <button
+                onClick={async () => {
+                  const res = await apiFetch(`/leagues/${id}/regenerate-code`, { method: "POST" });
+                  if (res.ok) {
+                    const data = await res.json();
+                    setInviteCode(data.invite_code);
+                  }
+                }}
+                className="rounded-lg border border-border p-3 text-text-secondary transition-colors hover:bg-bg-tertiary hover:text-text-primary"
+                title="Generate new code"
+              >
+                <MdRefresh size={18} />
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -186,7 +188,7 @@ export const LeagueSettingsPage = () => {
                   {m.role === "player" ? (
                     <button
                       onClick={() => handlePromote(m.player_id)}
-                      className="rounded-lg p-1.5 text-text-muted transition-colors hover:bg-accent-light hover:text-accent"
+                      className="rounded-lg p-2 text-text-muted transition-colors hover:bg-accent-light hover:text-accent"
                       title="Promote to admin"
                     >
                       <MdStar size={18} />
@@ -194,7 +196,7 @@ export const LeagueSettingsPage = () => {
                   ) : (
                     <button
                       onClick={() => handleDemote(m.player_id)}
-                      className="rounded-lg p-1.5 text-accent transition-colors hover:bg-accent-light"
+                      className="rounded-lg p-2 text-accent transition-colors hover:bg-accent-light"
                       title="Demote to player"
                     >
                       <MdStarBorder size={18} />
@@ -202,7 +204,7 @@ export const LeagueSettingsPage = () => {
                   )}
                   <button
                     onClick={() => handleKick(m.player_id)}
-                    className="rounded-lg p-1.5 text-text-muted transition-colors hover:bg-danger/10 hover:text-danger"
+                    className="rounded-lg p-2 text-text-muted transition-colors hover:bg-danger/10 hover:text-danger"
                     title="Remove from league"
                   >
                     <MdPersonRemove size={18} />

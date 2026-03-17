@@ -40,7 +40,7 @@ export const SettingsPage = () => {
         <div className="space-y-4">
           <div>
             <label className="mb-1 block text-sm font-medium text-text-secondary">Display Name</label>
-            <div className="flex gap-2">
+            <div className="flex flex-col gap-2 sm:flex-row sm:gap-2">
               <input
                 type="text"
                 value={displayName}
@@ -52,7 +52,7 @@ export const SettingsPage = () => {
               <button
                 onClick={handleSave}
                 disabled={saving || displayName === user?.name || displayName.length < 2}
-                className="rounded-lg bg-accent px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-hover disabled:opacity-50"
+                className="w-full rounded-lg bg-accent px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-hover disabled:opacity-50 sm:w-auto"
               >
                 {saving ? "Saving..." : saved ? "Saved!" : "Save"}
               </button>

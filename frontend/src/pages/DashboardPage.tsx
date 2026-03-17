@@ -142,17 +142,17 @@ export const DashboardPage = () => {
         <h1 className="text-2xl font-bold text-text-primary">
           Welcome back{user?.name ? `, ${user.name}` : ""}
         </h1>
-        <div className="flex gap-2">
+        <div className="flex flex-col gap-2 sm:flex-row">
           <button
             onClick={() => { setShowJoin(!showJoin); setShowCreate(false); }}
-            className="flex items-center gap-2 rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-text-secondary transition-colors hover:bg-bg-tertiary hover:text-text-primary"
+            className="flex w-full items-center justify-center gap-2 rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-text-secondary transition-colors hover:bg-bg-tertiary hover:text-text-primary sm:w-auto"
           >
             <MdVpnKey size={16} />
             Join League
           </button>
           <button
             onClick={() => { setShowCreate(!showCreate); setShowJoin(false); }}
-            className="flex items-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-hover"
+            className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-hover sm:w-auto"
           >
             <MdAdd size={16} />
             Create League
@@ -164,7 +164,7 @@ export const DashboardPage = () => {
       {showJoin && (
         <div className="mb-6 rounded-xl border border-border bg-bg-secondary p-5 shadow-sm">
           <h2 className="mb-3 text-lg font-semibold text-text-primary">Join with Invite Code</h2>
-          <form onSubmit={handleJoinByCode} className="flex gap-3">
+          <form onSubmit={handleJoinByCode} className="flex flex-col gap-2 sm:flex-row sm:gap-3">
             <input
               type="text"
               value={joinCode}
@@ -176,7 +176,7 @@ export const DashboardPage = () => {
             />
             <button
               type="submit"
-              className="rounded-lg bg-accent px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-hover"
+              className="w-full rounded-lg bg-accent px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-hover sm:w-auto"
             >
               Join
             </button>

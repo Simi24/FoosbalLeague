@@ -85,11 +85,11 @@ export const LeagueDetailPage = () => {
             {league.match_count} matches
           </p>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
           {currentMember && !isAdmin && (
             <button
               onClick={handleLeave}
-              className="flex items-center gap-2 rounded-lg border border-danger/30 px-3 py-2.5 text-sm text-danger transition-colors hover:bg-danger/5"
+              className="flex items-center justify-center gap-2 rounded-lg border border-danger/30 px-3 py-3 text-sm text-danger transition-colors hover:bg-danger/5 sm:py-2.5"
             >
               <MdLogout size={16} /> Leave
             </button>
@@ -97,20 +97,20 @@ export const LeagueDetailPage = () => {
           {isAdmin && (
             <Link
               to={`/leagues/${id}/settings`}
-              className="flex items-center gap-2 rounded-lg border border-border px-3 py-2.5 text-sm text-text-secondary transition-colors hover:bg-bg-tertiary hover:text-text-primary"
+              className="flex items-center justify-center gap-2 rounded-lg border border-border px-3 py-3 text-sm text-text-secondary transition-colors hover:bg-bg-tertiary hover:text-text-primary sm:py-2.5"
             >
               <MdSettings size={16} />
             </Link>
           )}
           <Link
             to={`/leagues/${id}/leaderboard`}
-            className="flex items-center gap-2 rounded-lg border border-border px-3 py-2.5 text-sm text-text-secondary transition-colors hover:bg-bg-tertiary hover:text-text-primary"
+            className="flex items-center justify-center gap-2 rounded-lg border border-border px-3 py-3 text-sm text-text-secondary transition-colors hover:bg-bg-tertiary hover:text-text-primary sm:py-2.5"
           >
             <MdLeaderboard size={16} /> Leaderboard
           </Link>
           <Link
             to={`/leagues/${id}/match/new`}
-            className="flex items-center gap-2 rounded-lg bg-accent px-3 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-hover"
+            className="flex items-center justify-center gap-2 rounded-lg bg-accent px-3 py-3 text-sm font-medium text-white transition-colors hover:bg-accent-hover sm:py-2.5"
           >
             <MdAdd size={16} /> Record Match
           </Link>
@@ -173,9 +173,9 @@ export const LeagueDetailPage = () => {
               {matches.slice(0, 10).map((m) => (
                 <div
                   key={m.match_id}
-                  className="flex items-center justify-between rounded-lg px-3 py-2 text-sm hover:bg-bg-tertiary"
+                  className="flex min-w-0 items-center justify-between gap-2 rounded-lg px-3 py-2 text-sm hover:bg-bg-tertiary"
                 >
-                  <span className="text-text-primary">
+                  <span className="min-w-0 truncate text-text-primary">
                     {m.team1_player_ids.map(resolveName).join(", ")} vs{" "}
                     {m.team2_player_ids.map(resolveName).join(", ")}
                   </span>
@@ -187,14 +187,14 @@ export const LeagueDetailPage = () => {
                       <div className="flex items-center gap-1">
                         <button
                           onClick={() => handleConfirm(m.match_id)}
-                          className="rounded-full bg-success/10 p-1 text-success transition-colors hover:bg-success/20"
+                          className="rounded-full bg-success/10 p-2 text-success transition-colors hover:bg-success/20"
                           title="Confirm"
                         >
                           <MdCheck size={16} />
                         </button>
                         <button
                           onClick={() => handleDispute(m.match_id)}
-                          className="rounded-full bg-danger/10 p-1 text-danger transition-colors hover:bg-danger/20"
+                          className="rounded-full bg-danger/10 p-2 text-danger transition-colors hover:bg-danger/20"
                           title="Dispute"
                         >
                           <MdClose size={16} />

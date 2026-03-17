@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { apiFetch } from "@/api";
 import { useAppSelector } from "@/app/hooks";
 import { Avatar } from "@/components/Avatar";
+import { Dropdown } from "@/components/inputs";
 import { AchievementBadge, EloHistoryChart, StatCard } from "@/projects/league/components";
 import type { Achievement, EloHistoryPoint, Leaderboard, MyLeague, RankingEntry } from "@/projects/league/types";
 
@@ -78,17 +79,12 @@ export const ProfilePage = () => {
           </div>
         </div>
         {leagues.length > 0 && (
-          <select
+          <Dropdown
             value={selectedLeague}
-            onChange={(e) => setSelectedLeague(e.target.value)}
-            className="rounded-lg border border-border bg-bg-tertiary px-3 py-2.5 text-sm text-text-primary outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
-          >
-            {leagues.map((lg) => (
-              <option key={lg.league_id} value={lg.league_id}>
-                {lg.name}
-              </option>
-            ))}
-          </select>
+            onChange={setSelectedLeague}
+            options={leagues.map((lg) => ({ value: lg.league_id, label: lg.name }))}
+            className="w-full sm:w-48"
+          />
         )}
       </div>
 

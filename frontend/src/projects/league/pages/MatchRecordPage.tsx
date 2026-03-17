@@ -206,13 +206,13 @@ export const MatchRecordPage = () => {
         {unassigned.length > 0 && (
           <div className="mb-6">
             <h2 className="mb-2 text-sm font-semibold text-text-secondary">Players</h2>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
               {unassigned.map((p) => (
-                <div key={p.player_id} className="flex">
+                <div key={p.player_id} className="flex w-full sm:w-auto">
                   <button
                     type="button"
                     onClick={() => addToTeam(p.player_id, 1)}
-                    className="rounded-l-lg border border-border bg-bg-secondary px-3 py-2 text-sm text-text-primary transition-colors hover:border-accent hover:bg-accent-light"
+                    className="flex-1 rounded-l-lg border border-border bg-bg-secondary px-3 py-3 text-sm text-text-primary transition-colors hover:border-accent hover:bg-accent-light sm:flex-initial sm:py-2"
                   >
                     <span className="font-medium">{p.display_name}</span>
                     <span className="ml-1.5 font-mono text-xs text-text-muted">{p.current_elo}</span>
@@ -220,7 +220,7 @@ export const MatchRecordPage = () => {
                   <button
                     type="button"
                     onClick={() => addToTeam(p.player_id, 2)}
-                    className="rounded-r-lg border border-l-0 border-border bg-bg-secondary px-2 py-2 text-xs text-text-muted transition-colors hover:border-accent hover:bg-accent-light hover:text-accent"
+                    className="rounded-r-lg border border-l-0 border-border bg-bg-secondary px-4 py-3 text-sm text-text-muted transition-colors hover:border-accent hover:bg-accent-light hover:text-accent sm:px-2 sm:py-2 sm:text-xs"
                   >
                     &rsaquo;
                   </button>
@@ -253,7 +253,7 @@ export const MatchRecordPage = () => {
               min="0"
               value={score1}
               onChange={(e) => setScore1(e.target.value)}
-              className="w-full rounded-lg border border-border bg-bg-tertiary px-3 py-2.5 text-center font-mono text-2xl text-accent outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+              className="w-full rounded-lg border border-border bg-bg-tertiary px-3 py-3 text-center font-mono text-2xl text-accent outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
               required
             />
           </div>
@@ -267,7 +267,7 @@ export const MatchRecordPage = () => {
               min="0"
               value={score2}
               onChange={(e) => setScore2(e.target.value)}
-              className="w-full rounded-lg border border-border bg-bg-tertiary px-3 py-2.5 text-center font-mono text-2xl text-accent outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+              className="w-full rounded-lg border border-border bg-bg-tertiary px-3 py-3 text-center font-mono text-2xl text-accent outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
               required
             />
           </div>

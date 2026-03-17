@@ -119,14 +119,14 @@ export const MatchHistoryPage = () => {
                         <div className="flex items-center justify-center gap-1">
                           <button
                             onClick={() => handleConfirm(m.match_id)}
-                            className="rounded-full bg-success/10 p-1 text-success transition-colors hover:bg-success/20"
+                            className="rounded-full bg-success/10 p-2 text-success transition-colors hover:bg-success/20"
                             title="Confirm"
                           >
                             <MdCheck size={16} />
                           </button>
                           <button
                             onClick={() => handleDispute(m.match_id)}
-                            className="rounded-full bg-danger/10 p-1 text-danger transition-colors hover:bg-danger/20"
+                            className="rounded-full bg-danger/10 p-2 text-danger transition-colors hover:bg-danger/20"
                             title="Dispute"
                           >
                             <MdClose size={16} />
