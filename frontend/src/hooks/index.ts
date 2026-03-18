@@ -1,1 +1,1 @@
-export {};
+export { useMyLeagues } from "./useMyLeagues";

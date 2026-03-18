@@ -1,19 +1,19 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { MdAdd, MdPeople, MdSportsSoccer, MdVpnKey } from "react-icons/md";
 
 import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import { apiFetch } from "@/api";
 import { initAuth } from "@/features/auth";
+import { fetchMyLeagues, invalidateLeagues } from "@/features/leagues";
+import { useMyLeagues } from "@/hooks";
 import { CreateLeagueForm } from "@/projects/league/components";
-import type { MyLeague } from "@/projects/league/types";
 
 export const DashboardPage = () => {
   const dispatch = useAppDispatch();
   const user = useAppSelector((state) => state.auth.user);
+  const { leagues: myLeagues, loading } = useMyLeagues();
 
-  const [myLeagues, setMyLeagues] = useState<MyLeague[]>([]);
-  const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
   const [joinCode, setJoinCode] = useState("");
   const [joinError, setJoinError] = useState("");
@@ -25,22 +25,6 @@ export const DashboardPage = () => {
   const [registerError, setRegisterError] = useState<string | null>(null);
 
   const needsRegistration = user && !user.player_id;
-
-  const fetchData = async () => {
-    if (needsRegistration) {
-      setLoading(false);
-      return;
-    }
-    setLoading(true);
-    const res = await apiFetch("/leagues/my");
-    const my = res.ok ? ((await res.json()) as MyLeague[]) : [];
-    setMyLeagues(my);
-    setLoading(false);
-  };
-
-  useEffect(() => {
-    fetchData();
-  }, [needsRegistration]);
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -73,16 +57,18 @@ export const DashboardPage = () => {
     if (response.ok) {
       setJoinCode("");
       setShowJoin(false);
-      await fetchData();
+      dispatch(invalidateLeagues());
+      dispatch(fetchMyLeagues());
     } else {
       const data = await response.json();
       setJoinError(data.detail ?? "Invalid code");
     }
   };
 
-  const handleCreated = async () => {
+  const handleCreated = () => {
     setShowCreate(false);
-    await fetchData();
+    dispatch(invalidateLeagues());
+    dispatch(fetchMyLeagues());
   };
 
   // Registration prompt for unregistered users

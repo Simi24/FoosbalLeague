@@ -4,13 +4,15 @@ import { useParams } from "react-router-dom";
 import { apiFetch } from "@/api";
 import { Avatar } from "@/components/Avatar";
 import { Dropdown } from "@/components/inputs";
+import { useMyLeagues } from "@/hooks";
 import { AchievementBadge, EloHistoryChart, StatCard } from "../components";
 import type { Achievement, EloHistoryPoint, Leaderboard, MyLeague, Player, RankingEntry } from "../types";
 
 export const PlayerProfilePage = () => {
   const { id: playerId } = useParams<{ id: string }>();
+  const { leagues: myLeagues } = useMyLeagues();
   const [player, setPlayer] = useState<Player | null>(null);
-  const [leagues, setLeagues] = useState<MyLeague[]>([]);
+  const [sharedLeagues, setSharedLeagues] = useState<MyLeague[]>([]);
   const [selectedLeague, setSelectedLeague] = useState("");
   const [rankingEntry, setRankingEntry] = useState<RankingEntry | null>(null);
   const [eloHistory, setEloHistory] = useState<EloHistoryPoint[]>([]);
@@ -19,32 +21,31 @@ export const PlayerProfilePage = () => {
 
   useEffect(() => {
     if (!playerId) return;
-    Promise.all([
-      apiFetch(`/players/${playerId}`).then((r) => r.json()),
-      apiFetch("/leagues/my").then((r) => (r.ok ? r.json() : [])) as Promise<MyLeague[]>,
-    ])
-      .then(async ([p, myLeagues]) => {
-        setPlayer(p);
-
-        // Filter to only leagues where the viewed player also has a ranking
-        const checks = await Promise.all(
-          myLeagues.map(async (lg) => {
-            const res = await apiFetch(`/rankings/league/${lg.league_id}`);
-            if (!res.ok) return null;
-            const data = (await res.json()) as Leaderboard;
-            const hasPlayer = data.entries.some((e) => e.player_id === playerId);
-            return hasPlayer ? lg : null;
-          }),
-        );
-        const shared = checks.filter((lg): lg is MyLeague => lg !== null);
-
-        setLeagues(shared);
-        if (shared.length > 0 && !selectedLeague) {
-          setSelectedLeague(shared[0]!.league_id);
-        }
-      })
+    apiFetch(`/players/${playerId}`)
+      .then((r) => r.json())
+      .then(setPlayer)
       .finally(() => setLoading(false));
   }, [playerId]);
+
+  useEffect(() => {
+    if (!playerId || myLeagues.length === 0) return;
+
+    Promise.all(
+      myLeagues.map(async (lg) => {
+        const res = await apiFetch(`/rankings/league/${lg.league_id}`);
+        if (!res.ok) return null;
+        const data = (await res.json()) as Leaderboard;
+        const hasPlayer = data.entries.some((e) => e.player_id === playerId);
+        return hasPlayer ? lg : null;
+      }),
+    ).then((checks) => {
+      const shared = checks.filter((lg): lg is MyLeague => lg !== null);
+      setSharedLeagues(shared);
+      if (shared.length > 0 && !selectedLeague) {
+        setSelectedLeague(shared[0]!.league_id);
+      }
+    });
+  }, [playerId, myLeagues]);
 
   useEffect(() => {
     if (!playerId || !selectedLeague) return;
@@ -92,11 +93,11 @@ export const PlayerProfilePage = () => {
             <p className="text-sm text-text-secondary">{player.email}</p>
           </div>
         </div>
-        {leagues.length > 0 && (
+        {sharedLeagues.length > 0 && (
           <Dropdown
             value={selectedLeague}
             onChange={setSelectedLeague}
-            options={leagues.map((lg) => ({ value: lg.league_id, label: lg.name }))}
+            options={sharedLeagues.map((lg) => ({ value: lg.league_id, label: lg.name }))}
             className="w-full sm:w-48"
           />
         )}
@@ -110,7 +111,7 @@ export const PlayerProfilePage = () => {
           <StatCard label="Losses" value={rankingEntry.losses} color="text-danger" />
           <StatCard label="Win Rate" value={`${winRate}%`} color="text-accent" />
         </div>
-      ) : leagues.length > 0 ? (
+      ) : sharedLeagues.length > 0 ? (
         <p className="mb-6 text-sm text-text-muted">No stats in this league yet.</p>
       ) : (
         <p className="mb-6 text-sm text-text-muted">Not enrolled in any league yet.</p>
@@ -139,7 +140,7 @@ export const PlayerProfilePage = () => {
       )}
 
       {/* ELO History */}
-      {leagues.length > 0 && (
+      {sharedLeagues.length > 0 && (
         <div className="rounded-xl border border-border bg-bg-secondary p-5 shadow-sm">
           <h2 className="mb-4 text-lg font-semibold text-text-primary">
             ELO History

@@ -3,19 +3,25 @@ import { useNavigate, useParams } from "react-router-dom";
 import { MdArrowBack, MdContentCopy, MdPersonRemove, MdRefresh, MdStar, MdStarBorder, MdDelete } from "react-icons/md";
 
 import { apiFetch } from "@/api";
-import { useAppSelector } from "@/app/hooks";
-import type { League, LeagueMember, MyLeague } from "../types";
+import { useAppDispatch, useAppSelector } from "@/app/hooks";
+import { fetchMyLeagues, invalidateLeagues } from "@/features/leagues";
+import { useMyLeagues } from "@/hooks";
+import type { League, LeagueMember } from "../types";
 
 export const LeagueSettingsPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
   const user = useAppSelector((state) => state.auth.user);
+  const { leagues: myLeagues } = useMyLeagues();
+
   const [league, setLeague] = useState<League | null>(null);
   const [members, setMembers] = useState<LeagueMember[]>([]);
   const [loading, setLoading] = useState(true);
-  const [inviteCode, setInviteCode] = useState("");
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+
+  const inviteCode = myLeagues.find((l) => l.league_id === id)?.invite_code ?? "";
 
   const fetchData = () => {
     if (!id) return;
@@ -23,15 +29,12 @@ export const LeagueSettingsPage = () => {
     Promise.all([
       apiFetch(`/leagues/${id}`).then((r) => r.json()) as Promise<League>,
       apiFetch(`/leagues/${id}/members`).then((r) => r.json()) as Promise<LeagueMember[]>,
-      apiFetch("/leagues/my").then((r) => (r.ok ? r.json() : [])) as Promise<MyLeague[]>,
     ])
-      .then(([lg, mem, myLeagues]) => {
+      .then(([lg, mem]) => {
         setLeague(lg);
         setMembers(mem);
         setName(lg.name);
         setDescription(lg.description);
-        const myEntry = myLeagues.find((l) => l.league_id === id);
-        if (myEntry?.invite_code) setInviteCode(myEntry.invite_code);
       })
       .finally(() => setLoading(false));
   };
@@ -49,11 +52,15 @@ export const LeagueSettingsPage = () => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name, description }),
     });
+    dispatch(invalidateLeagues());
+    dispatch(fetchMyLeagues());
     fetchData();
   };
 
   const handleKick = async (playerId: string) => {
     await apiFetch(`/leagues/${id}/kick/${playerId}`, { method: "POST" });
+    dispatch(invalidateLeagues());
+    dispatch(fetchMyLeagues());
     fetchData();
   };
 
@@ -69,6 +76,7 @@ export const LeagueSettingsPage = () => {
 
   const handleDelete = async () => {
     await apiFetch(`/leagues/${id}`, { method: "DELETE" });
+    dispatch(invalidateLeagues());
     navigate("/");
   };
 
@@ -150,8 +158,8 @@ export const LeagueSettingsPage = () => {
                 onClick={async () => {
                   const res = await apiFetch(`/leagues/${id}/regenerate-code`, { method: "POST" });
                   if (res.ok) {
-                    const data = await res.json();
-                    setInviteCode(data.invite_code);
+                    dispatch(invalidateLeagues());
+                    dispatch(fetchMyLeagues());
                   }
                 }}
                 className="rounded-lg border border-border p-3 text-text-secondary transition-colors hover:bg-bg-tertiary hover:text-text-primary"

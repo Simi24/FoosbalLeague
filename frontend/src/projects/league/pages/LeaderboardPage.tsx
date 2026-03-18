@@ -4,7 +4,8 @@ import { Link, useParams } from "react-router-dom";
 import { apiFetch } from "@/api";
 import { Avatar } from "@/components/Avatar";
 import { Dropdown } from "@/components/inputs";
-import type { Leaderboard, MyLeague } from "../types";
+import { useMyLeagues } from "@/hooks";
+import type { Leaderboard } from "../types";
 
 const getRankStyle = (rank: number): string => {
   if (rank === 1) return "bg-amber-50 border-amber-200";
@@ -22,21 +23,16 @@ const getRankBadge = (rank: number): string | null => {
 
 export const LeaderboardPage = () => {
   const { id: leagueId } = useParams<{ id: string }>();
-  const [leagues, setLeagues] = useState<MyLeague[]>([]);
+  const { leagues } = useMyLeagues();
   const [selectedLeague, setSelectedLeague] = useState(leagueId ?? "");
   const [leaderboard, setLeaderboard] = useState<Leaderboard | null>(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    apiFetch("/leagues/my")
-      .then((r) => (r.ok ? r.json() : []))
-      .then((myLeagues: MyLeague[]) => {
-        setLeagues(myLeagues);
-        if (!selectedLeague && myLeagues.length > 0) {
-          setSelectedLeague(myLeagues[0]!.league_id);
-        }
-      });
-  }, []);
+    if (!selectedLeague && leagues.length > 0) {
+      setSelectedLeague(leagues[0]!.league_id);
+    }
+  }, [leagues, selectedLeague]);
 
   useEffect(() => {
     if (!selectedLeague) return;

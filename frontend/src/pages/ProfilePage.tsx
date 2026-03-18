@@ -4,32 +4,25 @@ import { apiFetch } from "@/api";
 import { useAppSelector } from "@/app/hooks";
 import { Avatar } from "@/components/Avatar";
 import { Dropdown } from "@/components/inputs";
+import { useMyLeagues } from "@/hooks";
 import { AchievementBadge, EloHistoryChart, StatCard } from "@/projects/league/components";
-import type { Achievement, EloHistoryPoint, Leaderboard, MyLeague, RankingEntry } from "@/projects/league/types";
+import type { Achievement, EloHistoryPoint, Leaderboard, RankingEntry } from "@/projects/league/types";
 
 export const ProfilePage = () => {
   const user = useAppSelector((state) => state.auth.user);
-  const [leagues, setLeagues] = useState<MyLeague[]>([]);
+  const { leagues, loading } = useMyLeagues();
   const [selectedLeague, setSelectedLeague] = useState("");
   const [rankingEntry, setRankingEntry] = useState<RankingEntry | null>(null);
   const [eloHistory, setEloHistory] = useState<EloHistoryPoint[]>([]);
   const [achievements, setAchievements] = useState<Achievement[]>([]);
-  const [loading, setLoading] = useState(true);
 
   const playerId = user?.player_id;
 
   useEffect(() => {
-    if (!playerId) return;
-    apiFetch("/leagues/my")
-      .then((r) => (r.ok ? r.json() : []))
-      .then((lg: MyLeague[]) => {
-        setLeagues(lg);
-        if (lg.length > 0 && !selectedLeague) {
-          setSelectedLeague(lg[0]!.league_id);
-        }
-      })
-      .finally(() => setLoading(false));
-  }, [playerId]);
+    if (leagues.length > 0 && !selectedLeague) {
+      setSelectedLeague(leagues[0]!.league_id);
+    }
+  }, [leagues, selectedLeague]);
 
   useEffect(() => {
     if (!playerId || !selectedLeague) return;

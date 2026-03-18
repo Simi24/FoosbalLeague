@@ -3,13 +3,15 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { MdAdd, MdCheck, MdClose, MdHistory, MdLeaderboard, MdLogout, MdSettings } from "react-icons/md";
 
 import { apiFetch } from "@/api";
-import { useAppSelector } from "@/app/hooks";
+import { useAppDispatch, useAppSelector } from "@/app/hooks";
+import { invalidateLeagues } from "@/features/leagues";
 import { Avatar } from "@/components/Avatar";
 import type { League, LeagueMember, Match } from "../types";
 
 export const LeagueDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
   const user = useAppSelector((state) => state.auth.user);
   const [league, setLeague] = useState<League | null>(null);
   const [members, setMembers] = useState<LeagueMember[]>([]);
@@ -61,7 +63,10 @@ export const LeagueDetailPage = () => {
 
   const handleLeave = async () => {
     const res = await apiFetch(`/leagues/${id}/leave`, { method: "POST" });
-    if (res.ok) navigate("/");
+    if (res.ok) {
+      dispatch(invalidateLeagues());
+      navigate("/");
+    }
   };
 
   if (loading) {

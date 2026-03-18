@@ -1,27 +1,16 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { MdAdd, MdPeople, MdSportsSoccer } from "react-icons/md";
 
-import { apiFetch } from "@/api";
+import { useAppDispatch } from "@/app/hooks";
+import { fetchMyLeagues, invalidateLeagues } from "@/features/leagues";
+import { useMyLeagues } from "@/hooks";
 import { CreateLeagueForm, EmptyState } from "../components";
-import type { MyLeague } from "../types";
 
 export const LeagueListPage = () => {
-  const [leagues, setLeagues] = useState<MyLeague[]>([]);
-  const [loading, setLoading] = useState(true);
+  const dispatch = useAppDispatch();
+  const { leagues, loading } = useMyLeagues();
   const [showCreate, setShowCreate] = useState(false);
-
-  const fetchData = () => {
-    setLoading(true);
-    apiFetch("/leagues/my")
-      .then((r) => (r.ok ? r.json() : []))
-      .then(setLeagues)
-      .finally(() => setLoading(false));
-  };
-
-  useEffect(() => {
-    fetchData();
-  }, []);
 
   return (
     <div>
@@ -38,7 +27,8 @@ export const LeagueListPage = () => {
 
       {showCreate && <CreateLeagueForm onCreated={() => {
         setShowCreate(false);
-        fetchData();
+        dispatch(invalidateLeagues());
+        dispatch(fetchMyLeagues());
       }} />}
 
       {loading ? (
