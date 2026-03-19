@@ -114,8 +114,8 @@ export const EloHistoryChart = ({
     >
       <defs>
         <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#f59e0b" stopOpacity={0.25} />
-          <stop offset="100%" stopColor="#f59e0b" stopOpacity={0} />
+          <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.25} />
+          <stop offset="100%" stopColor="#3b82f6" stopOpacity={0} />
         </linearGradient>
       </defs>
 
@@ -123,8 +123,8 @@ export const EloHistoryChart = ({
         {/* Grid lines */}
         {yTicks.map(({ y, elo }) => (
           <g key={elo}>
-            <line x1={0} y1={y} x2={chartWidth} y2={y} stroke="#e5e7eb" strokeDasharray="4" />
-            <text x={-10} y={y + 4} textAnchor="end" fill="#9ca3af" fontSize={10} fontFamily="monospace">
+            <line x1={0} y1={y} x2={chartWidth} y2={y} stroke="#252b38" strokeDasharray="4" />
+            <text x={-10} y={y + 4} textAnchor="end" fill="#5a6373" fontSize={10} fontFamily="monospace">
               {elo}
             </text>
           </g>
@@ -138,13 +138,13 @@ export const EloHistoryChart = ({
           <path
             d={linePath}
             fill="none"
-            stroke="#f59e0b"
+            stroke="#3b82f6"
             strokeWidth={2.5}
             strokeLinecap="round"
             strokeLinejoin="round"
           />
         ) : (
-          <circle cx={points[0]![0]} cy={points[0]![1]} r={5} fill="#f59e0b" />
+          <circle cx={points[0]![0]} cy={points[0]![1]} r={5} fill="#3b82f6" />
         )}
 
         {/* Dots */}
@@ -156,14 +156,14 @@ export const EloHistoryChart = ({
             return (
               <g key={data[i]!.match_id}>
                 {(isLast || isActive) && (
-                  <circle cx={x} cy={y} r={8} fill="#f59e0b" opacity={0.15} />
+                  <circle cx={x} cy={y} r={8} fill="#3b82f6" opacity={0.15} />
                 )}
                 <circle
                   cx={x}
                   cy={y}
                   r={isActive ? 5 : isLast ? 4.5 : 3}
-                  fill="#f59e0b"
-                  stroke="white"
+                  fill="#3b82f6"
+                  stroke="#151921"
                   strokeWidth={isActive || isLast ? 2 : 0}
                 />
               </g>
@@ -178,7 +178,7 @@ export const EloHistoryChart = ({
               y1={0}
               x2={points[hovered]![0]}
               y2={chartHeight}
-              stroke="#f59e0b"
+              stroke="#3b82f6"
               strokeWidth={1}
               strokeDasharray="3"
               opacity={0.5}
@@ -193,7 +193,7 @@ export const EloHistoryChart = ({
 
               return (
                 <g transform={`translate(${tooltipX}, ${tooltipY})`}>
-                  <rect width={108} height={52} rx={8} fill="#1f2937" />
+                  <rect width={108} height={52} rx={8} fill="#1e2330" />
                   <text x={12} y={20} fill="white" fontSize={14} fontWeight="bold" fontFamily="monospace">
                     {hoveredPoint.elo}
                   </text>
@@ -207,7 +207,7 @@ export const EloHistoryChart = ({
                   >
                     {hoveredPoint.delta >= 0 ? "+" : ""}{hoveredPoint.delta}
                   </text>
-                  <text x={52} y={38} fill="#9ca3af" fontSize={10}>
+                  <text x={52} y={38} fill="#5a6373" fontSize={10}>
                     {formatDate(hoveredPoint.timestamp)}
                   </text>
                 </g>
@@ -218,7 +218,7 @@ export const EloHistoryChart = ({
 
         {/* X-axis labels */}
         {xLabels.map(({ i, label }) => (
-          <text key={i} x={xScale(i)} y={chartHeight + 20} textAnchor="middle" fill="#9ca3af" fontSize={9}>
+          <text key={i} x={xScale(i)} y={chartHeight + 20} textAnchor="middle" fill="#5a6373" fontSize={9}>
             {label}
           </text>
         ))}

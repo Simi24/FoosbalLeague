@@ -44,11 +44,12 @@ export const LeagueListPage = () => {
         />
       ) : (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {leagues.map((league) => (
+          {leagues.map((league, i) => (
             <Link
               key={league.league_id}
               to={`/leagues/${league.league_id}`}
-              className="rounded-xl border border-border bg-bg-secondary p-5 shadow-sm transition-all hover:border-accent hover:shadow-md"
+              className="card-interactive animate-in rounded-xl border border-border bg-bg-secondary p-5"
+              style={{ animationDelay: `${i * 60}ms` }}
             >
               <div className="mb-2 flex items-center justify-between">
                 <h3 className="text-lg font-semibold text-text-primary">{league.name}</h3>

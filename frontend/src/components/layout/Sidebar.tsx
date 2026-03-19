@@ -18,7 +18,7 @@ export const Sidebar = () => {
   return (
     <aside className="fixed left-0 top-0 z-40 hidden h-full w-56 flex-col border-r border-border bg-bg-secondary md:flex">
       <div className="flex h-14 items-center border-b border-border px-4">
-        <span className="text-lg font-bold text-accent">FoosLeague</span>
+        <span className="brand-gradient text-lg font-bold">FoosLeague</span>
       </div>
 
       <nav className="flex-1 space-y-1 p-3">
@@ -28,10 +28,10 @@ export const Sidebar = () => {
             to={to}
             end={to === "/"}
             className={({ isActive }) =>
-              `flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors ${
+              `flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all duration-200 ${
                 isActive
-                  ? "bg-accent-light text-accent font-medium"
-                  : "text-text-secondary hover:bg-bg-tertiary hover:text-text-primary"
+                  ? "bg-accent-light text-accent font-medium border-l-2 border-accent"
+                  : "text-text-secondary hover:bg-bg-tertiary hover:text-text-primary border-l-2 border-transparent"
               }`
             }
           >

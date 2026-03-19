@@ -130,11 +130,13 @@ export const MatchRecordPage = () => {
   const TeamSlot = ({ team, label }: { team: 1 | 2; label: string }) => {
     const teamPlayers = team === 1 ? team1Players : team2Players;
     const slots = maxPerTeam - teamPlayers.length;
+    const teamColor = team === 1 ? "text-team-blue" : "text-team-red";
+    const borderColor = team === 1 ? "border-team-blue/30" : "border-team-red/30";
 
     return (
       <div className="flex-1">
-        <h3 className="mb-2 text-sm font-semibold text-text-secondary">{label}</h3>
-        <div className="min-h-[100px] space-y-2 rounded-xl border-2 border-dashed border-border p-3">
+        <h3 className={`mb-2 text-sm font-semibold ${teamColor}`}>{label}</h3>
+        <div className={`min-h-[100px] space-y-2 rounded-xl border-2 border-dashed ${borderColor} p-3`}>
           {teamPlayers.map((p) => (
             <PlayerChip
               key={p.player_id}
@@ -171,7 +173,7 @@ export const MatchRecordPage = () => {
                   <button
                     type="button"
                     onClick={() => addToTeam(p.player_id, 1)}
-                    className="flex-1 rounded-l-lg border border-border bg-bg-secondary px-3 py-3 text-sm text-text-primary transition-colors hover:border-accent hover:bg-accent-light sm:flex-initial sm:py-2"
+                    className="flex-1 rounded-l-lg border border-border bg-bg-secondary px-3 py-3 text-sm text-text-primary transition-colors hover:border-team-blue/50 hover:bg-team-blue/10 sm:flex-initial sm:py-2"
                   >
                     <span className="font-medium">{p.display_name}</span>
                     <span className="ml-1.5 font-mono text-xs text-text-muted">{p.current_elo}</span>
@@ -179,7 +181,7 @@ export const MatchRecordPage = () => {
                   <button
                     type="button"
                     onClick={() => addToTeam(p.player_id, 2)}
-                    className="rounded-r-lg border border-l-0 border-border bg-bg-secondary px-4 py-3 text-sm text-text-muted transition-colors hover:border-accent hover:bg-accent-light hover:text-accent sm:px-2 sm:py-2 sm:text-xs"
+                    className="rounded-r-lg border border-l-0 border-border bg-bg-secondary px-4 py-3 text-sm text-text-muted transition-colors hover:border-team-red/50 hover:bg-team-red/10 hover:text-team-red sm:px-2 sm:py-2 sm:text-xs"
                   >
                     &rsaquo;
                   </button>
@@ -204,7 +206,7 @@ export const MatchRecordPage = () => {
         {/* Scores */}
         <div className="mb-6 grid grid-cols-[1fr_auto_1fr] items-end gap-4">
           <div>
-            <label className="mb-1 block text-sm font-medium text-text-secondary">
+            <label className="mb-1 block text-sm font-medium text-team-blue">
               Team 1 Score
             </label>
             <input
@@ -212,13 +214,13 @@ export const MatchRecordPage = () => {
               min="0"
               value={score1}
               onChange={(e) => setScore1(e.target.value)}
-              className="w-full rounded-lg border border-border bg-bg-tertiary px-3 py-3 text-center font-mono text-2xl text-accent outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+              className="w-full rounded-lg border border-team-blue/30 bg-bg-tertiary px-3 py-3 text-center font-mono text-2xl text-team-blue outline-none focus:border-team-blue focus:ring-2 focus:ring-team-blue/20"
               required
             />
           </div>
           <span className="pb-3 text-lg font-bold text-text-muted">&ndash;</span>
           <div>
-            <label className="mb-1 block text-sm font-medium text-text-secondary">
+            <label className="mb-1 block text-sm font-medium text-team-red">
               Team 2 Score
             </label>
             <input
@@ -226,7 +228,7 @@ export const MatchRecordPage = () => {
               min="0"
               value={score2}
               onChange={(e) => setScore2(e.target.value)}
-              className="w-full rounded-lg border border-border bg-bg-tertiary px-3 py-3 text-center font-mono text-2xl text-accent outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+              className="w-full rounded-lg border border-team-red/30 bg-bg-tertiary px-3 py-3 text-center font-mono text-2xl text-team-red outline-none focus:border-team-red focus:ring-2 focus:ring-team-red/20"
               required
             />
           </div>
@@ -234,8 +236,8 @@ export const MatchRecordPage = () => {
 
         {/* ELO Preview */}
         {hasPreview && (
-          <div className="mb-6 rounded-xl border border-accent/30 bg-accent-light/30 p-4">
-            <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-accent">
+          <div className="mb-6 rounded-xl border border-field-green/20 bg-field-green/5 p-4">
+            <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-field-green">
               ELO Preview
             </h3>
             <div className="grid grid-cols-2 gap-4">

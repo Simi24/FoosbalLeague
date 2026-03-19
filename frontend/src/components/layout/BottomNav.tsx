@@ -23,15 +23,22 @@ export const BottomNav = () => (
         to={to}
         end={to === "/"}
         className={({ isActive }) =>
-          `flex flex-col items-center gap-0.5 px-2 py-1 ${
+          `relative flex flex-col items-center gap-0.5 px-2 py-1 transition-colors duration-200 ${
             isActive
               ? "text-accent font-medium"
               : "text-text-muted"
           }`
         }
       >
-        <Icon size={20} />
-        <span className="text-[10px]">{label}</span>
+        {({ isActive }) => (
+          <>
+            <Icon size={20} />
+            <span className="text-[10px]">{label}</span>
+            {isActive && (
+              <span className="absolute bottom-1 h-1 w-1 rounded-full bg-accent" />
+            )}
+          </>
+        )}
       </NavLink>
     ))}
   </nav>

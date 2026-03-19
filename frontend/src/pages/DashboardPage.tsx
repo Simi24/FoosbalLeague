@@ -60,7 +60,7 @@ export const DashboardPage = () => {
   if (needsRegistration) {
     return (
       <div className="mx-auto max-w-md py-12">
-        <div className="rounded-xl border border-border bg-bg-secondary p-8 shadow-sm text-center">
+        <div className="animate-in rounded-xl border border-border bg-bg-secondary p-8 shadow-sm text-center">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-accent-light">
             <MdSportsSoccer size={32} className="text-accent" />
           </div>
@@ -123,7 +123,7 @@ export const DashboardPage = () => {
           </button>
           <button
             onClick={() => { setShowCreate(!showCreate); setShowJoin(false); }}
-            className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-hover sm:w-auto"
+            className="btn-press flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-sm font-medium text-white transition-all hover:bg-accent-hover sm:w-auto"
           >
             <MdAdd size={16} />
             Create League
@@ -162,13 +162,13 @@ export const DashboardPage = () => {
 
       {/* Onboarding card when user has no leagues */}
       {myLeagues.length === 0 && !showCreate && !showJoin && (
-        <div className="mb-8 rounded-xl border border-accent/30 bg-accent-light/50 p-6">
+        <div className="animate-in mb-8 rounded-xl border border-accent/20 bg-accent-light p-6">
           <h2 className="mb-2 text-lg font-semibold text-text-primary">Get started with FoosLeague</h2>
           <p className="mb-4 text-sm text-text-secondary">Create a league and invite your colleagues, or join one with an invite code.</p>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <button
               onClick={() => setShowJoin(true)}
-              className="flex items-center gap-3 rounded-xl border border-border bg-bg-secondary p-4 text-left transition-colors hover:border-accent"
+              className="card-interactive flex items-center gap-3 rounded-xl border border-border bg-bg-secondary p-4 text-left"
             >
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent-light">
                 <MdVpnKey size={20} className="text-accent" />
@@ -180,7 +180,7 @@ export const DashboardPage = () => {
             </button>
             <button
               onClick={() => setShowCreate(true)}
-              className="flex items-center gap-3 rounded-xl border border-border bg-bg-secondary p-4 text-left transition-colors hover:border-accent"
+              className="card-interactive flex items-center gap-3 rounded-xl border border-border bg-bg-secondary p-4 text-left"
             >
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent-light">
                 <MdAdd size={20} className="text-accent" />
@@ -199,11 +199,12 @@ export const DashboardPage = () => {
         <section>
           <h2 className="mb-4 text-lg font-semibold text-text-primary">My Leagues</h2>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {myLeagues.map((league) => (
+            {myLeagues.map((league, i) => (
               <Link
                 key={league.league_id}
                 to={`/leagues/${league.league_id}`}
-                className="rounded-xl border border-border bg-bg-secondary p-5 shadow-sm transition-all hover:border-accent hover:shadow-md"
+                className="card-interactive animate-in rounded-xl border border-border bg-bg-secondary p-5"
+                style={{ animationDelay: `${i * 60}ms` }}
               >
                 <div className="mb-2 flex items-center justify-between">
                   <h3 className="text-lg font-semibold text-text-primary">{league.name}</h3>

@@ -30,8 +30,8 @@ export const LoginPage = () => {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-bg-primary">
-      <div className="w-full max-w-sm rounded-xl border border-border bg-bg-secondary p-8 shadow-sm">
-        <h1 className="mb-2 text-center text-3xl font-bold text-accent">
+      <div className="animate-in w-full max-w-sm rounded-xl border border-border bg-bg-secondary p-8 shadow-sm">
+        <h1 className="brand-gradient mb-2 text-center text-3xl font-bold">
           FoosLeague
         </h1>
         <p className="mb-8 text-center text-sm text-text-secondary">
@@ -71,7 +71,7 @@ export const LoginPage = () => {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full rounded-lg bg-accent px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-hover disabled:opacity-50"
+            className="btn-press w-full rounded-lg bg-accent px-4 py-2.5 text-sm font-medium text-white transition-all hover:bg-accent-hover disabled:opacity-50"
           >
             {isLoading ? "Signing in..." : "Sign in"}
           </button>

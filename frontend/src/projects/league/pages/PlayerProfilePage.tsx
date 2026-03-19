@@ -102,11 +102,11 @@ export const PlayerProfilePage = () => {
 
       {rankingEntry ? (
         <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-5">
-          <StatCard label="ELO" value={rankingEntry.elo} color="text-accent" />
+          <StatCard label="ELO" value={rankingEntry.elo} color="text-field-green" />
           <StatCard label="Rank" value={`#${rankingEntry.rank}`} />
           <StatCard label="Wins" value={rankingEntry.wins} color="text-success" />
           <StatCard label="Losses" value={rankingEntry.losses} color="text-danger" />
-          <StatCard label="Win Rate" value={`${winRate}%`} color="text-accent" />
+          <StatCard label="Win Rate" value={`${winRate}%`} color="text-field-green" />
         </div>
       ) : sharedLeagues.length > 0 ? (
         <p className="mb-6 text-sm text-text-muted">No stats in this league yet.</p>

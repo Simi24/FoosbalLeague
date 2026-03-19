@@ -6,9 +6,9 @@ import { Avatar } from "@/components/Avatar";
 import { Dropdown } from "@/components/inputs";
 
 const getRankStyle = (rank: number): string => {
-  if (rank === 1) return "bg-amber-50 border-amber-200";
-  if (rank === 2) return "bg-gray-50 border-gray-200";
-  if (rank === 3) return "bg-orange-50 border-orange-200";
+  if (rank === 1) return "bg-amber-500/10";
+  if (rank === 2) return "bg-gray-400/10";
+  if (rank === 3) return "bg-orange-500/10";
   return "";
 };
 
@@ -66,12 +66,13 @@ export const LeaderboardPage = () => {
               </tr>
             </thead>
             <tbody>
-              {leaderboard.entries.map((entry) => {
+              {leaderboard.entries.map((entry, i) => {
                 const badge = getRankBadge(entry.rank);
                 return (
                   <tr
                     key={entry.player_id}
-                    className={`border-b border-border/50 transition-colors hover:bg-bg-tertiary ${getRankStyle(entry.rank)}`}
+                    className={`animate-in border-b border-border/50 transition-colors hover:bg-bg-tertiary ${getRankStyle(entry.rank)}`}
+                    style={{ animationDelay: `${i * 40}ms` }}
                   >
                     <td className="px-4 py-3 text-sm text-text-muted">
                       {badge ?? entry.rank}

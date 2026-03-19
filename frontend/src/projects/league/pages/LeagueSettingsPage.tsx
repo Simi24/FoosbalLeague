@@ -33,6 +33,7 @@ export const LeagueSettingsPage = () => {
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   const inviteCode = myLeagues.find((l) => l.league_id === id)?.invite_code ?? "";
   const loading = leagueLoading || membersLoading;
@@ -201,12 +202,34 @@ export const LeagueSettingsPage = () => {
         <p className="mb-4 text-sm text-text-secondary">
           Deleting a league removes all members, matches, and rankings permanently.
         </p>
-        <button
-          onClick={handleDelete}
-          className="flex items-center gap-2 rounded-lg bg-danger px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-danger/80"
-        >
-          <MdDelete size={16} /> Delete League
-        </button>
+        {!confirmDelete ? (
+          <button
+            onClick={() => setConfirmDelete(true)}
+            className="flex items-center gap-2 rounded-lg bg-danger px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-danger/80"
+          >
+            <MdDelete size={16} /> Delete League
+          </button>
+        ) : (
+          <div className="animate-in flex flex-col gap-3 rounded-lg border border-danger/30 bg-bg-secondary p-4">
+            <p className="text-sm font-medium text-text-primary">
+              Are you sure? This action cannot be undone.
+            </p>
+            <div className="flex gap-2">
+              <button
+                onClick={handleDelete}
+                className="btn-press flex items-center gap-2 rounded-lg bg-danger px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-danger/80"
+              >
+                <MdDelete size={16} /> Yes, delete
+              </button>
+              <button
+                onClick={() => setConfirmDelete(false)}
+                className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-secondary transition-colors hover:bg-bg-tertiary"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

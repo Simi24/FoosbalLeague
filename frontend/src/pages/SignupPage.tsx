@@ -86,8 +86,8 @@ export const SignupPage = () => {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-bg-primary">
-      <div className="w-full max-w-sm rounded-xl border border-border bg-bg-secondary p-8 shadow-sm">
-        <h1 className="mb-2 text-center text-3xl font-bold text-accent">
+      <div className="animate-in w-full max-w-sm rounded-xl border border-border bg-bg-secondary p-8 shadow-sm">
+        <h1 className="brand-gradient mb-2 text-center text-3xl font-bold">
           FoosLeague
         </h1>
         <p className="mb-8 text-center text-sm text-text-secondary">

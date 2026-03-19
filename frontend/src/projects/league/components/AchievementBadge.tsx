@@ -24,27 +24,27 @@ type AchievementBadgeProps = {
 
 const RARITY_STYLES: Record<string, { bg: string; border: string; glow: string; label: string }> = {
   common: {
-    bg: "from-slate-100 to-slate-200",
-    border: "border-slate-300",
+    bg: "from-slate-800 to-slate-700",
+    border: "border-slate-500",
     glow: "",
     label: "Common",
   },
   rare: {
-    bg: "from-blue-100 to-blue-200",
-    border: "border-blue-400",
-    glow: "shadow-blue-200/50",
+    bg: "from-blue-900 to-blue-800",
+    border: "border-blue-500",
+    glow: "shadow-blue-500/20",
     label: "Rare",
   },
   epic: {
-    bg: "from-purple-100 to-purple-200",
-    border: "border-purple-400",
-    glow: "shadow-purple-200/50",
+    bg: "from-purple-900 to-purple-800",
+    border: "border-purple-500",
+    glow: "shadow-purple-500/20",
     label: "Epic",
   },
   legendary: {
-    bg: "from-amber-100 via-yellow-100 to-amber-200",
-    border: "border-amber-400",
-    glow: "shadow-amber-200/50",
+    bg: "from-amber-900 via-yellow-900 to-amber-800",
+    border: "border-amber-500",
+    glow: "shadow-amber-500/20",
     label: "Legendary",
   },
 };
@@ -80,13 +80,13 @@ export const AchievementBadge = ({
         className={`group relative flex h-14 w-14 items-center justify-center rounded-xl border-2 bg-gradient-to-br transition-transform hover:scale-110 ${
           unlocked
             ? `${style.bg} ${style.border} ${style.glow} shadow-md`
-            : "from-gray-100 to-gray-200 border-gray-200 opacity-40"
+            : "from-gray-800 to-gray-900 border-gray-700 opacity-40"
         }`}
         title={`${name} — ${description}`}
       >
         <IconComponent
           size={24}
-          className={unlocked ? "text-gray-700" : "text-gray-400"}
+          className={unlocked ? "text-gray-200" : "text-gray-500"}
         />
       </div>
     );
@@ -97,25 +97,25 @@ export const AchievementBadge = ({
       className={`relative overflow-hidden rounded-xl border-2 bg-gradient-to-br p-4 transition-transform hover:scale-[1.02] ${
         unlocked
           ? `${style.bg} ${style.border} ${style.glow} shadow-md`
-          : "from-gray-50 to-gray-100 border-gray-200 opacity-50"
+          : "from-gray-800 to-gray-900 border-gray-700 opacity-50"
       }`}
     >
       <div className="flex items-start gap-3">
         <div
           className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-lg ${
-            unlocked ? "bg-white/60" : "bg-gray-200/60"
+            unlocked ? "bg-white/10" : "bg-gray-700/40"
           }`}
         >
           <IconComponent
             size={28}
-            className={unlocked ? "text-gray-700" : "text-gray-400"}
+            className={unlocked ? "text-gray-200" : "text-gray-500"}
           />
         </div>
         <div className="min-w-0">
           <div className="flex items-center gap-2">
             <h3
               className={`text-sm font-bold ${
-                unlocked ? "text-gray-800" : "text-gray-400"
+                unlocked ? "text-gray-100" : "text-gray-500"
               }`}
             >
               {name}
@@ -124,12 +124,12 @@ export const AchievementBadge = ({
               <span
                 className={`rounded-full px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
                   rarity === "legendary"
-                    ? "bg-amber-300/50 text-amber-800"
+                    ? "bg-amber-500/20 text-amber-300"
                     : rarity === "epic"
-                      ? "bg-purple-300/50 text-purple-800"
+                      ? "bg-purple-500/20 text-purple-300"
                       : rarity === "rare"
-                        ? "bg-blue-300/50 text-blue-800"
-                        : "bg-slate-300/50 text-slate-600"
+                        ? "bg-blue-500/20 text-blue-300"
+                        : "bg-slate-500/20 text-slate-400"
                 }`}
               >
                 {style.label}
@@ -138,7 +138,7 @@ export const AchievementBadge = ({
           </div>
           <p
             className={`mt-0.5 text-xs ${
-              unlocked ? "text-gray-600" : "text-gray-400"
+              unlocked ? "text-gray-400" : "text-gray-500"
             }`}
           >
             {description}
@@ -146,8 +146,8 @@ export const AchievementBadge = ({
         </div>
       </div>
       {!unlocked && (
-        <div className="absolute inset-0 flex items-center justify-center bg-white/30">
-          <MdLock size={20} className="text-gray-300" />
+        <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+          <MdLock size={20} className="text-gray-600" />
         </div>
       )}
     </div>

@@ -1,22 +1,36 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap");
 @import "tailwindcss";
 
 @theme {
-  --color-bg-primary: #f8f9fb;
-  --color-bg-secondary: #ffffff;
-  --color-bg-tertiary: #f1f3f5;
-  --color-accent: #f59e0b;
-  --color-accent-hover: #d97706;
-  --color-accent-light: #fef3c7;
-  --color-text-primary: #111827;
-  --color-text-secondary: #6b7280;
-  --color-text-muted: #9ca3af;
-  --color-border: #e5e7eb;
+  /* Backgrounds — dark game room */
+  --color-bg-primary: #0c0f14;
+  --color-bg-secondary: #151921;
+  --color-bg-tertiary: #1e2330;
+
+  /* Accent — foosball blue team */
+  --color-accent: #3b82f6;
+  --color-accent-hover: #2563eb;
+  --color-accent-light: #172241;
+
+  /* Text — light on dark */
+  --color-text-primary: #f1f3f5;
+  --color-text-secondary: #8b95a5;
+  --color-text-muted: #5a6373;
+
+  /* Borders */
+  --color-border: #252b38;
+
+  /* Status */
   --color-danger: #ef4444;
   --color-warning: #eab308;
   --color-success: #22c55e;
 
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  /* Foosball team colors */
+  --color-team-blue: #3b82f6;
+  --color-team-red: #ef4444;
+  --color-field-green: #22c55e;
+
+  --font-sans: "Outfit", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", "Fira Code", "Cascadia Code", monospace;
 }
 
@@ -30,14 +44,58 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--color-bg-tertiary);
+  background: var(--color-bg-primary);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--color-border);
+  background: var(--color-bg-tertiary);
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-text-muted);
+}
+
+/* Color scheme hint for native elements */
+html {
+  color-scheme: dark;
+}
+
+/* Entrance animation */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-in {
+  animation: fadeInUp 0.35s ease-out both;
+}
+
+/* Card hover — lift + glow */
+.card-interactive {
+  @apply transition-all duration-200 ease-out;
+}
+
+.card-interactive:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px -8px rgba(59, 130, 246, 0.12);
+}
+
+/* Button press feedback */
+.btn-press:active {
+  transform: scale(0.97);
+}
+
+/* Brand gradient: blue → red (foosball teams) */
+.brand-gradient {
+  background: linear-gradient(135deg, var(--color-team-blue), #a855f7, var(--color-team-red));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
