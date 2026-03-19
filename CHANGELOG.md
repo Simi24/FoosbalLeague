@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.8.0](https://github.com/Simi24/FoosbalLeague/compare/foosball-league-v0.7.0...foosball-league-v0.8.0) (2026-03-19)
+
+
+### Features
+
+* ⚡️ cache /leagues/my in Redux with 5-min TTL ([4c50d13](https://github.com/Simi24/FoosbalLeague/commit/4c50d136fd94e8ef97e12dd1abcf18d4e2ec85f1))
+* ✨ migrate to RTK Query and add UX polish components ([def6b12](https://github.com/Simi24/FoosbalLeague/commit/def6b128e86a4f93e4ded987b1185d28c3ac44c7))
+
 ## [0.7.0](https://github.com/Simi24/FoosbalLeague/compare/foosball-league-v0.6.0...foosball-league-v0.7.0) (2026-03-17)
 
 
