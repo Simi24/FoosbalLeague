@@ -1,9 +1,6 @@
-from typing import Any
-
-from fastapi import APIRouter, Depends, HTTPException
-
-from dependencies.auth import get_current_user
+from dependencies.auth import AuthenticatedUser, get_current_user
 from dependencies.tenant import get_tenant_id
+from fastapi import APIRouter, Depends, HTTPException
 from schemas.league import (
     CreateLeagueRequest,
     JoinByCodeRequest,
@@ -40,11 +37,11 @@ router = APIRouter(
 
 @router.get("/my", response_model=list[MyLeagueResponse])
 async def read_my_leagues(
-    user: dict[str, Any] = Depends(get_current_user),
+    user: AuthenticatedUser = Depends(get_current_user),
     tenant_id: str = Depends(get_tenant_id),
 ) -> list[MyLeagueResponse]:
     """List leagues the current player is enrolled in."""
-    player = get_player_by_cognito_sub(tenant_id, user.get("sub", ""))
+    player = get_player_by_cognito_sub(tenant_id, user.sub)
     if not player:
         return []
 
@@ -94,7 +91,7 @@ async def read_leagues(
 @router.post("/", response_model=LeagueResponse, status_code=201)
 async def create_new_league(
     body: CreateLeagueRequest,
-    user: dict[str, Any] = Depends(get_current_user),
+    user: AuthenticatedUser = Depends(get_current_user),
     tenant_id: str = Depends(get_tenant_id),
 ) -> LeagueResponse:
     """Create a new league."""
@@ -104,11 +101,11 @@ async def create_new_league(
         league_type=body.league_type,
         initial_elo=body.initial_elo,
         description=body.description,
-        created_by=user.get("sub", ""),
+        created_by=user.sub,
     )
 
     # Auto-enroll creator as admin
-    player = get_player_by_cognito_sub(tenant_id, user.get("sub", ""))
+    player = get_player_by_cognito_sub(tenant_id, user.sub)
     if player:
         join_league(
             tenant_id=tenant_id,
@@ -157,7 +154,7 @@ async def read_league(
 async def patch_league(
     league_id: str,
     body: UpdateLeagueRequest,
-    user: dict[str, Any] = Depends(get_current_user),
+    user: AuthenticatedUser = Depends(get_current_user),
     tenant_id: str = Depends(get_tenant_id),
 ) -> LeagueResponse:
     """Update league settings."""
@@ -185,11 +182,11 @@ async def patch_league(
 @router.post("/join", status_code=201)
 async def join_by_code_endpoint(
     body: JoinByCodeRequest,
-    user: dict[str, Any] = Depends(get_current_user),
+    user: AuthenticatedUser = Depends(get_current_user),
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict:
     """Join a league using an invite code."""
-    player = get_player_by_cognito_sub(tenant_id, user.get("sub", ""))
+    player = get_player_by_cognito_sub(tenant_id, user.sub)
     if not player:
         raise HTTPException(status_code=400, detail="Player not registered")
 
@@ -207,17 +204,21 @@ async def join_by_code_endpoint(
         player_id=player.player_id,
         display_name=player.display_name,
     )
-    return {"status": "joined", "league_id": league.league_id, "league_name": league.name}
+    return {
+        "status": "joined",
+        "league_id": league.league_id,
+        "league_name": league.name,
+    }
 
 
 @router.post("/{league_id}/leave", status_code=200)
 async def leave_league_endpoint(
     league_id: str,
-    user: dict[str, Any] = Depends(get_current_user),
+    user: AuthenticatedUser = Depends(get_current_user),
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict:
     """Leave a league."""
-    player = get_player_by_cognito_sub(tenant_id, user.get("sub", ""))
+    player = get_player_by_cognito_sub(tenant_id, user.sub)
     if not player:
         raise HTTPException(status_code=400, detail="Player not registered")
 
@@ -251,9 +252,9 @@ async def read_league_members(
     ]
 
 
-def _require_admin(tenant_id: str, league_id: str, user: dict) -> None:
+def _require_admin(tenant_id: str, league_id: str, user: AuthenticatedUser) -> None:
     """Validate the current user is an admin of the league."""
-    player = get_player_by_cognito_sub(tenant_id, user.get("sub", ""))
+    player = get_player_by_cognito_sub(tenant_id, user.sub)
     if not player:
         raise HTTPException(status_code=400, detail="Player not registered")
     enrollment = get_enrollment(tenant_id, league_id, player.player_id)
@@ -264,7 +265,7 @@ def _require_admin(tenant_id: str, league_id: str, user: dict) -> None:
 @router.delete("/{league_id}", status_code=200)
 async def delete_league_endpoint(
     league_id: str,
-    user: dict[str, Any] = Depends(get_current_user),
+    user: AuthenticatedUser = Depends(get_current_user),
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict:
     """Delete a league and all its data. Admin only."""
@@ -279,7 +280,7 @@ async def delete_league_endpoint(
 async def kick_player_endpoint(
     league_id: str,
     player_id: str,
-    user: dict[str, Any] = Depends(get_current_user),
+    user: AuthenticatedUser = Depends(get_current_user),
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict:
     """Remove a player from a league. Admin only."""
@@ -294,7 +295,7 @@ async def kick_player_endpoint(
 async def promote_player_endpoint(
     league_id: str,
     player_id: str,
-    user: dict[str, Any] = Depends(get_current_user),
+    user: AuthenticatedUser = Depends(get_current_user),
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict:
     """Promote a player to admin. Admin only."""
@@ -309,7 +310,7 @@ async def promote_player_endpoint(
 async def demote_player_endpoint(
     league_id: str,
     player_id: str,
-    user: dict[str, Any] = Depends(get_current_user),
+    user: AuthenticatedUser = Depends(get_current_user),
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict:
     """Demote an admin to player. Admin only."""
@@ -324,7 +325,7 @@ async def demote_player_endpoint(
 async def add_player_endpoint(
     league_id: str,
     player_id: str,
-    user: dict[str, Any] = Depends(get_current_user),
+    user: AuthenticatedUser = Depends(get_current_user),
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict:
     """Add a player to a league. Admin only."""
@@ -342,7 +343,7 @@ async def add_player_endpoint(
 @router.post("/{league_id}/regenerate-code", status_code=200)
 async def regenerate_code_endpoint(
     league_id: str,
-    user: dict[str, Any] = Depends(get_current_user),
+    user: AuthenticatedUser = Depends(get_current_user),
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict:
     """Regenerate the invite code for a league. Admin only."""

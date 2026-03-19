@@ -1,6 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 import { getIdToken } from "@/features/auth/tokenStorage";
+import { withScopedEffects } from "./tagHelpers";
 import type {
   Achievement,
   EloHistoryPoint,
@@ -82,21 +83,24 @@ export const api = createApi({
         url: `/leagues/${leagueId}/kick/${playerId}`,
         method: "POST",
       }),
-      invalidatesTags: (_, __, { leagueId }) => [{ type: "Members", id: leagueId }, "MyLeagues"],
+      invalidatesTags: (_, __, { leagueId }) =>
+        withScopedEffects(leagueId, ["Members"]),
     }),
     promoteMember: build.mutation<void, { leagueId: string; playerId: string }>({
       query: ({ leagueId, playerId }) => ({
         url: `/leagues/${leagueId}/promote/${playerId}`,
         method: "POST",
       }),
-      invalidatesTags: (_, __, { leagueId }) => [{ type: "Members", id: leagueId }],
+      invalidatesTags: (_, __, { leagueId }) =>
+        withScopedEffects(leagueId, ["Members"]),
     }),
     demoteMember: build.mutation<void, { leagueId: string; playerId: string }>({
       query: ({ leagueId, playerId }) => ({
         url: `/leagues/${leagueId}/demote/${playerId}`,
         method: "POST",
       }),
-      invalidatesTags: (_, __, { leagueId }) => [{ type: "Members", id: leagueId }],
+      invalidatesTags: (_, __, { leagueId }) =>
+        withScopedEffects(leagueId, ["Members"]),
     }),
 
     // ─── Matches ───────────────────────────────────────────
@@ -113,30 +117,18 @@ export const api = createApi({
       }
     >({
       query: (body) => ({ url: "/matches/", method: "POST", body }),
-      invalidatesTags: (_, __, { league_id }) => [
-        { type: "Matches", id: league_id },
-        { type: "Leaderboard", id: league_id },
-        { type: "Members", id: league_id },
-        { type: "League", id: league_id },
-        "MyLeagues",
-      ],
+      invalidatesTags: (_, __, { league_id }) =>
+        withScopedEffects(league_id, ["Matches"]),
     }),
     confirmMatch: build.mutation<void, { matchId: string; leagueId: string }>({
       query: ({ matchId }) => ({ url: `/matches/${matchId}/confirm`, method: "POST" }),
-      invalidatesTags: (_, __, { leagueId }) => [
-        { type: "Matches", id: leagueId },
-        { type: "Leaderboard", id: leagueId },
-        { type: "Members", id: leagueId },
-        { type: "League", id: leagueId },
-      ],
+      invalidatesTags: (_, __, { leagueId }) =>
+        withScopedEffects(leagueId, ["Matches"]),
     }),
     disputeMatch: build.mutation<void, { matchId: string; leagueId: string }>({
       query: ({ matchId }) => ({ url: `/matches/${matchId}/dispute`, method: "POST" }),
-      invalidatesTags: (_, __, { leagueId }) => [
-        { type: "Matches", id: leagueId },
-        { type: "Members", id: leagueId },
-        { type: "League", id: leagueId },
-      ],
+      invalidatesTags: (_, __, { leagueId }) =>
+        withScopedEffects(leagueId, ["Matches"]),
     }),
 
     // ─── Rankings ──────────────────────────────────────────

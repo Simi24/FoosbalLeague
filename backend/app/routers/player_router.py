@@ -1,11 +1,13 @@
-from typing import Any
-
-from fastapi import APIRouter, Depends, HTTPException
-
-from dependencies.auth import get_current_user
+from dependencies.auth import AuthenticatedUser, get_current_user
 from dependencies.tenant import get_tenant_id
+from fastapi import APIRouter, Depends, HTTPException
 from schemas.player import PlayerResponse, PlayerStatsResponse, UpdatePlayerRequest
-from services.player_service import get_player, get_player_by_cognito_sub, list_players, update_display_name
+from services.player_service import (
+    get_player,
+    get_player_by_cognito_sub,
+    list_players,
+    update_display_name,
+)
 
 router = APIRouter(
     prefix="/api/v1/players",
@@ -57,11 +59,11 @@ async def read_player(
 @router.patch("/me", response_model=PlayerResponse)
 async def update_me(
     body: UpdatePlayerRequest,
-    user: dict[str, Any] = Depends(get_current_user),
+    user: AuthenticatedUser = Depends(get_current_user),
     tenant_id: str = Depends(get_tenant_id),
 ) -> PlayerResponse:
     """Update the current player's display name."""
-    player = get_player_by_cognito_sub(tenant_id, user.get("sub", ""))
+    player = get_player_by_cognito_sub(tenant_id, user.sub)
     if not player:
         raise HTTPException(status_code=400, detail="Player not registered")
 
@@ -97,5 +99,7 @@ async def read_player_stats(
         total_matches=player.total_matches,
         total_wins=player.total_wins,
         total_losses=player.total_losses,
-        win_rate=round(player.total_wins / total, 2) if player.total_matches > 0 else 0.0,
+        win_rate=round(player.total_wins / total, 2)
+        if player.total_matches > 0
+        else 0.0,
     )

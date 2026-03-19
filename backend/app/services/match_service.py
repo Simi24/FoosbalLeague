@@ -8,8 +8,15 @@ from models.base import BaseEntity
 from models.match import MatchModel
 from models.rating import RatingModel
 from models.season import EloHistoryModel
+from schemas.confirmation import (
+    ConfirmationResult,
+    EloChangeDetail,
+    UnlockedAchievement,
+)
+from services.achievement_service import ACHIEVEMENT_CATALOG, evaluate_achievements
 from services.elo_service import calculate_elo_changes
-from services.league_service import get_enrollment, get_league
+from services.exceptions import MatchNotFoundError, MissingRatingsError
+from services.league_service import get_league
 
 
 def record_match(
@@ -69,77 +76,115 @@ def confirm_match(
     tenant_id: str,
     match_id: str,
     confirmed_by: str,
-) -> MatchModel | None:
+) -> ConfirmationResult:
     """Confirm a pending match, compute ELO changes, update ratings.
 
-    The confirmer must be either:
-    - A player from the opposing team, OR
-    - A league admin
+    Returns a ConfirmationResult with the confirmed match, per-player ELO
+    change details, and any newly unlocked achievements.
+
+    Raises:
+        MatchNotFoundError: match does not exist or is not PENDING.
+        MissingRatingsError: one or both teams lack rating records.
     """
     match = get_match(tenant_id, match_id)
     if not match or match.status != "PENDING":
-        return None
+        raise MatchNotFoundError(match_id)
 
     now = datetime.now(timezone.utc)
 
-    # Gather current ratings for all players
+    # ------------------------------------------------------------------
+    # 1. Gather current ratings — capture elo_before per player
+    # ------------------------------------------------------------------
     team1_elos: list[tuple[str, int, int]] = []
     team2_elos: list[tuple[str, int, int]] = []
+    rating_snapshot: dict[
+        str, tuple[int, str]
+    ] = {}  # pid -> (elo_before, display_name)
 
     for pid in match.team1_player_ids:
         rating = _get_rating(tenant_id, match.league_id, pid)
         if rating:
             team1_elos.append((pid, rating.elo, rating.matches_played))
+            rating_snapshot[pid] = (rating.elo, rating.display_name)
 
     for pid in match.team2_player_ids:
         rating = _get_rating(tenant_id, match.league_id, pid)
         if rating:
             team2_elos.append((pid, rating.elo, rating.matches_played))
+            rating_snapshot[pid] = (rating.elo, rating.display_name)
 
     if not team1_elos or not team2_elos:
         logger.error(f"Missing ratings for match {match_id}")
-        return None
+        raise MissingRatingsError(match_id)
 
-    # Calculate ELO changes
+    # ------------------------------------------------------------------
+    # 2. Calculate ELO changes
+    # ------------------------------------------------------------------
     elo_changes = calculate_elo_changes(
         team1_elos, team2_elos, match.team1_score, match.team2_score
     )
 
-    # Update ratings and create history entries
-    is_team1_winner = match.team1_score > match.team2_score
-    all_player_ids = match.team1_player_ids + match.team2_player_ids
+    # ------------------------------------------------------------------
+    # 3. Build EloChangeDetail objects
+    # ------------------------------------------------------------------
+    elo_details: list[EloChangeDetail] = []
+    for pid in match.team1_player_ids + match.team2_player_ids:
+        delta = elo_changes.get(pid, 0)
+        elo_before, display_name = rating_snapshot.get(pid, (1200, ""))
+        elo_details.append(
+            EloChangeDetail(
+                player_id=pid,
+                display_name=display_name,
+                elo_before=elo_before,
+                elo_after=elo_before + delta,
+                delta=delta,
+            )
+        )
 
-    for pid in all_player_ids:
+    # ------------------------------------------------------------------
+    # 4. Update ratings and write history
+    # ------------------------------------------------------------------
+    is_team1_winner = match.team1_score > match.team2_score
+
+    for pid in match.team1_player_ids + match.team2_player_ids:
         delta = elo_changes.get(pid, 0)
         is_winner = (pid in match.team1_player_ids and is_team1_winner) or (
             pid in match.team2_player_ids and not is_team1_winner
         )
         _update_rating(tenant_id, match.league_id, pid, delta, is_winner, now)
-        _write_elo_history(
-            tenant_id, match.league_id, pid, match.match_id, delta, now
-        )
+        _write_elo_history(tenant_id, match.league_id, pid, match.match_id, delta, now)
 
-    # Update match status
+    # ------------------------------------------------------------------
+    # 5. Persist CONFIRMED status
+    # ------------------------------------------------------------------
     elo_changes_serializable = {
         pid: {"delta": delta} for pid, delta in elo_changes.items()
     }
 
-    MatchModel.update(match.pk, match.sk).set(
-        "status", "CONFIRMED"
-    ).set("confirmed_by", confirmed_by).set(
-        "elo_changes", elo_changes_serializable
-    ).set("updated_at", now).execute()
+    MatchModel.update(match.pk, match.sk).set("status", "CONFIRMED").set(
+        "confirmed_by", confirmed_by
+    ).set("elo_changes", elo_changes_serializable).set("updated_at", now).execute()
 
     logger.info(f"Confirmed match {match_id}, ELO changes: {elo_changes}")
 
-    # Evaluate achievements
-    from services.achievement_service import evaluate_achievements
+    # ------------------------------------------------------------------
+    # 6. Evaluate achievements and capture newly unlocked
+    # ------------------------------------------------------------------
+    confirmed = get_match(tenant_id, match_id)
+    if not confirmed:
+        confirmed = match  # fallback — should not happen
 
-    confirmed_match = get_match(tenant_id, match_id)
-    if confirmed_match:
-        evaluate_achievements(tenant_id, league_id=match.league_id, match=confirmed_match)
+    raw_unlocked = evaluate_achievements(
+        tenant_id, league_id=match.league_id, match=confirmed
+    )
 
-    return confirmed_match
+    newly_unlocked = _build_unlocked_achievements(raw_unlocked)
+
+    return ConfirmationResult(
+        match=confirmed,
+        elo_changes=elo_details,
+        newly_unlocked=newly_unlocked,
+    )
 
 
 def dispute_match(
@@ -152,9 +197,9 @@ def dispute_match(
         return None
 
     now = datetime.now(timezone.utc)
-    MatchModel.update(match.pk, match.sk).set(
-        "status", "DISPUTED"
-    ).set("updated_at", now).execute()
+    MatchModel.update(match.pk, match.sk).set("status", "DISPUTED").set(
+        "updated_at", now
+    ).execute()
 
     logger.info(f"Disputed match {match_id}")
     return get_match(tenant_id, match_id)
@@ -170,13 +215,37 @@ def list_matches_by_league(league_id: str) -> list[MatchModel]:
     return [item for item in results if isinstance(item, MatchModel)]
 
 
-def _get_rating(
-    tenant_id: str, league_id: str, player_id: str
-) -> RatingModel | None:
+def _build_unlocked_achievements(raw_unlocked: list[str]) -> list[UnlockedAchievement]:
+    """Convert 'player_id:achievement_type' strings into UnlockedAchievement objects.
+
+    Looks up each type in ACHIEVEMENT_CATALOG; unknown types are silently skipped.
+    """
+    catalog_map = {entry["type"]: entry for entry in ACHIEVEMENT_CATALOG}
+    result: list[UnlockedAchievement] = []
+    for entry in raw_unlocked:
+        parts = entry.split(":", 1)
+        if len(parts) != 2:
+            continue
+        pid, atype = parts
+        defn = catalog_map.get(atype)
+        if not defn:
+            continue
+        result.append(
+            UnlockedAchievement(
+                player_id=pid,
+                achievement_type=atype,
+                name=defn["name"],
+                description=defn["description"],
+                icon=defn["icon"],
+                rarity=defn["rarity"],
+            )
+        )
+    return result
+
+
+def _get_rating(tenant_id: str, league_id: str, player_id: str) -> RatingModel | None:
     """Get current rating for a player in a league."""
-    result = BaseEntity.get(
-        f"TENANT#{tenant_id}", f"RATING#{league_id}#{player_id}"
-    )
+    result = BaseEntity.get(f"TENANT#{tenant_id}", f"RATING#{league_id}#{player_id}")
     if result and isinstance(result, RatingModel):
         return result
     return None

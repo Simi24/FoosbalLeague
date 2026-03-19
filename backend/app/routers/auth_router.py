@@ -1,9 +1,6 @@
-from typing import Any
-
-from fastapi import APIRouter, Depends, HTTPException
-
-from dependencies.auth import get_current_user
+from dependencies.auth import AuthenticatedUser, get_current_user
 from dependencies.tenant import get_tenant_id
+from fastapi import APIRouter, Depends, HTTPException
 from schemas.auth import RegisterRequest, RegisterResponse, UserInfo
 from services.player_service import get_player_by_cognito_sub
 
@@ -15,21 +12,17 @@ router = APIRouter(
 
 @router.get("/me", response_model=UserInfo)
 async def get_me(
-    user: dict[str, Any] = Depends(get_current_user),
+    user: AuthenticatedUser = Depends(get_current_user),
     tenant_id: str = Depends(get_tenant_id),
 ) -> UserInfo:
     """Return current authenticated user info."""
-    groups_raw = user.get("cognito:groups", [])
-    groups = groups_raw if isinstance(groups_raw, list) else [g for g in groups_raw.split(",") if g] if groups_raw else []
-
-    sub = user.get("sub", "")
-    player = get_player_by_cognito_sub(tenant_id, sub) if sub else None
+    player = get_player_by_cognito_sub(tenant_id, user.sub) if user.sub else None
 
     return UserInfo(
-        sub=sub,
-        email=user.get("email", ""),
-        name=user.get("name", ""),
-        groups=groups,
+        sub=user.sub,
+        email=user.email,
+        name=user.name,
+        groups=user.groups,
         tenant_id=tenant_id,
         player_id=player.player_id if player else None,
     )
@@ -38,20 +31,20 @@ async def get_me(
 @router.post("/register", response_model=RegisterResponse, status_code=201)
 async def register(
     body: RegisterRequest,
-    user: dict[str, Any] = Depends(get_current_user),
+    user: AuthenticatedUser = Depends(get_current_user),
     tenant_id: str = Depends(get_tenant_id),
 ) -> RegisterResponse:
     """Self-register as a player (creates player from Cognito user)."""
     from services.player_service import create_player
 
-    existing = get_player_by_cognito_sub(tenant_id, user.get("sub", ""))
+    existing = get_player_by_cognito_sub(tenant_id, user.sub)
     if existing:
         raise HTTPException(status_code=409, detail="Player already registered")
 
     player = create_player(
         tenant_id=tenant_id,
-        cognito_sub=user.get("sub", ""),
-        email=user.get("email", ""),
+        cognito_sub=user.sub,
+        email=user.email,
         display_name=body.display_name,
     )
     return RegisterResponse(

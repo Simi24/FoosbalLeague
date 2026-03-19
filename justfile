@@ -65,6 +65,14 @@ install-frontend:
 dev-frontend:
     cd frontend && yarn dev
 
+# Run frontend unit tests
+test-frontend:
+    cd frontend && yarn test
+
+# Run frontend tests in watch mode
+test-frontend-watch:
+    cd frontend && yarn test:watch
+
 # Lint frontend
 lint-frontend:
     cd frontend && yarn lint

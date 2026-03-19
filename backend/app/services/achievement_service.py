@@ -1,13 +1,15 @@
 """Achievement service - definitions, evaluation, and storage."""
 
+from collections.abc import Callable
 from datetime import datetime, timezone
 
 from libs.commons.logging import logger
 from models.achievement import AchievementModel
 from models.base import BaseEntity
 from models.match import MatchModel
-from services.ranking_service import get_leaderboard, get_player_rating
-
+from models.rating import RatingModel
+from schemas.match_context import MatchContext
+from services.ranking_service import get_leaderboard as _default_get_leaderboard
 
 ACHIEVEMENT_CATALOG = [
     {
@@ -98,65 +100,78 @@ def get_player_achievements(
         if defn["type"] in unlocked_map:
             a = unlocked_map[defn["type"]]
             entry["unlocked"] = True
-            entry["unlocked_at"] = a.unlocked_at.isoformat() if hasattr(a.unlocked_at, "isoformat") else str(a.unlocked_at)
+            entry["unlocked_at"] = (
+                a.unlocked_at.isoformat()
+                if hasattr(a.unlocked_at, "isoformat")
+                else str(a.unlocked_at)
+            )
         result.append(entry)
     return result
 
 
 def evaluate_achievements(
-    tenant_id: str,
-    league_id: str,
-    match: MatchModel,
+    ctx: MatchContext,
+    *,
+    get_unlocked: Callable[[str, str, str], list[AchievementModel]] | None = None,
+    get_recent: Callable[[str, str, int], list[MatchModel]] | None = None,
+    get_leaderboard: Callable[[str], list[RatingModel]] | None = None,
+    save: Callable[[str, str, str, str], None] | None = None,
 ) -> list[str]:
     """Evaluate and award achievements after a confirmed match.
 
-    Returns list of newly unlocked achievement types.
+    Args:
+        ctx: MatchContext with all pre-computed match data.
+        get_unlocked: Override for fetching unlocked achievements (testing).
+        get_recent: Override for fetching recent matches (testing).
+        get_leaderboard: Override for fetching leaderboard (testing).
+        save: Override for saving achievements (testing).
+
+    Returns:
+        List of newly unlocked achievement keys as "player_id:achievement_type".
     """
+    _unlocked_fn = get_unlocked or _get_unlocked
+    _recent_fn = get_recent or _get_recent_player_matches
+    _leaderboard_fn = get_leaderboard or _default_get_leaderboard
+    _save_fn = save or _save_achievement
+
+    match = ctx.match
     newly_unlocked: list[str] = []
-    is_team1_winner = match.team1_score > match.team2_score
-    all_player_ids = match.team1_player_ids + match.team2_player_ids
 
-    for pid in all_player_ids:
-        is_winner = (pid in match.team1_player_ids and is_team1_winner) or (
-            pid in match.team2_player_ids and not is_team1_winner
-        )
+    # Batch: fetch leaderboard once for all players
+    leaderboard = _leaderboard_fn(ctx.league_id)
 
-        unlocked = {a.achievement_type for a in _get_unlocked(tenant_id, league_id, pid)}
-        rating = get_player_rating(tenant_id, league_id, pid)
-        if not rating:
-            continue
-
+    for pid, player in ctx.players.items():
+        unlocked = {
+            a.achievement_type for a in _unlocked_fn(ctx.tenant_id, ctx.league_id, pid)
+        }
         new_for_player: list[str] = []
 
         # first_blood: first win
-        if "first_blood" not in unlocked and is_winner and rating.wins >= 1:
+        if "first_blood" not in unlocked and player.won and player.wins >= 1:
             new_for_player.append("first_blood")
 
         # veteran: 10 matches
-        if "veteran" not in unlocked and rating.matches_played >= 10:
+        if "veteran" not in unlocked and player.matches_played >= 10:
             new_for_player.append("veteran")
 
         # centurion: 50 matches
-        if "centurion" not in unlocked and rating.matches_played >= 50:
+        if "centurion" not in unlocked and player.matches_played >= 50:
             new_for_player.append("centurion")
 
         # shutout: win with opponent scoring 0
-        if "shutout" not in unlocked and is_winner:
-            opponent_score = match.team2_score if pid in match.team1_player_ids else match.team1_score
+        if "shutout" not in unlocked and player.won:
+            opponent_score = (
+                match.team2_score if player.team == 1 else match.team1_score
+            )
             if opponent_score == 0:
                 new_for_player.append("shutout")
 
-        # giant_killer / underdog: beat a higher-rated team
-        if is_winner:
-            team1_elos = [get_player_rating(tenant_id, league_id, p) for p in match.team1_player_ids]
-            team2_elos = [get_player_rating(tenant_id, league_id, p) for p in match.team2_player_ids]
-            team1_avg = sum(r.elo for r in team1_elos if r) / max(len([r for r in team1_elos if r]), 1)
-            team2_avg = sum(r.elo for r in team2_elos if r) / max(len([r for r in team2_elos if r]), 1)
-
-            if pid in match.team1_player_ids:
-                elo_diff = team2_avg - team1_avg
+        # giant_killer / underdog: beat a higher-rated team (using pre-update ELOs)
+        if player.won:
+            if player.team == 1:
+                elo_diff = ctx.team2_avg_elo_before - ctx.team1_avg_elo_before
             else:
-                elo_diff = team1_avg - team2_avg
+                elo_diff = ctx.team1_avg_elo_before - ctx.team2_avg_elo_before
 
             if "giant_killer" not in unlocked and elo_diff >= 50:
                 new_for_player.append("giant_killer")
@@ -164,8 +179,8 @@ def evaluate_achievements(
                 new_for_player.append("underdog")
 
         # Streak-based: hat_trick (3), on_fire (5), brick_wall (3 low-concede wins)
-        if is_winner:
-            recent = _get_recent_player_matches(league_id, pid, limit=5)
+        if player.won:
+            recent = _recent_fn(ctx.league_id, pid, limit=5)
             if recent:
                 streak = _count_win_streak(recent, pid)
                 if "hat_trick" not in unlocked and streak >= 3:
@@ -177,15 +192,14 @@ def evaluate_achievements(
                 if "brick_wall" not in unlocked and low_concede_streak >= 3:
                     new_for_player.append("brick_wall")
 
-        # top_dog: #1 on leaderboard
+        # top_dog: #1 on leaderboard (uses pre-fetched leaderboard)
         if "top_dog" not in unlocked:
-            leaderboard = get_leaderboard(league_id)
             if leaderboard and leaderboard[0].player_id == pid:
                 new_for_player.append("top_dog")
 
         # Save newly unlocked
         for atype in new_for_player:
-            _save_achievement(tenant_id, league_id, pid, atype)
+            _save_fn(ctx.tenant_id, ctx.league_id, pid, atype)
             newly_unlocked.append(f"{pid}:{atype}")
 
     if newly_unlocked:
@@ -199,9 +213,13 @@ def _get_unlocked(
     player_id: str,
 ) -> list[AchievementModel]:
     """Get all unlocked achievements for a player in a league."""
-    results = BaseEntity.query(
-        f"TENANT#{tenant_id}",
-    ).starts_with(f"ACHIEVE#{league_id}#{player_id}#").all()
+    results = (
+        BaseEntity.query(
+            f"TENANT#{tenant_id}",
+        )
+        .starts_with(f"ACHIEVE#{league_id}#{player_id}#")
+        .all()
+    )
     return [item for item in results if isinstance(item, AchievementModel)]
 
 
@@ -240,7 +258,8 @@ def _get_recent_player_matches(
         .all()
     )
     matches = [
-        item for item in results
+        item
+        for item in results
         if isinstance(item, MatchModel)
         and item.status == "CONFIRMED"
         and (player_id in item.team1_player_ids or player_id in item.team2_player_ids)

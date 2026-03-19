@@ -8,45 +8,10 @@ import {
   useGetLeaderboardQuery,
   useRecordMatchMutation,
 } from "@/api/baseApi";
+import { calculateEloPreview } from "@/shared/eloCalc";
 import type { LeagueMember } from "../types";
 
 type PlayerWithStats = LeagueMember & { matches_played: number };
-
-const getKFactor = (gamesPlayed: number): number => {
-  if (gamesPlayed <= 10) return 40;
-  if (gamesPlayed <= 30) return 32;
-  return 24;
-};
-
-const expectedScore = (teamAvg: number, opponentAvg: number): number =>
-  1.0 / (1.0 + Math.pow(10.0, (opponentAvg - teamAvg) / 400.0));
-
-const calculatePreview = (
-  team1: PlayerWithStats[],
-  team2: PlayerWithStats[],
-  team1Score: number,
-  team2Score: number,
-): Record<string, number> => {
-  if (team1.length === 0 || team2.length === 0) return {};
-
-  const team1Avg = team1.reduce((s, p) => s + p.current_elo, 0) / team1.length;
-  const team2Avg = team2.reduce((s, p) => s + p.current_elo, 0) / team2.length;
-
-  const team1Actual = team1Score > team2Score ? 1.0 : team1Score < team2Score ? 0.0 : 0.5;
-  const team2Actual = 1.0 - team1Actual;
-
-  const team1Expected = expectedScore(team1Avg, team2Avg);
-  const team2Expected = expectedScore(team2Avg, team1Avg);
-
-  const changes: Record<string, number> = {};
-  for (const p of team1) {
-    changes[p.player_id] = Math.round(getKFactor(p.matches_played) * (team1Actual - team1Expected));
-  }
-  for (const p of team2) {
-    changes[p.player_id] = Math.round(getKFactor(p.matches_played) * (team2Actual - team2Expected));
-  }
-  return changes;
-};
 
 export const MatchRecordPage = () => {
   const { id: leagueId } = useParams<{ id: string }>();
@@ -98,11 +63,17 @@ export const MatchRecordPage = () => {
   const scoresReady = score1 !== "" && score2 !== "" && score1 !== score2;
 
   const preview = useMemo(() => {
-    if (!teamsReady || !scoresReady) return {};
-    return calculatePreview(team1Players, team2Players, Number(score1), Number(score2));
+    if (!teamsReady || !scoresReady) return new Map<string, number>();
+    const s1 = Number(score1);
+    const s2 = Number(score2);
+    return calculateEloPreview(
+      team1Players.map((p) => ({ id: p.player_id, elo: p.current_elo, matchesPlayed: p.matches_played })),
+      team2Players.map((p) => ({ id: p.player_id, elo: p.current_elo, matchesPlayed: p.matches_played })),
+      s1 > s2 ? true : s1 < s2 ? false : null,
+    );
   }, [team1Players, team2Players, score1, score2, teamsReady, scoresReady]);
 
-  const hasPreview = Object.keys(preview).length > 0;
+  const hasPreview = preview.size > 0;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -169,7 +140,7 @@ export const MatchRecordPage = () => {
               key={p.player_id}
               player={p}
               onRemove={() => removeFromTeam(p.player_id)}
-              delta={preview[p.player_id]}
+              delta={preview.get(p.player_id)}
             />
           ))}
           {Array.from({ length: slots }).map((_, i) => (
@@ -273,10 +244,10 @@ export const MatchRecordPage = () => {
                   <div key={p.player_id} className="flex items-center justify-between text-sm">
                     <span className="text-text-primary">{p.display_name}</span>
                     <span
-                      className={`font-mono font-semibold ${(preview[p.player_id] ?? 0) >= 0 ? "text-success" : "text-danger"}`}
+                      className={`font-mono font-semibold ${(preview.get(p.player_id) ?? 0) >= 0 ? "text-success" : "text-danger"}`}
                     >
-                      {(preview[p.player_id] ?? 0) >= 0 ? "+" : ""}
-                      {preview[p.player_id]}
+                      {(preview.get(p.player_id) ?? 0) >= 0 ? "+" : ""}
+                      {preview.get(p.player_id)}
                     </span>
                   </div>
                 ))}
@@ -286,10 +257,10 @@ export const MatchRecordPage = () => {
                   <div key={p.player_id} className="flex items-center justify-between text-sm">
                     <span className="text-text-primary">{p.display_name}</span>
                     <span
-                      className={`font-mono font-semibold ${(preview[p.player_id] ?? 0) >= 0 ? "text-success" : "text-danger"}`}
+                      className={`font-mono font-semibold ${(preview.get(p.player_id) ?? 0) >= 0 ? "text-success" : "text-danger"}`}
                     >
-                      {(preview[p.player_id] ?? 0) >= 0 ? "+" : ""}
-                      {preview[p.player_id]}
+                      {(preview.get(p.player_id) ?? 0) >= 0 ? "+" : ""}
+                      {preview.get(p.player_id)}
                     </span>
                   </div>
                 ))}

@@ -1,9 +1,6 @@
-from typing import Any
-
-from fastapi import APIRouter, Depends, HTTPException
-
-from dependencies.auth import get_current_user
+from dependencies.auth import AuthenticatedUser, get_current_user
 from dependencies.tenant import get_tenant_id
+from fastapi import APIRouter, Depends, HTTPException
 from services.tenant_service import get_tenant
 
 router = APIRouter(
@@ -14,7 +11,7 @@ router = APIRouter(
 
 @router.get("/tenant")
 async def read_tenant(
-    user: dict[str, Any] = Depends(get_current_user),
+    user: AuthenticatedUser = Depends(get_current_user),
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict:
     """Get tenant settings."""

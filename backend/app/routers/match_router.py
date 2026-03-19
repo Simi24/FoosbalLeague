@@ -1,10 +1,11 @@
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException
-
-from dependencies.auth import get_current_user
+from dependencies.auth import AuthenticatedUser, get_current_user
 from dependencies.tenant import get_tenant_id
+from fastapi import APIRouter, Depends, HTTPException
+from schemas.confirmation import ConfirmationResult
 from schemas.match import EloChange, MatchResponse, RecordMatchRequest
+from services.exceptions import MatchNotFoundError, MissingRatingsError
 from services.league_service import get_enrollment
 from services.match_service import (
     confirm_match,
@@ -24,11 +25,11 @@ router = APIRouter(
 @router.post("/", response_model=MatchResponse, status_code=201)
 async def create_match(
     body: RecordMatchRequest,
-    user: dict[str, Any] = Depends(get_current_user),
+    user: AuthenticatedUser = Depends(get_current_user),
     tenant_id: str = Depends(get_tenant_id),
 ) -> MatchResponse:
     """Record a new match result (status=PENDING)."""
-    player = get_player_by_cognito_sub(tenant_id, user.get("sub", ""))
+    player = get_player_by_cognito_sub(tenant_id, user.sub)
     if not player:
         raise HTTPException(status_code=400, detail="Player not registered")
 
@@ -69,7 +70,7 @@ async def read_match(
 @router.post("/{match_id}/confirm", response_model=MatchResponse)
 async def confirm_match_endpoint(
     match_id: str,
-    user: dict[str, Any] = Depends(get_current_user),
+    user: AuthenticatedUser = Depends(get_current_user),
     tenant_id: str = Depends(get_tenant_id),
 ) -> MatchResponse:
     """Confirm a pending match.
@@ -78,7 +79,7 @@ async def confirm_match_endpoint(
     - A player from the opposing team, OR
     - A league admin
     """
-    player = get_player_by_cognito_sub(tenant_id, user.get("sub", ""))
+    player = get_player_by_cognito_sub(tenant_id, user.sub)
     if not player:
         raise HTTPException(status_code=400, detail="Player not registered")
 
@@ -104,17 +105,23 @@ async def confirm_match_endpoint(
             detail="Only an opponent player or league admin can confirm",
         )
 
-    confirmed = confirm_match(tenant_id, match_id, player.player_id)
-    if not confirmed:
-        raise HTTPException(status_code=400, detail="Cannot confirm this match")
+    try:
+        result = confirm_match(tenant_id, match_id, player.player_id)
+    except MatchNotFoundError:
+        raise HTTPException(status_code=404, detail="Match not found or not pending")
+    except MissingRatingsError:
+        raise HTTPException(
+            status_code=409,
+            detail="Missing player ratings — cannot compute ELO",
+        )
 
-    return _match_to_response(confirmed)
+    return _confirmation_to_response(result)
 
 
 @router.post("/{match_id}/dispute", response_model=MatchResponse)
 async def dispute_match_endpoint(
     match_id: str,
-    user: dict[str, Any] = Depends(get_current_user),
+    user: AuthenticatedUser = Depends(get_current_user),
     tenant_id: str = Depends(get_tenant_id),
 ) -> MatchResponse:
     """Dispute a pending match (any participant can dispute)."""
@@ -165,5 +172,37 @@ def _match_to_response(match: Any) -> MatchResponse:
         status=match.status,
         submitted_by=match.submitted_by,
         elo_changes=elo_changes,
-        created_at=match.created_at.isoformat() if hasattr(match.created_at, 'isoformat') else str(match.created_at),
+        created_at=match.created_at.isoformat()
+        if hasattr(match.created_at, "isoformat")
+        else str(match.created_at),
+    )
+
+
+def _confirmation_to_response(result: ConfirmationResult) -> MatchResponse:
+    """Convert ConfirmationResult to MatchResponse with rich ELO data."""
+    elo_changes = [
+        EloChange(
+            player_id=d.player_id,
+            display_name=d.display_name,
+            elo_before=d.elo_before,
+            elo_after=d.elo_after,
+            delta=d.delta,
+        )
+        for d in result.elo_changes
+    ]
+
+    match = result.match
+    return MatchResponse(
+        match_id=match.match_id,
+        league_id=match.league_id,
+        team1_player_ids=match.team1_player_ids,
+        team2_player_ids=match.team2_player_ids,
+        team1_score=match.team1_score,
+        team2_score=match.team2_score,
+        status=match.status,
+        submitted_by=match.submitted_by,
+        elo_changes=elo_changes,
+        created_at=match.created_at.isoformat()
+        if hasattr(match.created_at, "isoformat")
+        else str(match.created_at),
     )
