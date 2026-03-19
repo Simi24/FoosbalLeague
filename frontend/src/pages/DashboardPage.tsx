@@ -3,16 +3,18 @@ import { Link } from "react-router-dom";
 import { MdAdd, MdPeople, MdSportsSoccer, MdVpnKey } from "react-icons/md";
 
 import { useAppDispatch, useAppSelector } from "@/app/hooks";
-import { apiFetch } from "@/api";
+import {
+  useGetMyLeaguesQuery,
+  useRegisterPlayerMutation,
+  useJoinLeagueMutation,
+} from "@/api/baseApi";
 import { initAuth } from "@/features/auth";
-import { fetchMyLeagues, invalidateLeagues } from "@/features/leagues";
-import { useMyLeagues } from "@/hooks";
 import { CreateLeagueForm } from "@/projects/league/components";
 
 export const DashboardPage = () => {
   const dispatch = useAppDispatch();
   const user = useAppSelector((state) => state.auth.user);
-  const { leagues: myLeagues, loading } = useMyLeagues();
+  const { data: myLeagues = [], isLoading: loading } = useGetMyLeaguesQuery();
 
   const [showCreate, setShowCreate] = useState(false);
   const [joinCode, setJoinCode] = useState("");
@@ -21,54 +23,37 @@ export const DashboardPage = () => {
 
   // Registration state
   const [displayName, setDisplayName] = useState("");
-  const [registering, setRegistering] = useState(false);
   const [registerError, setRegisterError] = useState<string | null>(null);
+  const [registerPlayer, { isLoading: registering }] = useRegisterPlayerMutation();
+  const [joinLeague] = useJoinLeagueMutation();
 
   const needsRegistration = user && !user.player_id;
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setRegisterError(null);
-    setRegistering(true);
-
-    const response = await apiFetch("/auth/register", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ display_name: displayName }),
-    });
-
-    if (response.ok) {
+    try {
+      await registerPlayer({ display_name: displayName }).unwrap();
       await dispatch(initAuth());
-    } else {
-      const data = await response.json();
-      setRegisterError(data.detail ?? "Registration failed");
+    } catch (err: any) {
+      setRegisterError(err?.data?.detail ?? "Registration failed");
     }
-    setRegistering(false);
   };
 
   const handleJoinByCode = async (e: React.FormEvent) => {
     e.preventDefault();
     setJoinError("");
-    const response = await apiFetch("/leagues/join", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ code: joinCode }),
-    });
-    if (response.ok) {
+    try {
+      await joinLeague({ code: joinCode }).unwrap();
       setJoinCode("");
       setShowJoin(false);
-      dispatch(invalidateLeagues());
-      dispatch(fetchMyLeagues());
-    } else {
-      const data = await response.json();
-      setJoinError(data.detail ?? "Invalid code");
+    } catch (err: any) {
+      setJoinError(err?.data?.detail ?? "Invalid code");
     }
   };
 
   const handleCreated = () => {
     setShowCreate(false);
-    dispatch(invalidateLeagues());
-    dispatch(fetchMyLeagues());
   };
 
   // Registration prompt for unregistered users

@@ -1,11 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
-import { apiFetch } from "@/api";
+import { useGetMyLeaguesQuery, useGetLeaderboardQuery } from "@/api/baseApi";
 import { Avatar } from "@/components/Avatar";
 import { Dropdown } from "@/components/inputs";
-import { useMyLeagues } from "@/hooks";
-import type { Leaderboard } from "../types";
 
 const getRankStyle = (rank: number): string => {
   if (rank === 1) return "bg-amber-50 border-amber-200";
@@ -23,25 +21,18 @@ const getRankBadge = (rank: number): string | null => {
 
 export const LeaderboardPage = () => {
   const { id: leagueId } = useParams<{ id: string }>();
-  const { leagues } = useMyLeagues();
+  const { data: myLeagues = [] } = useGetMyLeaguesQuery();
   const [selectedLeague, setSelectedLeague] = useState(leagueId ?? "");
-  const [leaderboard, setLeaderboard] = useState<Leaderboard | null>(null);
-  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!selectedLeague && leagues.length > 0) {
-      setSelectedLeague(leagues[0]!.league_id);
+    if (!selectedLeague && myLeagues.length > 0) {
+      setSelectedLeague(myLeagues[0]!.league_id);
     }
-  }, [leagues, selectedLeague]);
+  }, [myLeagues, selectedLeague]);
 
-  useEffect(() => {
-    if (!selectedLeague) return;
-    setLoading(true);
-    apiFetch(`/rankings/league/${selectedLeague}`)
-      .then((r) => r.json())
-      .then(setLeaderboard)
-      .finally(() => setLoading(false));
-  }, [selectedLeague]);
+  const { data: leaderboard, isLoading: loading } = useGetLeaderboardQuery(selectedLeague, {
+    skip: !selectedLeague,
+  });
 
   return (
     <div>
@@ -50,7 +41,7 @@ export const LeaderboardPage = () => {
         <Dropdown
           value={selectedLeague}
           onChange={setSelectedLeague}
-          options={leagues.map((lg) => ({ value: lg.league_id, label: lg.name }))}
+          options={myLeagues.map((lg) => ({ value: lg.league_id, label: lg.name }))}
           className="w-full sm:w-48"
         />
       </div>

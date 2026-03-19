@@ -2,14 +2,11 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { MdAdd, MdPeople, MdSportsSoccer } from "react-icons/md";
 
-import { useAppDispatch } from "@/app/hooks";
-import { fetchMyLeagues, invalidateLeagues } from "@/features/leagues";
-import { useMyLeagues } from "@/hooks";
+import { useGetMyLeaguesQuery } from "@/api/baseApi";
 import { CreateLeagueForm, EmptyState } from "../components";
 
 export const LeagueListPage = () => {
-  const dispatch = useAppDispatch();
-  const { leagues, loading } = useMyLeagues();
+  const { data: leagues = [], isLoading: loading } = useGetMyLeaguesQuery();
   const [showCreate, setShowCreate] = useState(false);
 
   return (
@@ -25,11 +22,7 @@ export const LeagueListPage = () => {
         </button>
       </div>
 
-      {showCreate && <CreateLeagueForm onCreated={() => {
-        setShowCreate(false);
-        dispatch(invalidateLeagues());
-        dispatch(fetchMyLeagues());
-      }} />}
+      {showCreate && <CreateLeagueForm onCreated={() => setShowCreate(false)} />}
 
       {loading ? (
         <div className="flex items-center justify-center py-12">

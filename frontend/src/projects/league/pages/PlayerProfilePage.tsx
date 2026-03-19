@@ -1,42 +1,45 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
-import { apiFetch } from "@/api";
+import {
+  api,
+  useGetPlayerQuery,
+  useGetMyLeaguesQuery,
+  useGetLeaderboardQuery,
+  useGetEloHistoryQuery,
+  useGetAchievementsQuery,
+} from "@/api/baseApi";
+import { useAppDispatch } from "@/app/hooks";
 import { Avatar } from "@/components/Avatar";
 import { Dropdown } from "@/components/inputs";
-import { useMyLeagues } from "@/hooks";
 import { AchievementBadge, EloHistoryChart, StatCard } from "../components";
-import type { Achievement, EloHistoryPoint, Leaderboard, MyLeague, Player, RankingEntry } from "../types";
+import type { MyLeague } from "../types";
 
 export const PlayerProfilePage = () => {
   const { id: playerId } = useParams<{ id: string }>();
-  const { leagues: myLeagues } = useMyLeagues();
-  const [player, setPlayer] = useState<Player | null>(null);
+  const dispatch = useAppDispatch();
+  const { data: player, isLoading: loading } = useGetPlayerQuery(playerId!, { skip: !playerId });
+  const { data: myLeagues = [] } = useGetMyLeaguesQuery();
+
   const [sharedLeagues, setSharedLeagues] = useState<MyLeague[]>([]);
   const [selectedLeague, setSelectedLeague] = useState("");
-  const [rankingEntry, setRankingEntry] = useState<RankingEntry | null>(null);
-  const [eloHistory, setEloHistory] = useState<EloHistoryPoint[]>([]);
-  const [achievements, setAchievements] = useState<Achievement[]>([]);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (!playerId) return;
-    apiFetch(`/players/${playerId}`)
-      .then((r) => r.json())
-      .then(setPlayer)
-      .finally(() => setLoading(false));
-  }, [playerId]);
-
+  // Find shared leagues by checking each leaderboard
   useEffect(() => {
     if (!playerId || myLeagues.length === 0) return;
 
     Promise.all(
       myLeagues.map(async (lg) => {
-        const res = await apiFetch(`/rankings/league/${lg.league_id}`);
-        if (!res.ok) return null;
-        const data = (await res.json()) as Leaderboard;
-        const hasPlayer = data.entries.some((e) => e.player_id === playerId);
-        return hasPlayer ? lg : null;
+        const result = dispatch(api.endpoints.getLeaderboard.initiate(lg.league_id));
+        try {
+          const data = await result.unwrap();
+          const hasPlayer = data.entries.some((e) => e.player_id === playerId);
+          return hasPlayer ? lg : null;
+        } catch {
+          return null;
+        } finally {
+          result.unsubscribe();
+        }
       }),
     ).then((checks) => {
       const shared = checks.filter((lg): lg is MyLeague => lg !== null);
@@ -47,23 +50,17 @@ export const PlayerProfilePage = () => {
     });
   }, [playerId, myLeagues]);
 
-  useEffect(() => {
-    if (!playerId || !selectedLeague) return;
+  const { data: leaderboard } = useGetLeaderboardQuery(selectedLeague, { skip: !selectedLeague });
+  const { data: eloHistory = [] } = useGetEloHistoryQuery(
+    { playerId: playerId!, leagueId: selectedLeague },
+    { skip: !playerId || !selectedLeague },
+  );
+  const { data: achievements = [] } = useGetAchievementsQuery(
+    { playerId: playerId!, leagueId: selectedLeague },
+    { skip: !playerId || !selectedLeague },
+  );
 
-    Promise.all([
-      apiFetch(`/rankings/league/${selectedLeague}`)
-        .then((r) => (r.ok ? r.json() : null)) as Promise<Leaderboard | null>,
-      apiFetch(`/rankings/player/${playerId}/history?league_id=${selectedLeague}`)
-        .then((r) => (r.ok ? r.json() : { history: [] })) as Promise<{ history: EloHistoryPoint[] }>,
-      apiFetch(`/achievements/player/${playerId}?league_id=${selectedLeague}`)
-        .then((r) => (r.ok ? r.json() : { achievements: [] })) as Promise<{ achievements: Achievement[] }>,
-    ]).then(([leaderboard, historyData, achievementData]) => {
-      const entry = leaderboard?.entries.find((e) => e.player_id === playerId) ?? null;
-      setRankingEntry(entry);
-      setEloHistory(historyData.history);
-      setAchievements(achievementData.achievements);
-    });
-  }, [playerId, selectedLeague]);
+  const rankingEntry = leaderboard?.entries.find((e) => e.player_id === playerId) ?? null;
 
   if (loading) {
     return (

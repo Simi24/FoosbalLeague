@@ -1,31 +1,24 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { apiFetch } from "@/api";
-import { useAppDispatch } from "@/app/hooks";
-import { fetchMyLeagues, invalidateLeagues } from "@/features/leagues";
+import { useCreateLeagueMutation } from "@/api/baseApi";
 import type { League } from "../types";
 
 export const CreateLeagueForm = ({ onCreated }: { onCreated?: (lg: League) => void }) => {
   const navigate = useNavigate();
-  const dispatch = useAppDispatch();
   const [name, setName] = useState("");
   const [leagueType, setLeagueType] = useState<"1v1" | "2v2">("2v2");
   const [description, setDescription] = useState("");
+  const [createLeague] = useCreateLeagueMutation();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const response = await apiFetch("/leagues/", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, league_type: leagueType, description }),
-    });
-    if (response.ok) {
-      const league = (await response.json()) as League;
-      dispatch(invalidateLeagues());
-      dispatch(fetchMyLeagues());
+    try {
+      const league = await createLeague({ name, league_type: leagueType, description }).unwrap();
       if (onCreated) onCreated(league);
       navigate(`/leagues/${league.league_id}/settings`);
+    } catch {
+      // mutation error is available via hook if needed
     }
   };
 

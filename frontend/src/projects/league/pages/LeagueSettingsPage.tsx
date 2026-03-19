@@ -2,81 +2,58 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { MdArrowBack, MdContentCopy, MdPersonRemove, MdRefresh, MdStar, MdStarBorder, MdDelete } from "react-icons/md";
 
-import { apiFetch } from "@/api";
-import { useAppDispatch, useAppSelector } from "@/app/hooks";
-import { fetchMyLeagues, invalidateLeagues } from "@/features/leagues";
-import { useMyLeagues } from "@/hooks";
-import type { League, LeagueMember } from "../types";
+import {
+  useGetLeagueQuery,
+  useGetLeagueMembersQuery,
+  useGetMyLeaguesQuery,
+  useUpdateLeagueMutation,
+  useKickMemberMutation,
+  usePromoteMemberMutation,
+  useDemoteMemberMutation,
+  useDeleteLeagueMutation,
+  useRegenerateCodeMutation,
+} from "@/api/baseApi";
+import { useAppSelector } from "@/app/hooks";
 
 export const LeagueSettingsPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const dispatch = useAppDispatch();
   const user = useAppSelector((state) => state.auth.user);
-  const { leagues: myLeagues } = useMyLeagues();
 
-  const [league, setLeague] = useState<League | null>(null);
-  const [members, setMembers] = useState<LeagueMember[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: league, isLoading: leagueLoading } = useGetLeagueQuery(id!, { skip: !id });
+  const { data: members = [], isLoading: membersLoading } = useGetLeagueMembersQuery(id!, { skip: !id });
+  const { data: myLeagues = [] } = useGetMyLeaguesQuery();
+
+  const [updateLeague] = useUpdateLeagueMutation();
+  const [kickMember] = useKickMemberMutation();
+  const [promoteMember] = usePromoteMemberMutation();
+  const [demoteMember] = useDemoteMemberMutation();
+  const [deleteLeague] = useDeleteLeagueMutation();
+  const [regenerateCode] = useRegenerateCodeMutation();
+
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
 
   const inviteCode = myLeagues.find((l) => l.league_id === id)?.invite_code ?? "";
-
-  const fetchData = () => {
-    if (!id) return;
-    setLoading(true);
-    Promise.all([
-      apiFetch(`/leagues/${id}`).then((r) => r.json()) as Promise<League>,
-      apiFetch(`/leagues/${id}/members`).then((r) => r.json()) as Promise<LeagueMember[]>,
-    ])
-      .then(([lg, mem]) => {
-        setLeague(lg);
-        setMembers(mem);
-        setName(lg.name);
-        setDescription(lg.description);
-      })
-      .finally(() => setLoading(false));
-  };
+  const loading = leagueLoading || membersLoading;
 
   useEffect(() => {
-    fetchData();
-  }, [id]);
+    if (league) {
+      setName(league.name);
+      setDescription(league.description);
+    }
+  }, [league]);
 
   const currentMember = members.find((m) => m.player_id === user?.player_id);
   const isAdmin = currentMember?.role === "admin";
 
-  const handleSave = async () => {
-    await apiFetch(`/leagues/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, description }),
-    });
-    dispatch(invalidateLeagues());
-    dispatch(fetchMyLeagues());
-    fetchData();
-  };
-
-  const handleKick = async (playerId: string) => {
-    await apiFetch(`/leagues/${id}/kick/${playerId}`, { method: "POST" });
-    dispatch(invalidateLeagues());
-    dispatch(fetchMyLeagues());
-    fetchData();
-  };
-
-  const handlePromote = async (playerId: string) => {
-    await apiFetch(`/leagues/${id}/promote/${playerId}`, { method: "POST" });
-    fetchData();
-  };
-
-  const handleDemote = async (playerId: string) => {
-    await apiFetch(`/leagues/${id}/demote/${playerId}`, { method: "POST" });
-    fetchData();
-  };
+  const handleSave = () => updateLeague({ id: id!, name, description });
+  const handleKick = (playerId: string) => kickMember({ leagueId: id!, playerId });
+  const handlePromote = (playerId: string) => promoteMember({ leagueId: id!, playerId });
+  const handleDemote = (playerId: string) => demoteMember({ leagueId: id!, playerId });
 
   const handleDelete = async () => {
-    await apiFetch(`/leagues/${id}`, { method: "DELETE" });
-    dispatch(invalidateLeagues());
+    await deleteLeague(id!).unwrap();
     navigate("/");
   };
 
@@ -155,13 +132,7 @@ export const LeagueSettingsPage = () => {
                 <MdContentCopy size={18} />
               </button>
               <button
-                onClick={async () => {
-                  const res = await apiFetch(`/leagues/${id}/regenerate-code`, { method: "POST" });
-                  if (res.ok) {
-                    dispatch(invalidateLeagues());
-                    dispatch(fetchMyLeagues());
-                  }
-                }}
+                onClick={() => regenerateCode(id!)}
                 className="rounded-lg border border-border p-3 text-text-secondary transition-colors hover:bg-bg-tertiary hover:text-text-primary"
                 title="Generate new code"
               >

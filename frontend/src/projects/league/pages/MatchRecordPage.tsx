@@ -1,9 +1,14 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { MdClose, MdSportsSoccer } from "react-icons/md";
 
-import { apiFetch } from "@/api";
-import type { League, LeagueMember, RankingEntry } from "../types";
+import {
+  useGetLeagueQuery,
+  useGetLeagueMembersQuery,
+  useGetLeaderboardQuery,
+  useRecordMatchMutation,
+} from "@/api/baseApi";
+import type { LeagueMember } from "../types";
 
 type PlayerWithStats = LeagueMember & { matches_played: number };
 
@@ -46,34 +51,25 @@ const calculatePreview = (
 export const MatchRecordPage = () => {
   const { id: leagueId } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [league, setLeague] = useState<League | null>(null);
-  const [players, setPlayers] = useState<PlayerWithStats[]>([]);
+
+  const { data: league } = useGetLeagueQuery(leagueId!, { skip: !leagueId });
+  const { data: members = [] } = useGetLeagueMembersQuery(leagueId!, { skip: !leagueId });
+  const { data: leaderboard } = useGetLeaderboardQuery(leagueId!, { skip: !leagueId });
+  const [recordMatch, { isLoading: submitting }] = useRecordMatchMutation();
+
+  const players = useMemo<PlayerWithStats[]>(() => {
+    const rankingMap = new Map(leaderboard?.entries.map((e) => [e.player_id, e]) ?? []);
+    return members.map((m) => ({
+      ...m,
+      matches_played: rankingMap.get(m.player_id)?.matches_played ?? 0,
+    }));
+  }, [members, leaderboard]);
+
   const [team1Ids, setTeam1Ids] = useState<string[]>([]);
   const [team2Ids, setTeam2Ids] = useState<string[]>([]);
   const [score1, setScore1] = useState("");
   const [score2, setScore2] = useState("");
-  const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
-
-  useEffect(() => {
-    if (!leagueId) return;
-    Promise.all([
-      apiFetch(`/leagues/${leagueId}`).then((r) => r.json()) as Promise<League>,
-      apiFetch(`/leagues/${leagueId}/members`).then((r) => r.json()) as Promise<LeagueMember[]>,
-      apiFetch(`/rankings/league/${leagueId}`).then((r) =>
-        r.ok ? r.json() : { entries: [] },
-      ) as Promise<{ entries: RankingEntry[] }>,
-    ]).then(([lg, mem, rankings]) => {
-      setLeague(lg);
-      const rankingMap = new Map(rankings.entries.map((e) => [e.player_id, e]));
-      setPlayers(
-        mem.map((m) => ({
-          ...m,
-          matches_played: rankingMap.get(m.player_id)?.matches_played ?? 0,
-        })),
-      );
-    });
-  }, [leagueId]);
 
   const maxPerTeam = league?.league_type === "1v1" ? 1 : 2;
 
@@ -117,24 +113,16 @@ export const MatchRecordPage = () => {
       return;
     }
 
-    setSubmitting(true);
-    const response = await apiFetch("/matches/", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        league_id: leagueId,
+    try {
+      await recordMatch({
+        league_id: leagueId!,
         team1: { player_ids: team1Ids, score: Number(score1) },
         team2: { player_ids: team2Ids, score: Number(score2) },
-      }),
-    });
-
-    if (response.ok) {
+      }).unwrap();
       navigate(`/leagues/${leagueId}`);
-    } else {
-      const data = await response.json();
-      setError(data.detail || "Failed to record match");
+    } catch (err: any) {
+      setError(err?.data?.detail || "Failed to record match");
     }
-    setSubmitting(false);
   };
 
   const PlayerChip = ({

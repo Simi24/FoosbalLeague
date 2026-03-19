@@ -1,42 +1,32 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { MdAdd, MdCheck, MdClose, MdHistory, MdLeaderboard, MdLogout, MdSettings } from "react-icons/md";
 
-import { apiFetch } from "@/api";
-import { useAppDispatch, useAppSelector } from "@/app/hooks";
-import { invalidateLeagues } from "@/features/leagues";
+import {
+  useGetLeagueQuery,
+  useGetLeagueMembersQuery,
+  useGetLeagueMatchesQuery,
+  useConfirmMatchMutation,
+  useDisputeMatchMutation,
+  useLeaveLeagueMutation,
+} from "@/api/baseApi";
+import { useAppSelector } from "@/app/hooks";
 import { Avatar } from "@/components/Avatar";
-import type { League, LeagueMember, Match } from "../types";
 
 export const LeagueDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const dispatch = useAppDispatch();
   const user = useAppSelector((state) => state.auth.user);
-  const [league, setLeague] = useState<League | null>(null);
-  const [members, setMembers] = useState<LeagueMember[]>([]);
-  const [matches, setMatches] = useState<Match[]>([]);
-  const [loading, setLoading] = useState(true);
 
-  const fetchData = () => {
-    if (!id) return;
-    setLoading(true);
-    Promise.all([
-      apiFetch(`/leagues/${id}`).then((r) => r.json()),
-      apiFetch(`/leagues/${id}/members`).then((r) => r.json()),
-      apiFetch(`/matches/league/${id}`).then((r) => r.json()),
-    ])
-      .then(([lg, mem, mat]) => {
-        setLeague(lg);
-        setMembers(mem);
-        setMatches(mat);
-      })
-      .finally(() => setLoading(false));
-  };
+  const { data: league, isLoading: leagueLoading } = useGetLeagueQuery(id!, { skip: !id });
+  const { data: members = [], isLoading: membersLoading } = useGetLeagueMembersQuery(id!, { skip: !id });
+  const { data: matches = [], isLoading: matchesLoading } = useGetLeagueMatchesQuery(id!, { skip: !id });
 
-  useEffect(() => {
-    fetchData();
-  }, [id]);
+  const [confirmMatch] = useConfirmMatchMutation();
+  const [disputeMatch] = useDisputeMatchMutation();
+  const [leaveLeague] = useLeaveLeagueMutation();
+
+  const loading = leagueLoading || membersLoading || matchesLoading;
 
   const playerNames = useMemo(() => {
     const map: Record<string, string> = {};
@@ -46,27 +36,22 @@ export const LeagueDetailPage = () => {
     return map;
   }, [members]);
 
-  const resolveName = (id: string) => playerNames[id] ?? id;
+  const resolveName = (pid: string) => playerNames[pid] ?? pid;
 
   const currentMember = members.find((m) => m.player_id === user?.player_id);
   const isAdmin = currentMember?.role === "admin";
 
-  const handleConfirm = async (matchId: string) => {
-    const res = await apiFetch(`/matches/${matchId}/confirm`, { method: "POST" });
-    if (res.ok) fetchData();
+  const handleConfirm = (matchId: string) => {
+    confirmMatch({ matchId, leagueId: id! });
   };
 
-  const handleDispute = async (matchId: string) => {
-    const res = await apiFetch(`/matches/${matchId}/dispute`, { method: "POST" });
-    if (res.ok) fetchData();
+  const handleDispute = (matchId: string) => {
+    disputeMatch({ matchId, leagueId: id! });
   };
 
   const handleLeave = async () => {
-    const res = await apiFetch(`/leagues/${id}/leave`, { method: "POST" });
-    if (res.ok) {
-      dispatch(invalidateLeagues());
-      navigate("/");
-    }
+    await leaveLeague(id!).unwrap();
+    navigate("/");
   };
 
   if (loading) {

@@ -1,1 +1,1 @@
-export { leaguesSlice, fetchMyLeagues, invalidateLeagues } from "./leaguesSlice";
+// leaguesSlice replaced by RTK Query — see api/baseApi.ts

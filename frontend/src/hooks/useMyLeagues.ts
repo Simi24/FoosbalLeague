@@ -1,18 +1,6 @@
-import { useEffect } from "react";
-
-import { useAppDispatch, useAppSelector } from "@/app/hooks";
-import { fetchMyLeagues } from "@/features/leagues";
+import { useGetMyLeaguesQuery } from "@/api/baseApi";
 
 export const useMyLeagues = () => {
-  const dispatch = useAppDispatch();
-  const { data, status } = useAppSelector((state) => state.leagues);
-
-  useEffect(() => {
-    dispatch(fetchMyLeagues());
-  }, [dispatch]);
-
-  return {
-    leagues: data,
-    loading: status === "loading" && data.length === 0,
-  };
+  const { data = [], isLoading } = useGetMyLeaguesQuery();
+  return { leagues: data, loading: isLoading };
 };
