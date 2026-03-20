@@ -1,7 +1,7 @@
 from dependencies.auth import AuthenticatedUser, get_current_user
 from dependencies.tenant import get_tenant_id
 from fastapi import APIRouter, Depends, HTTPException
-from schemas.player import PlayerResponse, PlayerStatsResponse, UpdatePlayerRequest
+from schemas.player import PlayerListItem, PlayerResponse, PlayerStatsResponse, UpdatePlayerRequest
 from services.player_service import (
     get_player,
     get_player_by_cognito_sub,
@@ -15,17 +15,16 @@ router = APIRouter(
 )
 
 
-@router.get("/", response_model=list[PlayerResponse])
+@router.get("/", response_model=list[PlayerListItem])
 async def read_players(
     tenant_id: str = Depends(get_tenant_id),
-) -> list[PlayerResponse]:
-    """List all players in the tenant."""
+) -> list[PlayerListItem]:
+    """List all players in the tenant (no email exposed)."""
     players = list_players(tenant_id)
     return [
-        PlayerResponse(
+        PlayerListItem(
             player_id=p.player_id,
             display_name=p.display_name,
-            email=p.email,
             tenant_id=tenant_id,
             total_matches=p.total_matches,
             total_wins=p.total_wins,

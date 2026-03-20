@@ -1,8 +1,21 @@
 from pydantic import BaseModel, ConfigDict, Field
 
 
+class PlayerListItem(BaseModel):
+    """Player summary for list endpoints — no email."""
+
+    player_id: str
+    display_name: str
+    tenant_id: str
+    total_matches: int = 0
+    total_wins: int = 0
+    total_losses: int = 0
+
+    model_config = ConfigDict(extra="forbid")
+
+
 class PlayerResponse(BaseModel):
-    """Player public profile."""
+    """Player full profile (individual lookup only)."""
 
     player_id: str
     display_name: str

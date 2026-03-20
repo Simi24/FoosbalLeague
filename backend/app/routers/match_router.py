@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from schemas.confirmation import ConfirmationResult
 from schemas.match import EloChange, MatchResponse, RecordMatchRequest
 from services.exceptions import MatchNotFoundError, MissingRatingsError
-from services.league_service import get_enrollment
+from services.league_service import get_enrollment, get_league
 from services.match_service import (
     confirm_match,
     dispute_match,
@@ -124,10 +124,34 @@ async def dispute_match_endpoint(
     user: AuthenticatedUser = Depends(get_current_user),
     tenant_id: str = Depends(get_tenant_id),
 ) -> MatchResponse:
-    """Dispute a pending match (any participant can dispute)."""
+    """Dispute a pending match.
+
+    The disputer must be either:
+    - A player involved in the match, OR
+    - A league admin
+    """
+    player = get_player_by_cognito_sub(tenant_id, user.sub)
+    if not player:
+        raise HTTPException(status_code=400, detail="Player not registered")
+
     match = get_match(tenant_id, match_id)
     if not match:
         raise HTTPException(status_code=404, detail="Match not found")
+
+    # Authorization: participant or league admin
+    is_participant = (
+        player.player_id in match.team1_player_ids
+        or player.player_id in match.team2_player_ids
+    )
+
+    enrollment = get_enrollment(tenant_id, match.league_id, player.player_id)
+    is_admin = enrollment is not None and enrollment.role == "admin"
+
+    if not is_participant and not is_admin:
+        raise HTTPException(
+            status_code=403,
+            detail="Only a match participant or league admin can dispute",
+        )
 
     disputed = dispute_match(tenant_id, match_id)
     if not disputed:
@@ -142,6 +166,10 @@ async def read_matches_by_league(
     tenant_id: str = Depends(get_tenant_id),
 ) -> list[MatchResponse]:
     """Get matches for a league."""
+    league = get_league(tenant_id, league_id)
+    if not league:
+        raise HTTPException(status_code=404, detail="League not found")
+
     matches = list_matches_by_league(league_id)
     return [_match_to_response(m) for m in matches]
 

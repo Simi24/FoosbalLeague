@@ -57,7 +57,7 @@ export type Leaderboard = {
 export type Player = {
   player_id: string;
   display_name: string;
-  email: string;
+  email?: string;
   tenant_id: string;
   total_matches: number;
   total_wins: number;

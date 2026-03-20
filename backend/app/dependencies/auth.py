@@ -141,8 +141,8 @@ class CognitoJWTProvider:
             claims = self._decode_token(token)
         except jwt.ExpiredSignatureError:
             raise HTTPException(status_code=401, detail="Token expired")
-        except jwt.InvalidTokenError as e:
-            raise HTTPException(status_code=401, detail=f"Invalid token: {e}")
+        except jwt.InvalidTokenError:
+            raise HTTPException(status_code=401, detail="Invalid token")
 
         return _cognito_claims_to_user(claims)
 

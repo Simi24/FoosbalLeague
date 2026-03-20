@@ -3,6 +3,7 @@ variable "project" { type = string }
 variable "image_tag" { type = string }
 variable "table_arn" { type = string }
 variable "table_name" { type = string }
+variable "allowed_origins" { type = string }
 
 data "aws_ecr_repository" "main" {
   name = var.project
@@ -35,7 +36,6 @@ resource "aws_iam_role_policy" "dynamodb" {
         "dynamodb:UpdateItem",
         "dynamodb:DeleteItem",
         "dynamodb:Query",
-        "dynamodb:Scan",
       ]
       Resource = [
         var.table_arn,
@@ -50,6 +50,11 @@ resource "aws_iam_role_policy_attachment" "logs" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
+resource "aws_cloudwatch_log_group" "lambda" {
+  name              = "/aws/lambda/${var.project}-${var.environment}"
+  retention_in_days = 14
+}
+
 resource "aws_lambda_function" "main" {
   function_name = "${var.project}-${var.environment}"
   role          = aws_iam_role.lambda.arn
@@ -59,14 +64,19 @@ resource "aws_lambda_function" "main" {
   timeout       = 300
   memory_size   = 512
 
+  reserved_concurrent_executions = 100
+
   environment {
     variables = {
-      APP_NAME       = var.project
-      ENV            = var.environment
-      CLOUD_ENV      = var.environment
-      DYNAMODB_TABLE = var.table_name
+      APP_NAME        = var.project
+      ENV             = var.environment
+      CLOUD_ENV       = var.environment
+      DYNAMODB_TABLE  = var.table_name
+      ALLOWED_ORIGINS = var.allowed_origins
     }
   }
+
+  depends_on = [aws_cloudwatch_log_group.lambda]
 }
 
 output "invoke_arn" {

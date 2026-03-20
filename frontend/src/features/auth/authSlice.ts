@@ -1,8 +1,15 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
 import { apiFetch } from "@/api";
-import { cognitoLogin } from "./cognito";
-import { saveTokens, getIdToken, clearTokens, isTokenExpired } from "./tokenStorage";
+import { cognitoLogin, cognitoRefreshTokens } from "./cognito";
+import {
+  saveTokens,
+  getIdToken,
+  getRefreshToken,
+  clearTokens,
+  isTokenExpired,
+  tokenExpiresIn,
+} from "./tokenStorage";
 
 type UserInfo = {
   sub: string;
@@ -32,6 +39,18 @@ const fetchMe = async (): Promise<UserInfo> => {
   if (!response.ok) throw new Error("Not authenticated");
   return (await response.json()) as UserInfo;
 };
+
+/** Refresh the ID token using the stored refresh token. */
+export const refreshAuth = createAsyncThunk("auth/refresh", async () => {
+  const refresh = getRefreshToken();
+  if (!refresh) throw new Error("No refresh token");
+
+  const { id_token } = await cognitoRefreshTokens(refresh);
+  // Keep existing refresh token, update only id_token
+  saveTokens({ id_token, refresh_token: refresh });
+
+  return fetchMe();
+});
 
 export const initAuth = createAsyncThunk(
   "auth/initAuth",
@@ -94,8 +113,38 @@ export const authSlice = createSlice({
         state.status = "failed";
         state.error = action.error.message ?? "Login failed";
         state.isAuthenticated = false;
+      })
+      .addCase(refreshAuth.fulfilled, (state, action) => {
+        state.user = action.payload;
+        state.isAuthenticated = true;
+      })
+      .addCase(refreshAuth.rejected, (state) => {
+        state.user = null;
+        state.isAuthenticated = false;
+        state.status = "failed";
+        clearTokens();
       });
   },
 });
 
 export const { logout } = authSlice.actions;
+
+/**
+ * Schedule a token refresh 60 seconds before the current ID token expires.
+ * Call after login or initAuth succeeds. Returns a cleanup function.
+ */
+export const scheduleTokenRefresh = (
+  dispatch: (action: unknown) => unknown,
+): (() => void) => {
+  const token = getIdToken();
+  if (!token) return () => {};
+
+  const expiresIn = tokenExpiresIn(token);
+  const refreshIn = Math.max(0, expiresIn - 60) * 1000; // 60s before expiry
+
+  const timer = setTimeout(() => {
+    dispatch(refreshAuth());
+  }, refreshIn);
+
+  return () => clearTimeout(timer);
+};

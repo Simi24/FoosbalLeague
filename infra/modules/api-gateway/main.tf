@@ -6,12 +6,17 @@ variable "cognito_user_pool_id" { type = string }
 variable "cognito_client_id" { type = string }
 variable "aws_region" { type = string }
 
+variable "allowed_origins" {
+  description = "CORS allowed origins — restrict per environment"
+  type        = list(string)
+}
+
 resource "aws_apigatewayv2_api" "main" {
   name          = "${var.project}-${var.environment}"
   protocol_type = "HTTP"
 
   cors_configuration {
-    allow_origins = ["*"]
+    allow_origins = var.allowed_origins
     allow_methods = ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
     allow_headers = ["Authorization", "Content-Type"]
     max_age       = 300
@@ -22,6 +27,11 @@ resource "aws_apigatewayv2_stage" "main" {
   api_id      = aws_apigatewayv2_api.main.id
   name        = var.environment
   auto_deploy = true
+
+  default_route_settings {
+    throttling_burst_limit = 100
+    throttling_rate_limit  = 50
+  }
 }
 
 resource "aws_apigatewayv2_integration" "lambda" {

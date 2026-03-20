@@ -87,7 +87,9 @@ export const PlayerProfilePage = () => {
             <h1 className="text-2xl font-bold text-text-primary">
               {player.display_name}
             </h1>
-            <p className="text-sm text-text-secondary">{player.email}</p>
+            {player.email && (
+              <p className="text-sm text-text-secondary">{player.email}</p>
+            )}
           </div>
         </div>
         {sharedLeagues.length > 0 && (

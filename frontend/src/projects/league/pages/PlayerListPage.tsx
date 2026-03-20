@@ -47,7 +47,9 @@ export const PlayerListPage = () => {
             >
               <div>
                 <p className="text-sm font-medium text-text-primary">{p.display_name}</p>
-                <p className="text-xs text-text-muted">{p.email}</p>
+                <p className="text-xs text-text-muted">
+                  {p.total_matches} matches · {p.total_wins}W / {p.total_losses}L
+                </p>
               </div>
               <MdChevronRight size={20} className="text-text-muted" />
             </Link>

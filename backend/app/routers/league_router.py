@@ -157,7 +157,8 @@ async def patch_league(
     user: AuthenticatedUser = Depends(get_current_user),
     tenant_id: str = Depends(get_tenant_id),
 ) -> LeagueResponse:
-    """Update league settings."""
+    """Update league settings. Admin only."""
+    _require_admin(tenant_id, league_id, user)
     league = update_league(
         tenant_id=tenant_id,
         league_id=league_id,
@@ -235,6 +236,10 @@ async def read_league_members(
     tenant_id: str = Depends(get_tenant_id),
 ) -> list[LeagueMemberResponse]:
     """Get all members of a league."""
+    league = get_league(tenant_id, league_id)
+    if not league:
+        raise HTTPException(status_code=404, detail="League not found")
+
     members = get_league_members(league_id)
 
     # Use RATING as source of truth for ELO (enrollment current_elo can be stale)

@@ -21,6 +21,7 @@ services:
       AWS_DEFAULT_REGION: eu-west-1
       AWS_LAMBDA_FUNCTION_TIMEOUT: 300
       AWS_LAMBDA_FUNCTION_MEMORY_SIZE: 512
+      ALLOWED_ORIGINS: http://localhost:5173
     volumes:
       - ./backend/app:/var/task
       - ~/.aws:/root/.aws:ro

@@ -4,7 +4,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 5.0"
+      version = "~> 5.82"
     }
   }
 }
@@ -35,12 +35,13 @@ module "cognito" {
 }
 
 module "lambda" {
-  source      = "./modules/lambda"
-  environment = var.environment
-  project     = var.project
-  image_tag   = var.image_tag
-  table_arn   = module.dynamodb.table_arn
-  table_name  = module.dynamodb.table_name
+  source          = "./modules/lambda"
+  environment     = var.environment
+  project         = var.project
+  image_tag       = var.image_tag
+  table_arn       = module.dynamodb.table_arn
+  table_name      = module.dynamodb.table_name
+  allowed_origins = "https://${module.s3_frontend.cloudfront_domain}"
 }
 
 module "api_gateway" {
@@ -52,6 +53,7 @@ module "api_gateway" {
   cognito_user_pool_id = module.cognito.user_pool_id
   cognito_client_id    = module.cognito.client_id
   aws_region           = var.aws_region
+  allowed_origins      = ["https://${module.s3_frontend.cloudfront_domain}"]
 }
 
 module "s3_frontend" {

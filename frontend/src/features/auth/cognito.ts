@@ -93,6 +93,21 @@ export const cognitoForgotPassword = async (email: string): Promise<void> => {
   });
 };
 
+export const cognitoRefreshTokens = async (
+  refreshToken: string,
+): Promise<{ id_token: string }> => {
+  const data = await cognitoRequest("InitiateAuth", {
+    AuthFlow: "REFRESH_TOKEN_AUTH",
+    ClientId: COGNITO_CONFIG.clientId,
+    AuthParameters: {
+      REFRESH_TOKEN: refreshToken,
+    },
+  });
+
+  const result = data.AuthenticationResult as { IdToken: string };
+  return { id_token: result.IdToken };
+};
+
 export const cognitoConfirmForgotPassword = async (
   email: string,
   code: string,
