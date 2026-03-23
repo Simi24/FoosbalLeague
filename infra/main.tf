@@ -34,11 +34,6 @@ module "cognito" {
   project     = var.project
 }
 
-import {
-  to = module.lambda.aws_cloudwatch_log_group.lambda
-  id = "/aws/lambda/${var.project}-${var.environment}"
-}
-
 module "lambda" {
   source          = "./modules/lambda"
   environment     = var.environment
