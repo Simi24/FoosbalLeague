@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.3](https://github.com/Simi24/FoosbalLeague/compare/foosball-league-v0.9.2...foosball-league-v0.9.3) (2026-03-23)
+
+
+### Bug Fixes
+
+* remove import block after successful dev import ([69d163f](https://github.com/Simi24/FoosbalLeague/commit/69d163fec2ec262215553ea8d05559888e1c5e4a))
+
 ## [0.9.2](https://github.com/Simi24/FoosbalLeague/compare/foosball-league-v0.9.1...foosball-league-v0.9.2) (2026-03-23)
 
 
