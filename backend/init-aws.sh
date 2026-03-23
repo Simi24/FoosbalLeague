@@ -53,6 +53,12 @@ TENANT="TENANT#default"
 NOW="2026-03-01T12:00:00Z"
 INVITE_CODE="FOOS42"
 
+# Test user (your Cognito account) — override with env vars for other devs
+TEST_USER_SUB="${TEST_USER_SUB:-02651474-b031-70f8-a92a-a768ac3b6b19}"
+TEST_USER_EMAIL="${TEST_USER_EMAIL:-pettasimonepaolo@gmail.com}"
+TEST_USER_NAME="${TEST_USER_NAME:-Simi24}"
+TEST_USER_ID="player-test"
+
 # --------------------------------------------------
 # Tenant
 # --------------------------------------------------
@@ -105,6 +111,28 @@ done
 
 echo "[OK] 4 players seeded"
 
+# Test user player
+awslocal dynamodb put-item \
+    --table-name foosball-league \
+    --item "{
+        \"pk\": {\"S\": \"$TENANT\"},
+        \"sk\": {\"S\": \"PLAYER#$TEST_USER_ID\"},
+        \"entity_type\": {\"S\": \"PLAYER\"},
+        \"player_id\": {\"S\": \"$TEST_USER_ID\"},
+        \"cognito_sub\": {\"S\": \"$TEST_USER_SUB\"},
+        \"display_name\": {\"S\": \"$TEST_USER_NAME\"},
+        \"email\": {\"S\": \"$TEST_USER_EMAIL\"},
+        \"total_matches\": {\"N\": \"0\"},
+        \"total_wins\": {\"N\": \"0\"},
+        \"total_losses\": {\"N\": \"0\"},
+        \"gsi3_pk\": {\"S\": \"$TEST_USER_EMAIL\"},
+        \"gsi3_sk\": {\"S\": \"PLAYER#$TEST_USER_ID\"},
+        \"created_at\": {\"S\": \"$NOW\"},
+        \"updated_at\": {\"S\": \"$NOW\"}
+    }"
+
+echo "[OK] Test user seeded ($TEST_USER_EMAIL)"
+
 # --------------------------------------------------
 # League
 # --------------------------------------------------
@@ -122,7 +150,7 @@ awslocal dynamodb put-item \
         \"description\": {\"S\": \"La lega ufficiale del biliardino\"},
         \"created_by\": {\"S\": \"player-001\"},
         \"invite_code\": {\"S\": \"$INVITE_CODE\"},
-        \"member_count\": {\"N\": \"4\"},
+        \"member_count\": {\"N\": \"5\"},
         \"match_count\": {\"N\": \"4\"},
         \"gsi1_pk\": {\"S\": \"LEAGUE#league-001\"},
         \"gsi1_sk\": {\"S\": \"LEAGUE#league-001\"},
@@ -166,6 +194,26 @@ done
 
 echo "[OK] Enrollments seeded"
 
+# Test user enrollment (admin!)
+awslocal dynamodb put-item \
+    --table-name foosball-league \
+    --item "{
+        \"pk\": {\"S\": \"$TENANT\"},
+        \"sk\": {\"S\": \"ENROLL#league-001#$TEST_USER_ID\"},
+        \"entity_type\": {\"S\": \"ENROLLMENT\"},
+        \"league_id\": {\"S\": \"league-001\"},
+        \"player_id\": {\"S\": \"$TEST_USER_ID\"},
+        \"display_name\": {\"S\": \"$TEST_USER_NAME\"},
+        \"role\": {\"S\": \"admin\"},
+        \"current_elo\": {\"N\": \"1200\"},
+        \"gsi1_pk\": {\"S\": \"LEAGUE#league-001\"},
+        \"gsi1_sk\": {\"S\": \"ENROLL#$TEST_USER_ID\"},
+        \"created_at\": {\"S\": \"$NOW\"},
+        \"updated_at\": {\"S\": \"$NOW\"}
+    }"
+
+echo "[OK] Test user enrolled as admin"
+
 # --------------------------------------------------
 # Ratings
 # --------------------------------------------------
@@ -199,6 +247,29 @@ for ID in 001 002 003 004; do
 done
 
 echo "[OK] Ratings seeded"
+
+# Test user rating
+INV_ELO_TEST=$(printf "%04d" $((9999 - 1200)))
+awslocal dynamodb put-item \
+    --table-name foosball-league \
+    --item "{
+        \"pk\": {\"S\": \"$TENANT\"},
+        \"sk\": {\"S\": \"RATING#league-001#$TEST_USER_ID\"},
+        \"entity_type\": {\"S\": \"RATING\"},
+        \"league_id\": {\"S\": \"league-001\"},
+        \"player_id\": {\"S\": \"$TEST_USER_ID\"},
+        \"display_name\": {\"S\": \"$TEST_USER_NAME\"},
+        \"elo\": {\"N\": \"1200\"},
+        \"matches_played\": {\"N\": \"0\"},
+        \"wins\": {\"N\": \"0\"},
+        \"losses\": {\"N\": \"0\"},
+        \"gsi1_pk\": {\"S\": \"LEAGUE#league-001\"},
+        \"gsi1_sk\": {\"S\": \"RATING#${INV_ELO_TEST}#$TEST_USER_ID\"},
+        \"created_at\": {\"S\": \"$NOW\"},
+        \"updated_at\": {\"S\": \"$NOW\"}
+    }"
+
+echo "[OK] Test user rating seeded"
 
 # --------------------------------------------------
 # Matches (4 confirmed)

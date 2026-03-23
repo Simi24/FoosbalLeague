@@ -1,9 +1,10 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { Routes, Route } from "react-router-dom";
 
 import { ProtectedRoute } from "@/components/auth";
 import { AppShell } from "@/components/layout";
 import { initAuth } from "@/features/auth";
+import { scheduleTokenRefresh } from "@/features/auth/authSlice";
 import { DashboardPage } from "@/pages/DashboardPage";
 import { LoginPage } from "@/pages/LoginPage";
 import { SignupPage } from "@/pages/SignupPage";
@@ -23,11 +24,23 @@ import { useAppDispatch, useAppSelector } from "./hooks";
 export const App = () => {
   const dispatch = useAppDispatch();
   const authStatus = useAppSelector((state) => state.auth.status);
+  const cleanupRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
     if (authStatus === "idle") {
       dispatch(initAuth());
     }
+  }, [dispatch, authStatus]);
+
+  useEffect(() => {
+    if (authStatus === "succeeded") {
+      cleanupRef.current?.();
+      cleanupRef.current = scheduleTokenRefresh(dispatch);
+    }
+    return () => {
+      cleanupRef.current?.();
+      cleanupRef.current = null;
+    };
   }, [dispatch, authStatus]);
 
   return (

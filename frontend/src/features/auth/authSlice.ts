@@ -56,11 +56,19 @@ export const initAuth = createAsyncThunk(
   "auth/initAuth",
   async () => {
     const token = getIdToken();
-    if (!token || isTokenExpired(token)) {
+    if (token && !isTokenExpired(token)) {
+      return fetchMe();
+    }
+
+    // ID token missing or expired — try to refresh using persisted refresh token
+    const refresh = getRefreshToken();
+    if (!refresh) {
       clearTokens();
       throw new Error("No valid token");
     }
 
+    const { id_token } = await cognitoRefreshTokens(refresh);
+    saveTokens({ id_token, refresh_token: refresh });
     return fetchMe();
   },
 );

@@ -144,6 +144,10 @@ def evaluate_achievements(
         unlocked = {
             a.achievement_type for a in _unlocked_fn(ctx.tenant_id, ctx.league_id, pid)
         }
+        logger.info(
+            f"Evaluating {pid}: won={player.won}, wins={player.wins}, "
+            f"matches={player.matches_played}, already_unlocked={unlocked}"
+        )
         new_for_player: list[str] = []
 
         # first_blood: first win
@@ -199,8 +203,11 @@ def evaluate_achievements(
 
         # Save newly unlocked
         for atype in new_for_player:
-            _save_fn(ctx.tenant_id, ctx.league_id, pid, atype)
-            newly_unlocked.append(f"{pid}:{atype}")
+            try:
+                _save_fn(ctx.tenant_id, ctx.league_id, pid, atype)
+                newly_unlocked.append(f"{pid}:{atype}")
+            except Exception:
+                logger.exception(f"Failed to save achievement {atype} for player {pid}")
 
     if newly_unlocked:
         logger.info(f"Achievements unlocked: {newly_unlocked}")
@@ -231,6 +238,10 @@ def _save_achievement(
 ) -> None:
     """Save an unlocked achievement."""
     now = datetime.now(timezone.utc)
+    logger.info(
+        f"Saving achievement {achievement_type} for {player_id} "
+        f"in league {league_id} (tenant={tenant_id})"
+    )
     achievement = AchievementModel(
         pk=f"TENANT#{tenant_id}",
         sk=f"ACHIEVE#{league_id}#{player_id}#{achievement_type}",

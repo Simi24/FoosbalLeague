@@ -1,9 +1,13 @@
 /**
- * In-memory token storage — not accessible via XSS (unlike sessionStorage).
+ * Hybrid token storage.
  *
- * Trade-off: tokens are lost on page refresh, requiring re-authentication.
- * This is more secure than sessionStorage for SPAs with Cognito JWT.
+ * - ID token: in-memory only (short-lived, XSS-safe).
+ * - Refresh token: persisted in localStorage so sessions survive page refresh.
+ *   The refresh token is only exchangeable at Cognito's endpoint with the
+ *   app's client ID, making localStorage an acceptable trade-off.
  */
+
+const REFRESH_TOKEN_KEY = "foosball_refresh_token";
 
 let idToken: string | null = null;
 let refreshToken: string | null = null;
@@ -11,15 +15,18 @@ let refreshToken: string | null = null;
 export const saveTokens = (tokens: { id_token: string; refresh_token: string }): void => {
   idToken = tokens.id_token;
   refreshToken = tokens.refresh_token;
+  localStorage.setItem(REFRESH_TOKEN_KEY, tokens.refresh_token);
 };
 
 export const getIdToken = (): string | null => idToken;
 
-export const getRefreshToken = (): string | null => refreshToken;
+export const getRefreshToken = (): string | null =>
+  refreshToken ?? localStorage.getItem(REFRESH_TOKEN_KEY);
 
 export const clearTokens = (): void => {
   idToken = null;
   refreshToken = null;
+  localStorage.removeItem(REFRESH_TOKEN_KEY);
 };
 
 export const isTokenExpired = (token: string): boolean => {

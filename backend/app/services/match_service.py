@@ -13,6 +13,7 @@ from schemas.confirmation import (
     EloChangeDetail,
     UnlockedAchievement,
 )
+from schemas.match_context import MatchContext, PlayerMatchResult
 from services.achievement_service import ACHIEVEMENT_CATALOG, evaluate_achievements
 from services.elo_service import calculate_elo_changes
 from services.exceptions import MatchNotFoundError, MissingRatingsError
@@ -98,20 +99,30 @@ def confirm_match(
     team1_elos: list[tuple[str, int, int]] = []
     team2_elos: list[tuple[str, int, int]] = []
     rating_snapshot: dict[
-        str, tuple[int, str]
-    ] = {}  # pid -> (elo_before, display_name)
+        str, tuple[int, str, int, int]
+    ] = {}  # pid -> (elo_before, display_name, matches_played, wins)
 
     for pid in match.team1_player_ids:
         rating = _get_rating(tenant_id, match.league_id, pid)
         if rating:
             team1_elos.append((pid, rating.elo, rating.matches_played))
-            rating_snapshot[pid] = (rating.elo, rating.display_name)
+            rating_snapshot[pid] = (
+                rating.elo,
+                rating.display_name,
+                rating.matches_played,
+                rating.wins,
+            )
 
     for pid in match.team2_player_ids:
         rating = _get_rating(tenant_id, match.league_id, pid)
         if rating:
             team2_elos.append((pid, rating.elo, rating.matches_played))
-            rating_snapshot[pid] = (rating.elo, rating.display_name)
+            rating_snapshot[pid] = (
+                rating.elo,
+                rating.display_name,
+                rating.matches_played,
+                rating.wins,
+            )
 
     if not team1_elos or not team2_elos:
         logger.error(f"Missing ratings for match {match_id}")
@@ -130,7 +141,7 @@ def confirm_match(
     elo_details: list[EloChangeDetail] = []
     for pid in match.team1_player_ids + match.team2_player_ids:
         delta = elo_changes.get(pid, 0)
-        elo_before, display_name = rating_snapshot.get(pid, (1200, ""))
+        elo_before, display_name, _mp, _w = rating_snapshot.get(pid, (1200, "", 0, 0))
         elo_details.append(
             EloChangeDetail(
                 player_id=pid,
@@ -174,9 +185,47 @@ def confirm_match(
     if not confirmed:
         confirmed = match  # fallback — should not happen
 
-    raw_unlocked = evaluate_achievements(
-        tenant_id, league_id=match.league_id, match=confirmed
+    # Build PlayerMatchResult for each player
+    player_results: dict[str, PlayerMatchResult] = {}
+    for pid in match.team1_player_ids + match.team2_player_ids:
+        delta = elo_changes.get(pid, 0)
+        elo_before, _name, matches_played, wins = rating_snapshot.get(
+            pid, (1200, "", 0, 0)
+        )
+        is_winner = (pid in match.team1_player_ids and is_team1_winner) or (
+            pid in match.team2_player_ids and not is_team1_winner
+        )
+        player_results[pid] = PlayerMatchResult(
+            player_id=pid,
+            team=1 if pid in match.team1_player_ids else 2,
+            won=is_winner,
+            elo_before=elo_before,
+            elo_delta=delta,
+            elo_after=elo_before + delta,
+            matches_played=matches_played + 1,
+            wins=wins + (1 if is_winner else 0),
+        )
+
+    team1_avg_elo_before = sum(
+        rating_snapshot[p][0] for p in match.team1_player_ids if p in rating_snapshot
+    ) / max(len(match.team1_player_ids), 1)
+    team2_avg_elo_before = sum(
+        rating_snapshot[p][0] for p in match.team2_player_ids if p in rating_snapshot
+    ) / max(len(match.team2_player_ids), 1)
+
+    ctx = MatchContext(
+        tenant_id=tenant_id,
+        league_id=match.league_id,
+        match=confirmed,
+        players=player_results,
+        team1_avg_elo_before=team1_avg_elo_before,
+        team2_avg_elo_before=team2_avg_elo_before,
     )
+    try:
+        raw_unlocked = evaluate_achievements(ctx)
+    except Exception:
+        logger.exception(f"Achievement evaluation failed for match {match_id}")
+        raw_unlocked = []
 
     newly_unlocked = _build_unlocked_achievements(raw_unlocked)
 
