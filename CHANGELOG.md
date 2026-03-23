@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.1](https://github.com/Simi24/FoosbalLeague/compare/foosball-league-v0.9.0...foosball-league-v0.9.1) (2026-03-23)
+
+
+### Bug Fixes
+
+* import existing CloudWatch log group to resolve deploy failure ([58c3b85](https://github.com/Simi24/FoosbalLeague/commit/58c3b8515a7af6f3bb4d1247ef9728eac11558b7))
+
 ## [0.9.0](https://github.com/Simi24/FoosbalLeague/compare/foosball-league-v0.8.0...foosball-league-v0.9.0) (2026-03-23)
 
 
