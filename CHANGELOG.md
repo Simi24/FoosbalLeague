@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.5](https://github.com/Simi24/FoosbalLeague/compare/foosball-league-v0.9.4...foosball-league-v0.9.5) (2026-03-23)
+
+
+### Bug Fixes
+
+* Add unit tests for match confirmation, ELO calculations, health checks, and security ([f67bae2](https://github.com/Simi24/FoosbalLeague/commit/f67bae2147b4882536f2c4b4c7f4fa99c705d876))
+
 ## [0.9.4](https://github.com/Simi24/FoosbalLeague/compare/foosball-league-v0.9.3...foosball-league-v0.9.4) (2026-03-23)
 
 
