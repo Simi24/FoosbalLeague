@@ -33,6 +33,9 @@ import_resource "module.lambda.aws_iam_role_policy.dynamodb" "${PROJECT}-${ENV}-
 import_resource "module.lambda.aws_iam_role_policy_attachment.logs" \
   "${PROJECT}-${ENV}-lambda/arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 
+# --- Lambda CloudWatch Log Group ---
+import_resource "module.lambda.aws_cloudwatch_log_group.lambda" "/aws/lambda/${PROJECT}-${ENV}"
+
 # --- Lambda function ---
 import_resource "module.lambda.aws_lambda_function.main" "${PROJECT}-${ENV}"
 
