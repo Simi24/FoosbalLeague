@@ -64,8 +64,6 @@ resource "aws_lambda_function" "main" {
   timeout       = 300
   memory_size   = 512
 
-  reserved_concurrent_executions = 100
-
   environment {
     variables = {
       APP_NAME        = var.project
