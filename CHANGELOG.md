@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.9.0](https://github.com/Simi24/FoosbalLeague/compare/foosball-league-v0.8.0...foosball-league-v0.9.0) (2026-03-23)
+
+
+### Features
+
+* dark foosball theme with blue/red team identity and playful UI ([35486b3](https://github.com/Simi24/FoosbalLeague/commit/35486b39bbcefe18af01cd3d5f56e35cc788c180))
+
+
+### Bug Fixes
+
+* implement OWASP security audit findings across full stack ([a8e84a6](https://github.com/Simi24/FoosbalLeague/commit/a8e84a6b4df79ee2b86566b1ae59667eb60ea8d7))
+
 ## [0.8.0](https://github.com/Simi24/FoosbalLeague/compare/foosball-league-v0.7.0...foosball-league-v0.8.0) (2026-03-19)
 
 
