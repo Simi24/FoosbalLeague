@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.2](https://github.com/Simi24/FoosbalLeague/compare/foosball-league-v0.9.1...foosball-league-v0.9.2) (2026-03-23)
+
+
+### Bug Fixes
+
+* remove reserved concurrency to unblock dev deploy ([4e5c5b7](https://github.com/Simi24/FoosbalLeague/commit/4e5c5b789586f9d9c46109ae615a9b3621ae701d))
+
 ## [0.9.1](https://github.com/Simi24/FoosbalLeague/compare/foosball-league-v0.9.0...foosball-league-v0.9.1) (2026-03-23)
 
 
