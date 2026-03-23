@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.4](https://github.com/Simi24/FoosbalLeague/compare/foosball-league-v0.9.3...foosball-league-v0.9.4) (2026-03-23)
+
+
+### Bug Fixes
+
+* enable state locking for all envs and reconcile log group ([5ae621e](https://github.com/Simi24/FoosbalLeague/commit/5ae621ec8edc36ade5cc45fc6bbf8309368ba54f))
+
 ## [0.9.3](https://github.com/Simi24/FoosbalLeague/compare/foosball-league-v0.9.2...foosball-league-v0.9.3) (2026-03-23)
 
 
