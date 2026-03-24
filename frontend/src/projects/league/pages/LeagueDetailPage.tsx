@@ -49,6 +49,11 @@ export const LeagueDetailPage = () => {
     disputeMatch({ matchId, leagueId: id! });
   };
 
+  const recentMatches = useMemo(
+    () => [...matches].sort((a, b) => b.created_at.localeCompare(a.created_at)).slice(0, 10),
+    [matches],
+  );
+
   const handleLeave = async () => {
     await leaveLeague(id!).unwrap();
     navigate("/");
@@ -160,16 +165,21 @@ export const LeagueDetailPage = () => {
             <p className="text-sm text-text-muted">No matches yet.</p>
           ) : (
             <div className="space-y-1">
-              {matches.slice(0, 10).map((m) => (
+              {recentMatches.map((m) => (
                 <div
                   key={m.match_id}
                   className="flex min-w-0 items-center justify-between gap-2 rounded-lg px-3 py-2 text-sm hover:bg-bg-tertiary"
                 >
-                  <span className="min-w-0 truncate text-text-primary">
-                    {m.team1_player_ids.map(resolveName).join(", ")} vs{" "}
-                    {m.team2_player_ids.map(resolveName).join(", ")}
-                  </span>
-                  <div className="flex items-center gap-3">
+                  <div className="min-w-0">
+                    <span className="block truncate text-text-primary">
+                      {m.team1_player_ids.map(resolveName).join(", ")} vs{" "}
+                      {m.team2_player_ids.map(resolveName).join(", ")}
+                    </span>
+                    <span className="text-xs text-text-muted">
+                      {new Date(m.created_at).toLocaleDateString()}
+                    </span>
+                  </div>
+                  <div className="flex shrink-0 items-center gap-3">
                     <span className="font-mono font-semibold text-accent">
                       {m.team1_score} &ndash; {m.team2_score}
                     </span>
