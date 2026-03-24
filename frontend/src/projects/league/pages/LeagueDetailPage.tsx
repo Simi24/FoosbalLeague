@@ -183,7 +183,12 @@ export const LeagueDetailPage = () => {
                     <span className="font-mono font-semibold text-accent">
                       {m.team1_score} &ndash; {m.team2_score}
                     </span>
-                    {m.status === "PENDING" && isAdmin ? (
+                    {m.status === "PENDING" && (isAdmin || (
+                      user?.player_id !== m.submitted_by && (
+                        m.team1_player_ids.includes(user?.player_id ?? "") ||
+                        m.team2_player_ids.includes(user?.player_id ?? "")
+                      )
+                    )) ? (
                       <div className="flex items-center gap-1">
                         <button
                           onClick={() => handleConfirm(m.match_id)}

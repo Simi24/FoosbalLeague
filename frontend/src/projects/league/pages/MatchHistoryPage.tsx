@@ -104,6 +104,12 @@ export const MatchHistoryPage = () => {
                   <tbody>
                     {dayMatches.map((m) => {
                       const isTeam1Winner = m.team1_score > m.team2_score;
+                      const canAct = isAdmin || (
+                        user?.player_id !== m.submitted_by && (
+                          m.team1_player_ids.includes(user?.player_id ?? "") ||
+                          m.team2_player_ids.includes(user?.player_id ?? "")
+                        )
+                      );
                       return (
                         <tr
                           key={m.match_id}
@@ -119,7 +125,7 @@ export const MatchHistoryPage = () => {
                             {m.team2_player_ids.map(resolveName).join(", ")}
                           </td>
                           <td className="px-4 py-3 text-center">
-                            {m.status === "PENDING" && isAdmin ? (
+                            {m.status === "PENDING" && canAct ? (
                               <div className="flex items-center justify-center gap-1">
                                 <button
                                   onClick={() => handleConfirm(m.match_id)}
