@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.10.0](https://github.com/Simi24/FoosbalLeague/compare/foosball-league-v0.9.5...foosball-league-v0.10.0) (2026-03-24)
+
+
+### Features
+
+* allow opponents to confirm/dispute pending matches ([b9897ea](https://github.com/Simi24/FoosbalLeague/commit/b9897ea7f273c9c5537ed9a1d873578842135b20))
+* group match history by day and sort matches most recent first ([bb984cd](https://github.com/Simi24/FoosbalLeague/commit/bb984cdfefdc335977bf27a91d4a26e8c77332c6))
+
 ## [0.9.5](https://github.com/Simi24/FoosbalLeague/compare/foosball-league-v0.9.4...foosball-league-v0.9.5) (2026-03-23)
 
 
