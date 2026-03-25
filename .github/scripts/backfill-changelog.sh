@@ -51,7 +51,7 @@ PROMPT_END
 
   jq -n --rawfile prompt /tmp/bp-prompt.txt '{
     "contents": [{"parts": [{"text": $prompt}]}],
-    "generationConfig": {"temperature": 0.3, "maxOutputTokens": 512, "responseMimeType": "application/json"}
+    "generationConfig": {"temperature": 0.3, "maxOutputTokens": 2048, "responseMimeType": "application/json", "thinkingConfig": {"thinkingBudget": 0}}
   }' > /tmp/bp-payload.json
 
   local http_code

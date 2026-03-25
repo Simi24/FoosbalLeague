@@ -91,7 +91,7 @@ jobs:
           # Build JSON payload safely with jq (handles all escaping)
           jq -n --rawfile prompt /tmp/prompt.txt '{
             "contents": [{"parts": [{"text": $prompt}]}],
-            "generationConfig": {"temperature": 0.3, "maxOutputTokens": 512, "responseMimeType": "application/json"}
+            "generationConfig": {"temperature": 0.3, "maxOutputTokens": 2048, "responseMimeType": "application/json", "thinkingConfig": {"thinkingBudget": 0}}
           }' > /tmp/payload.json
 
           # Call Gemini API
@@ -106,20 +106,26 @@ jobs:
           if [[ "$HTTP_CODE" != "200" ]]; then
             echo "API error response:"
             cat /tmp/gemini-response.json
-            SUMMARY=""
+            echo '{"summary": ["Various improvements and bug fixes."]}' > /tmp/summary.json
           else
-            SUMMARY=$(jq -r '.candidates[0].content.parts[0].text // empty' /tmp/gemini-response.json)
+            # Extract the text content and write to file
+            jq -r '.candidates[0].content.parts[0].text // empty' /tmp/gemini-response.json > /tmp/summary-raw.txt
+
+            echo "--- Gemini raw response ---"
+            cat /tmp/summary-raw.txt
+            echo "--- end raw response ---"
+
+            # Try to parse as JSON directly from file
+            if jq -e '.summary' /tmp/summary-raw.txt > /dev/null 2>&1; then
+              cp /tmp/summary-raw.txt /tmp/summary.json
+            else
+              echo "Warning: Invalid JSON from Gemini, using fallback"
+              echo '{"summary": ["Various improvements and bug fixes."]}' > /tmp/summary.json
+            fi
           fi
 
-          # Strip markdown fences and collapse to single line
-          SUMMARY=$(echo "$SUMMARY" | sed 's/^```json//' | sed 's/^```//' | sed 's/```$//' | tr '\n' ' ' | sed 's/^  *//;s/  *$//')
-
-          # Validate JSON
-          if ! echo "$SUMMARY" | jq -e '.summary' > /dev/null 2>&1; then
-            echo "Warning: Invalid LLM response, using fallback"
-            echo "Raw SUMMARY: $SUMMARY"
-            SUMMARY='{"summary": ["Various improvements and bug fixes."]}'
-          fi
+          echo "Parsed summary:"
+          jq . /tmp/summary.json
 
           # Read existing changelog.json or init empty array
           CHANGELOG_FILE="frontend/public/changelog.json"
@@ -133,8 +139,8 @@ jobs:
           NEW_ENTRY=$(jq -n \
             --arg version "$VERSION" \
             --arg date "$DATE" \
-            --argjson summary "$SUMMARY" \
-            '{version: $version, date: $date, summary: $summary.summary}')
+            --slurpfile summary /tmp/summary.json \
+            '{version: $version, date: $date, summary: $summary[0].summary}')
 
           echo "$EXISTING" | jq --argjson entry "$NEW_ENTRY" '[$entry] + .' > "$CHANGELOG_FILE"
 
