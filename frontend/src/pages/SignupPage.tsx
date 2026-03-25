@@ -73,7 +73,7 @@ export const SignupPage = () => {
       });
 
       await dispatch(initAuth());
-      navigate("/");
+      navigate("/dashboard");
     } catch (err) {
       setError(err instanceof CognitoError ? err.message : (err as Error).message);
     } finally {

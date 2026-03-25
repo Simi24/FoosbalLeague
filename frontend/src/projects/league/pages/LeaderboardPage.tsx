@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 
 import { useGetMyLeaguesQuery, useGetLeaderboardQuery } from "@/api/baseApi";
 import { Avatar } from "@/components/Avatar";
+import { EloInfoSheet } from "@/components/EloInfoSheet";
 import { Dropdown } from "@/components/inputs";
 
 const getRankStyle = (rank: number): string => {
@@ -37,7 +38,10 @@ export const LeaderboardPage = () => {
   return (
     <div>
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-2xl font-bold text-text-primary">Leaderboard</h1>
+        <div className="flex items-center gap-1">
+          <h1 className="text-2xl font-bold text-text-primary">Leaderboard</h1>
+          <EloInfoSheet />
+        </div>
         <Dropdown
           value={selectedLeague}
           onChange={setSelectedLeague}

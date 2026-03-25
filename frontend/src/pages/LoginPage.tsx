@@ -20,7 +20,7 @@ export const LoginPage = () => {
 
     const result = await dispatch(loginWithCredentials({ email, password }));
     if (loginWithCredentials.fulfilled.match(result)) {
-      navigate("/");
+      navigate("/dashboard");
     } else {
       setError(result.error.message ?? "Login failed");
     }

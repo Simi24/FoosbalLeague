@@ -5,13 +5,15 @@ import { ProtectedRoute } from "@/components/auth";
 import { AppShell } from "@/components/layout";
 import { initAuth } from "@/features/auth";
 import { scheduleTokenRefresh } from "@/features/auth/authSlice";
+import { ChangelogPage } from "@/pages/ChangelogPage";
 import { DashboardPage } from "@/pages/DashboardPage";
-import { LoginPage } from "@/pages/LoginPage";
-import { SignupPage } from "@/pages/SignupPage";
-import { SettingsPage } from "@/pages/SettingsPage";
 import { ForgotPasswordPage } from "@/pages/ForgotPasswordPage";
+import { LandingPage } from "@/pages/LandingPage";
+import { LoginPage } from "@/pages/LoginPage";
 import { NotFoundPage } from "@/pages/NotFoundPage";
 import { ProfilePage } from "@/pages/ProfilePage";
+import { SettingsPage } from "@/pages/SettingsPage";
+import { SignupPage } from "@/pages/SignupPage";
 import { LeagueListPage } from "@/projects/league/pages/LeagueListPage";
 import { LeagueDetailPage } from "@/projects/league/pages/LeagueDetailPage";
 import { MatchRecordPage } from "@/projects/league/pages/MatchRecordPage";
@@ -45,16 +47,18 @@ export const App = () => {
 
   return (
     <Routes>
+      <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<SignupPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/changelog" element={<ChangelogPage />} />
       <Route
         path="*"
         element={
           <ProtectedRoute>
             <AppShell>
               <Routes>
-                <Route path="/" element={<DashboardPage />} />
+                <Route path="/dashboard" element={<DashboardPage />} />
                 <Route path="/leagues" element={<LeagueListPage />} />
                 <Route path="/leagues/:id" element={<LeagueDetailPage />} />
                 <Route

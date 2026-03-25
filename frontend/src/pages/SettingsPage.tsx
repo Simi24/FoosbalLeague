@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import { apiFetch } from "@/api";
@@ -69,7 +70,7 @@ export const SettingsPage = () => {
         </div>
       </div>
 
-      <div className="rounded-xl border-2 border-danger/30 bg-danger/5 p-5">
+      <div className="mb-6 rounded-xl border-2 border-danger/30 bg-danger/5 p-5">
         <h2 className="mb-2 text-lg font-semibold text-danger">Session</h2>
         <button
           onClick={handleLogout}
@@ -77,6 +78,15 @@ export const SettingsPage = () => {
         >
           Sign out
         </button>
+      </div>
+
+      <div className="text-center">
+        <Link
+          to="/changelog"
+          className="text-xs text-text-muted transition-colors hover:text-text-secondary"
+        >
+          FoosLeague v{__APP_VERSION__}
+        </Link>
       </div>
     </div>
   );

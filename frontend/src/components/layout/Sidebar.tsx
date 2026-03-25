@@ -1,4 +1,4 @@
-import { NavLink } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import {
   MdDashboard,
   MdLeaderboard,
@@ -8,7 +8,7 @@ import {
 } from "react-icons/md";
 
 const navItems = [
-  { to: "/", icon: MdDashboard, label: "Dashboard" },
+  { to: "/dashboard", icon: MdDashboard, label: "Dashboard" },
   { to: "/leagues", icon: MdSportsSoccer, label: "Leagues" },
   { to: "/leaderboard", icon: MdLeaderboard, label: "Leaderboard" },
   { to: "/profile", icon: MdPerson, label: "Profile" },
@@ -26,7 +26,7 @@ export const Sidebar = () => {
           <NavLink
             key={to}
             to={to}
-            end={to === "/"}
+            end
             className={({ isActive }) =>
               `flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all duration-200 ${
                 isActive
@@ -49,6 +49,12 @@ export const Sidebar = () => {
           <MdSettings size={18} />
           <span>Settings</span>
         </NavLink>
+        <Link
+          to="/changelog"
+          className="mt-1 block px-3 py-1 text-xs text-text-muted transition-colors hover:text-text-secondary"
+        >
+          v{__APP_VERSION__}
+        </Link>
       </div>
     </aside>
   );

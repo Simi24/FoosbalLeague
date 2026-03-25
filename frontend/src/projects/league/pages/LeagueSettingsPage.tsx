@@ -55,7 +55,7 @@ export const LeagueSettingsPage = () => {
 
   const handleDelete = async () => {
     await deleteLeague(id!).unwrap();
-    navigate("/");
+    navigate("/dashboard");
   };
 
   if (loading) {

@@ -56,7 +56,7 @@ export const LeagueDetailPage = () => {
 
   const handleLeave = async () => {
     await leaveLeague(id!).unwrap();
-    navigate("/");
+    navigate("/dashboard");
   };
 
   if (loading) {

@@ -8,7 +8,7 @@ import {
 } from "react-icons/md";
 
 const navItems = [
-  { to: "/", icon: MdDashboard, label: "Dashboard" },
+  { to: "/dashboard", icon: MdDashboard, label: "Dashboard" },
   { to: "/leagues", icon: MdSportsSoccer, label: "Leagues" },
   { to: "/leaderboard", icon: MdLeaderboard, label: "Board" },
   { to: "/profile", icon: MdPerson, label: "Profile" },
@@ -21,7 +21,7 @@ export const BottomNav = () => (
       <NavLink
         key={to}
         to={to}
-        end={to === "/"}
+        end
         className={({ isActive }) =>
           `relative flex flex-col items-center gap-0.5 px-2 py-1 transition-colors duration-200 ${
             isActive

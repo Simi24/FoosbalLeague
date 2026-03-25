@@ -27,9 +27,116 @@ jobs:
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
 
-  deploy-dev:
+  generate-changelog:
     needs: release-please
     if: ${{ needs.release-please.outputs.release_created == 'true' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Extract latest changelog entry
+        id: extract
+        run: |
+          VERSION=$(awk '/^## \[/{match($0,/\[([0-9.]+)\]/,a); print a[1]; exit}' CHANGELOG.md)
+          DATE=$(awk '/^## \[/{match($0,/\(([0-9-]+)\)/,a); print a[1]; exit}' CHANGELOG.md)
+          ENTRY=$(awk '/^## \[/{n++} n==1{print} n==2{exit}' CHANGELOG.md)
+
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "date=$DATE" >> "$GITHUB_OUTPUT"
+          echo "$ENTRY" > /tmp/changelog-entry.txt
+
+      - name: Get commit context
+        run: |
+          VERSION="${{ steps.extract.outputs.version }}"
+          CURR_TAG="foosball-league-v${VERSION}"
+          PREV_TAG=$(git tag --sort=-version:refname | grep -A1 "^${CURR_TAG}$" | tail -1)
+          if [[ -z "$PREV_TAG" || "$PREV_TAG" == "$CURR_TAG" ]]; then
+            PREV_TAG=$(git rev-list --max-parents=0 HEAD)
+          fi
+          git log --oneline "${PREV_TAG}..${CURR_TAG}" > /tmp/commits.txt 2>/dev/null || echo "No commits" > /tmp/commits.txt
+          git diff --stat "${PREV_TAG}..${CURR_TAG}" > /tmp/diffstat.txt 2>/dev/null || echo "No diff" > /tmp/diffstat.txt
+
+      - name: Generate human-readable changelog via Gemini
+        env:
+          GOOGLE_AI_API_KEY: ${{ secrets.GOOGLE_AI_API_KEY }}
+        run: |
+          VERSION="${{ steps.extract.outputs.version }}"
+          DATE="${{ steps.extract.outputs.date }}"
+          ENTRY=$(cat /tmp/changelog-entry.txt)
+          COMMITS=$(cat /tmp/commits.txt)
+          DIFFSTAT=$(cat /tmp/diffstat.txt)
+
+          PROMPT="You are writing a changelog for end users of a foosball league app called FoosLeague. The users are non-technical office workers who play foosball.
+
+          Transform the developer changelog below into 2-5 bullet points that a regular user would understand and care about. Focus on what changed from the user's perspective (new features, improvements, fixes they'd notice). Skip purely internal/infrastructure changes. If a release is ALL infrastructure, return a single bullet: \"Behind-the-scenes improvements for reliability and performance.\"
+
+          Return ONLY a JSON object: {\"summary\": [\"bullet 1\", \"bullet 2\"]}
+          No markdown, no code fences, just the raw JSON.
+
+          === CHANGELOG ENTRY ===
+          ${ENTRY}
+
+          === COMMITS ===
+          ${COMMITS}
+
+          === FILES CHANGED ===
+          ${DIFFSTAT}"
+
+          RESPONSE=$(curl -s "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GOOGLE_AI_API_KEY}" \
+            -H "Content-Type: application/json" \
+            -d "$(jq -n --arg prompt "$PROMPT" '{
+              "contents": [{"parts": [{"text": $prompt}]}],
+              "generationConfig": {"temperature": 0.3, "maxOutputTokens": 512}
+            }')" 2>/dev/null || echo '{}')
+
+          SUMMARY=$(echo "$RESPONSE" | jq -r '.candidates[0].content.parts[0].text // empty' 2>/dev/null || echo "")
+
+          # Strip markdown fences if present
+          SUMMARY=$(echo "$SUMMARY" | sed 's/^```json//;s/^```//' | tr -d '\n' | sed 's/```$//')
+
+          # Validate JSON
+          if ! echo "$SUMMARY" | jq -e '.summary' > /dev/null 2>&1; then
+            echo "Warning: Invalid LLM response, using fallback"
+            echo "Raw response: $SUMMARY"
+            SUMMARY='{"summary": ["Various improvements and bug fixes."]}'
+          fi
+
+          # Read existing changelog.json or init empty array
+          CHANGELOG_FILE="frontend/public/changelog.json"
+          if [[ -f "$CHANGELOG_FILE" ]]; then
+            EXISTING=$(cat "$CHANGELOG_FILE")
+          else
+            EXISTING="[]"
+          fi
+
+          # Prepend new entry
+          NEW_ENTRY=$(jq -n \
+            --arg version "$VERSION" \
+            --arg date "$DATE" \
+            --argjson summary "$SUMMARY" \
+            '{version: $version, date: $date, summary: $summary.summary}')
+
+          echo "$EXISTING" | jq --argjson entry "$NEW_ENTRY" '[$entry] + .' > "$CHANGELOG_FILE"
+
+          echo "Generated changelog entry for v${VERSION}"
+
+      - name: Commit changelog.json
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add frontend/public/changelog.json
+          git diff --cached --quiet && echo "No changes to commit" && exit 0
+          git commit -m "chore: update changelog.json for v${{ steps.extract.outputs.version }} [skip ci]"
+          git push
+
+  deploy-dev:
+    needs: [release-please, generate-changelog]
+    if: ${{ always() && needs.release-please.outputs.release_created == 'true' && needs.generate-changelog.result != 'cancelled' }}
     uses: ./.github/workflows/deploy.yml
     with:
       environment: dev
