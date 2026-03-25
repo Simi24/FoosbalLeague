@@ -91,7 +91,7 @@ jobs:
           # Build JSON payload safely with jq (handles all escaping)
           jq -n --rawfile prompt /tmp/prompt.txt '{
             "contents": [{"parts": [{"text": $prompt}]}],
-            "generationConfig": {"temperature": 0.3, "maxOutputTokens": 512}
+            "generationConfig": {"temperature": 0.3, "maxOutputTokens": 512, "responseMimeType": "application/json"}
           }' > /tmp/payload.json
 
           # Call Gemini API
