@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { MdArrowBack } from "react-icons/md";
 
@@ -8,6 +8,11 @@ interface ChangelogEntry {
   summary: string[];
 }
 
+interface VersionGroup {
+  label: string;
+  entries: ChangelogEntry[];
+}
+
 const formatDate = (dateStr: string): string => {
   const date = new Date(dateStr + "T00:00:00");
   return date.toLocaleDateString("en-US", {
@@ -15,6 +20,27 @@ const formatDate = (dateStr: string): string => {
     month: "long",
     day: "numeric",
   });
+};
+
+const getMajorMinor = (version: string): string => {
+  const parts = version.split(".");
+  return `${parts[0]}.${parts[1]}`;
+};
+
+const groupByMajorMinor = (entries: ChangelogEntry[]): VersionGroup[] => {
+  const groups: VersionGroup[] = [];
+  let current: VersionGroup | null = null;
+
+  for (const entry of entries) {
+    const label = getMajorMinor(entry.version);
+    if (!current || current.label !== label) {
+      current = { label, entries: [] };
+      groups.push(current);
+    }
+    current.entries.push(entry);
+  }
+
+  return groups;
 };
 
 export const ChangelogPage = () => {
@@ -28,6 +54,8 @@ export const ChangelogPage = () => {
       .catch(() => setEntries([]))
       .finally(() => setLoading(false));
   }, []);
+
+  const groups = useMemo(() => groupByMajorMinor(entries), [entries]);
 
   return (
     <div className="min-h-screen bg-bg-primary">
@@ -52,28 +80,40 @@ export const ChangelogPage = () => {
         ) : entries.length === 0 ? (
           <p className="text-text-muted">No updates yet.</p>
         ) : (
-          <div className="space-y-6">
-            {entries.map((entry, i) => (
-              <div
-                key={entry.version}
-                className="animate-in rounded-xl border border-border bg-bg-secondary p-5 shadow-sm"
-                style={{ animationDelay: `${i * 60}ms` }}
-              >
-                <div className="mb-3 flex items-center gap-3">
-                  <span className="rounded-full bg-accent-light px-2.5 py-0.5 text-xs font-semibold text-accent">
-                    v{entry.version}
-                  </span>
-                  <span className="text-xs text-text-muted">{formatDate(entry.date)}</span>
+          <div className="space-y-10">
+            {groups.map((group) => (
+              <section key={group.label}>
+                <div className="mb-4 flex items-center gap-3">
+                  <h2 className="text-lg font-bold text-text-primary">
+                    {group.label}
+                  </h2>
+                  <div className="h-px flex-1 bg-border" />
                 </div>
-                <ul className="space-y-1.5">
-                  {entry.summary.map((item, j) => (
-                    <li key={j} className="flex gap-2 text-sm text-text-secondary">
-                      <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent/50" />
-                      {item}
-                    </li>
+
+                <div className="space-y-4">
+                  {group.entries.map((entry) => (
+                    <div
+                      key={entry.version}
+                      className="animate-in rounded-xl border border-border bg-bg-secondary p-5 shadow-sm"
+                    >
+                      <div className="mb-3 flex items-center gap-3">
+                        <span className="rounded-full bg-accent-light px-2.5 py-0.5 text-xs font-semibold text-accent">
+                          v{entry.version}
+                        </span>
+                        <span className="text-xs text-text-muted">{formatDate(entry.date)}</span>
+                      </div>
+                      <ul className="space-y-1.5">
+                        {entry.summary.map((item, j) => (
+                          <li key={j} className="flex gap-2 text-sm text-text-secondary">
+                            <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent/50" />
+                            {item}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   ))}
-                </ul>
-              </div>
+                </div>
+              </section>
             ))}
           </div>
         )}
