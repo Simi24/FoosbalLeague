@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.11.0](https://github.com/Simi24/FoosbalLeague/compare/foosball-league-v0.10.0...foosball-league-v0.11.0) (2026-03-25)
+
+
+### Features
+
+* add landing page, ELO explanation, changelog system, and CI automation ([05b93ef](https://github.com/Simi24/FoosbalLeague/commit/05b93ef739531432d24f4e69281907b3578cdca9))
+
 ## [0.10.0](https://github.com/Simi24/FoosbalLeague/compare/foosball-league-v0.9.5...foosball-league-v0.10.0) (2026-03-24)
 
 
