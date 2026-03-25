@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.11.1](https://github.com/Simi24/FoosbalLeague/compare/foosball-league-v0.11.0...foosball-league-v0.11.1) (2026-03-25)
+
+
+### Bug Fixes
+
+* use file-based prompt building for Gemini API call in changelog CI ([0c34f2e](https://github.com/Simi24/FoosbalLeague/commit/0c34f2e98aa00a6d721dc11fb25cea63bd153e3b))
+* use X-goog-api-key header and gemini-flash-latest model ([35d529d](https://github.com/Simi24/FoosbalLeague/commit/35d529da0e3d06300a0fdf98cd699e2a174b1741))
+
 ## [0.11.0](https://github.com/Simi24/FoosbalLeague/compare/foosball-league-v0.10.0...foosball-league-v0.11.0) (2026-03-25)
 
 
