@@ -111,8 +111,8 @@ jobs:
             SUMMARY=$(jq -r '.candidates[0].content.parts[0].text // empty' /tmp/gemini-response.json)
           fi
 
-          # Strip markdown fences if present
-          SUMMARY=$(echo "$SUMMARY" | sed 's/^```json//' | sed 's/^```//' | sed 's/```$//' | tr '\n' ' ' | xargs)
+          # Strip markdown fences and collapse to single line
+          SUMMARY=$(echo "$SUMMARY" | sed 's/^```json//' | sed 's/^```//' | sed 's/```$//' | tr '\n' ' ' | sed 's/^  *//;s/  *$//')
 
           # Validate JSON
           if ! echo "$SUMMARY" | jq -e '.summary' > /dev/null 2>&1; then
