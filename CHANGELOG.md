@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.1](https://github.com/Simi24/FoosbalLeague/compare/foosball-league-v0.12.0...foosball-league-v0.12.1) (2026-03-25)
+
+
+### Bug Fixes
+
+* disable Gemini thinking tokens and use file-based JSON parsing ([f5083b2](https://github.com/Simi24/FoosbalLeague/commit/f5083b2a76169374bd739b9406822fff72fcdf34))
+
 ## [0.12.0](https://github.com/Simi24/FoosbalLeague/compare/foosball-league-v0.11.2...foosball-league-v0.12.0) (2026-03-25)
 
 
