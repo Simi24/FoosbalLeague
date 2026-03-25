@@ -1,11 +1,10 @@
-"""E2E test: record a match, confirm via service layer, verify achievements unlock.
+"""E2E test: record a match, confirm via API, verify achievements unlock.
 
 Scenario:
-    - Test player (pettasimonepaolo@gmail.com) is seeded as a non-admin member
+    - Test player (pettasimonepaolo@gmail.com) is seeded as an admin member
       of league-001.
     - Records a 2v2 match where their team wins 10-0 against higher-rated bots.
-    - Since the test player is NOT admin, confirmation bypasses the API and calls
-      the service directly (simulating DB-level acceptance).
+    - Confirms the match via the API (admin role bypasses opponent check).
     - After confirmation, achievements are verified via the API.
 
 Expected achievements for the test player:
@@ -22,7 +21,6 @@ from fastapi.testclient import TestClient
 from models.enrollment import EnrollmentModel
 from models.player import PlayerModel
 from models.rating import RatingModel
-from services.match_service import confirm_match
 
 # ---------------------------------------------------------------------------
 # Constants
@@ -57,7 +55,7 @@ def _seed_test_player():
         updated_at=now,
     ).save()
 
-    # Enrollment (non-admin)
+    # Enrollment (admin — so the same user can confirm matches via API)
     EnrollmentModel(
         pk=f"TENANT#{TENANT_ID}",
         sk=f"ENROLL#{LEAGUE_ID}#{TEST_PLAYER_ID}",
@@ -66,7 +64,7 @@ def _seed_test_player():
         league_id=LEAGUE_ID,
         player_id=TEST_PLAYER_ID,
         display_name=TEST_DISPLAY_NAME,
-        role="player",
+        role="admin",
         current_elo=1200,
         created_at=now,
         updated_at=now,
@@ -157,29 +155,28 @@ class TestE2EMatchAndAchievements:
         assert resp.status_code == 200
         assert resp.json()["status"] == "PENDING"
 
-    def test_03_confirm_match_via_service(self, client):
-        """Confirm directly via service layer (simulates DB-level acceptance).
-
-        The test user is not admin, so we bypass the API auth check.
-        In production, an opponent (player-001 or player-002) would confirm.
-        """
+    def test_03_confirm_match_via_api(self, client):
+        """Confirm via the API endpoint (test user is admin, so auth passes)."""
         match_id = TestE2EMatchAndAchievements._match_id
         assert match_id is not None
 
-        result = confirm_match(TENANT_ID, match_id, confirmed_by="player-001")
+        resp = client.post(f"/api/v1/matches/{match_id}/confirm")
+        assert resp.status_code == 200, resp.json()
 
-        assert result.match.status == "CONFIRMED"
-        assert len(result.elo_changes) == 4  # 2v2 = 4 players
+        data = resp.json()
+        assert data["status"] == "CONFIRMED"
+        assert len(data["elo_changes"]) == 4  # 2v2 = 4 players
 
         # Winners (team1) should gain ELO, losers (team2) should lose
-        for change in result.elo_changes:
-            if change.player_id in (TEST_PLAYER_ID, "player-003"):
-                assert change.delta > 0, f"Winner {change.player_id} should gain ELO"
+        for change in data["elo_changes"]:
+            if change["player_id"] in (TEST_PLAYER_ID, "player-003"):
+                assert change["delta"] > 0, (
+                    f"Winner {change['player_id']} should gain ELO"
+                )
             else:
-                assert change.delta < 0, f"Loser {change.player_id} should lose ELO"
-
-        # Should have unlocked achievements for the winning team
-        assert len(result.newly_unlocked) > 0
+                assert change["delta"] < 0, (
+                    f"Loser {change['player_id']} should lose ELO"
+                )
 
     def test_04_match_is_confirmed(self, client):
         """Verify the match is now CONFIRMED via API."""

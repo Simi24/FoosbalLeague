@@ -67,42 +67,56 @@ jobs:
         run: |
           VERSION="${{ steps.extract.outputs.version }}"
           DATE="${{ steps.extract.outputs.date }}"
-          ENTRY=$(cat /tmp/changelog-entry.txt)
-          COMMITS=$(cat /tmp/commits.txt)
-          DIFFSTAT=$(cat /tmp/diffstat.txt)
 
-          PROMPT="You are writing a changelog for end users of a foosball league app called FoosLeague. The users are non-technical office workers who play foosball.
+          # Build prompt safely via file (avoids shell escaping issues)
+          cat > /tmp/prompt.txt <<'PROMPT_END'
+          You are writing a changelog for end users of a foosball league app called FoosLeague. The users are non-technical office workers who play foosball.
 
-          Transform the developer changelog below into 2-5 bullet points that a regular user would understand and care about. Focus on what changed from the user's perspective (new features, improvements, fixes they'd notice). Skip purely internal/infrastructure changes. If a release is ALL infrastructure, return a single bullet: \"Behind-the-scenes improvements for reliability and performance.\"
+          Transform the developer changelog below into 2-5 bullet points that a regular user would understand and care about. Focus on what changed from the user's perspective (new features, improvements, fixes they'd notice). Skip purely internal/infrastructure changes. If a release is ALL infrastructure, return a single bullet: "Behind-the-scenes improvements for reliability and performance."
 
-          Return ONLY a JSON object: {\"summary\": [\"bullet 1\", \"bullet 2\"]}
+          Return ONLY a JSON object: {"summary": ["bullet 1", "bullet 2"]}
           No markdown, no code fences, just the raw JSON.
+          PROMPT_END
 
-          === CHANGELOG ENTRY ===
-          ${ENTRY}
+          echo "" >> /tmp/prompt.txt
+          echo "=== CHANGELOG ENTRY ===" >> /tmp/prompt.txt
+          cat /tmp/changelog-entry.txt >> /tmp/prompt.txt
+          echo "" >> /tmp/prompt.txt
+          echo "=== COMMITS ===" >> /tmp/prompt.txt
+          cat /tmp/commits.txt >> /tmp/prompt.txt
+          echo "" >> /tmp/prompt.txt
+          echo "=== FILES CHANGED ===" >> /tmp/prompt.txt
+          cat /tmp/diffstat.txt >> /tmp/prompt.txt
 
-          === COMMITS ===
-          ${COMMITS}
+          # Build JSON payload safely with jq (handles all escaping)
+          jq -n --rawfile prompt /tmp/prompt.txt '{
+            "contents": [{"parts": [{"text": $prompt}]}],
+            "generationConfig": {"temperature": 0.3, "maxOutputTokens": 512}
+          }' > /tmp/payload.json
 
-          === FILES CHANGED ===
-          ${DIFFSTAT}"
-
-          RESPONSE=$(curl -s "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GOOGLE_AI_API_KEY}" \
+          # Call Gemini API
+          HTTP_CODE=$(curl -s -o /tmp/gemini-response.json -w "%{http_code}" \
+            "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GOOGLE_AI_API_KEY}" \
             -H "Content-Type: application/json" \
-            -d "$(jq -n --arg prompt "$PROMPT" '{
-              "contents": [{"parts": [{"text": $prompt}]}],
-              "generationConfig": {"temperature": 0.3, "maxOutputTokens": 512}
-            }')" 2>/dev/null || echo '{}')
+            -d @/tmp/payload.json)
 
-          SUMMARY=$(echo "$RESPONSE" | jq -r '.candidates[0].content.parts[0].text // empty' 2>/dev/null || echo "")
+          echo "Gemini API HTTP status: ${HTTP_CODE}"
+
+          if [[ "$HTTP_CODE" != "200" ]]; then
+            echo "API error response:"
+            cat /tmp/gemini-response.json
+            SUMMARY=""
+          else
+            SUMMARY=$(jq -r '.candidates[0].content.parts[0].text // empty' /tmp/gemini-response.json)
+          fi
 
           # Strip markdown fences if present
-          SUMMARY=$(echo "$SUMMARY" | sed 's/^```json//;s/^```//' | tr -d '\n' | sed 's/```$//')
+          SUMMARY=$(echo "$SUMMARY" | sed 's/^```json//' | sed 's/^```//' | sed 's/```$//' | tr '\n' ' ' | xargs)
 
           # Validate JSON
           if ! echo "$SUMMARY" | jq -e '.summary' > /dev/null 2>&1; then
             echo "Warning: Invalid LLM response, using fallback"
-            echo "Raw response: $SUMMARY"
+            echo "Raw SUMMARY: $SUMMARY"
             SUMMARY='{"summary": ["Various improvements and bug fixes."]}'
           fi
 
