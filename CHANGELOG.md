@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.12.0](https://github.com/Simi24/FoosbalLeague/compare/foosball-league-v0.11.2...foosball-league-v0.12.0) (2026-03-25)
+
+
+### Features
+
+* enhance ChangelogPage to group entries by major and minor versions ([b72237e](https://github.com/Simi24/FoosbalLeague/commit/b72237e8d4be859813b10bf8254ac80c23ec8b17))
+
+
+### Bug Fixes
+
+* replace xargs with sed trim in changelog CI ([5ff0c96](https://github.com/Simi24/FoosbalLeague/commit/5ff0c9611dfefe9f1e958ddb8d384a3844907d74))
+
 ## [0.11.2](https://github.com/Simi24/FoosbalLeague/compare/foosball-league-v0.11.1...foosball-league-v0.11.2) (2026-03-25)
 
 
