@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.11.2](https://github.com/Simi24/FoosbalLeague/compare/foosball-league-v0.11.1...foosball-league-v0.11.2) (2026-03-25)
+
+
+### Bug Fixes
+
+* force valid JSON output from Gemini with responseMimeType ([1b8a130](https://github.com/Simi24/FoosbalLeague/commit/1b8a13078d51a7d622e5f3a23ddb225b42363e3f))
+* update changelog.json with proper entries for 0.11.0, 0.10.0, 0.11.1 ([db27a34](https://github.com/Simi24/FoosbalLeague/commit/db27a34d110a4087c7cf8fa560902535bf4eff21))
+
 ## [0.11.1](https://github.com/Simi24/FoosbalLeague/compare/foosball-league-v0.11.0...foosball-league-v0.11.1) (2026-03-25)
 
 
