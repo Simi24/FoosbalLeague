@@ -11,7 +11,7 @@ import {
   useGetLeagueMatchesQuery,
   useGetLeagueMembersQuery,
 } from "@/api/baseApi";
-import { useAppDispatch } from "@/app/hooks";
+import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import { Avatar } from "@/components/Avatar";
 import { Dropdown } from "@/components/inputs";
 import { AchievementBadge, EloHistoryChart, RecentMatchList, StatCard } from "../components";
@@ -20,15 +20,26 @@ import type { MyLeague } from "../types";
 export const PlayerProfilePage = () => {
   const { id: playerId } = useParams<{ id: string }>();
   const dispatch = useAppDispatch();
+  const user = useAppSelector((state) => state.auth.user);
+  const isOwnProfile = playerId === user?.player_id;
+
   const { data: player, isLoading: loading } = useGetPlayerQuery(playerId!, { skip: !playerId });
   const { data: myLeagues = [] } = useGetMyLeaguesQuery();
 
   const [sharedLeagues, setSharedLeagues] = useState<MyLeague[]>([]);
   const [selectedLeague, setSelectedLeague] = useState("");
 
-  // Find shared leagues by checking each leaderboard
+  // Own profile: use all my leagues. Other player: find shared leagues via leaderboard check.
   useEffect(() => {
     if (!playerId || myLeagues.length === 0) return;
+
+    if (isOwnProfile) {
+      setSharedLeagues(myLeagues);
+      if (myLeagues.length > 0 && !selectedLeague) {
+        setSelectedLeague(myLeagues[0]!.league_id);
+      }
+      return;
+    }
 
     Promise.all(
       myLeagues.map(async (lg) => {
@@ -50,7 +61,7 @@ export const PlayerProfilePage = () => {
         setSelectedLeague(shared[0]!.league_id);
       }
     });
-  }, [playerId, myLeagues]);
+  }, [playerId, myLeagues, isOwnProfile]);
 
   const { data: leaderboard } = useGetLeaderboardQuery(selectedLeague, { skip: !selectedLeague });
   const { data: eloHistory = [] } = useGetEloHistoryQuery(

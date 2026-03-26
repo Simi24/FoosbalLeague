@@ -11,7 +11,7 @@ import { ForgotPasswordPage } from "@/pages/ForgotPasswordPage";
 import { LandingPage } from "@/pages/LandingPage";
 import { LoginPage } from "@/pages/LoginPage";
 import { NotFoundPage } from "@/pages/NotFoundPage";
-import { ProfilePage } from "@/pages/ProfilePage";
+import { ProfileRedirect } from "@/pages/ProfileRedirect";
 import { SettingsPage } from "@/pages/SettingsPage";
 import { SignupPage } from "@/pages/SignupPage";
 import { LeagueListPage } from "@/projects/league/pages/LeagueListPage";
@@ -79,7 +79,7 @@ export const App = () => {
                 />
                 <Route path="/leaderboard" element={<LeaderboardPage />} />
                 <Route path="/players/:id" element={<PlayerProfilePage />} />
-                <Route path="/profile" element={<ProfilePage />} />
+                <Route path="/profile" element={<ProfileRedirect />} />
                 <Route path="/settings" element={<SettingsPage />} />
                 <Route path="*" element={<NotFoundPage />} />
               </Routes>
