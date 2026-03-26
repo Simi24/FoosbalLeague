@@ -23,5 +23,12 @@ fi
 echo "Installing Claude Code..."
 npm install -g @anthropic-ai/claude-code
 
+# Symlink host home so Claude Code plugin paths resolve inside the container
+# (plugin configs use absolute host paths like /Users/admintemp/.claude/...)
+if [ ! -e "/Users/admintemp" ]; then
+    sudo mkdir -p /Users/admintemp
+    sudo ln -sf /home/vscode/.claude /Users/admintemp/.claude
+fi
+
 echo "=== Setup Complete ==="
 echo "Run 'just dev' to start the full stack"
