@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.13.0](https://github.com/Simi24/FoosbalLeague/compare/foosball-league-v0.12.1...foosball-league-v0.13.0) (2026-03-26)
+
+
+### Features
+
+* add recent matches section to player profile ([d04cd4e](https://github.com/Simi24/FoosbalLeague/commit/d04cd4e0c16f98adde58a07992199df04836fd52))
+
+
+### Bug Fixes
+
+* add symlink setup for Claude Code plugin paths in dev environment ([8712235](https://github.com/Simi24/FoosbalLeague/commit/87122353b634afb83f3d9b3b4312b54eb84dba02))
+
 ## [0.12.1](https://github.com/Simi24/FoosbalLeague/compare/foosball-league-v0.12.0...foosball-league-v0.12.1) (2026-03-25)
 
 
