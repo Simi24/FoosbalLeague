@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.13.1](https://github.com/Simi24/FoosbalLeague/compare/foosball-league-v0.13.0...foosball-league-v0.13.1) (2026-03-26)
+
+
+### Bug Fixes
+
+* ensure changelog.json is included in frontend deploy ([4608f88](https://github.com/Simi24/FoosbalLeague/commit/4608f885353484ebd0c6c3a35b936f6d7c7ffdf6))
+
 ## [0.13.0](https://github.com/Simi24/FoosbalLeague/compare/foosball-league-v0.12.1...foosball-league-v0.13.0) (2026-03-26)
 
 
