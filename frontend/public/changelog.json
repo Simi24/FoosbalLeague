@@ -1,5 +1,13 @@
 [
   {
+    "version": "0.13.1",
+    "date": "2026-03-26",
+    "summary": [
+      "The player profile pages have been updated for a more consistent look and feel.",
+      "Behind-the-scenes improvements for reliability and performance."
+    ]
+  },
+  {
     "version": "0.13.0",
     "date": "2026-03-26",
     "summary": [
