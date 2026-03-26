@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 
 import {
@@ -8,11 +8,13 @@ import {
   useGetLeaderboardQuery,
   useGetEloHistoryQuery,
   useGetAchievementsQuery,
+  useGetLeagueMatchesQuery,
+  useGetLeagueMembersQuery,
 } from "@/api/baseApi";
 import { useAppDispatch } from "@/app/hooks";
 import { Avatar } from "@/components/Avatar";
 import { Dropdown } from "@/components/inputs";
-import { AchievementBadge, EloHistoryChart, StatCard } from "../components";
+import { AchievementBadge, EloHistoryChart, RecentMatchList, StatCard } from "../components";
 import type { MyLeague } from "../types";
 
 export const PlayerProfilePage = () => {
@@ -59,8 +61,31 @@ export const PlayerProfilePage = () => {
     { playerId: playerId!, leagueId: selectedLeague },
     { skip: !playerId || !selectedLeague },
   );
+  const { data: matches = [] } = useGetLeagueMatchesQuery(selectedLeague, {
+    skip: !selectedLeague,
+  });
+  const { data: members = [] } = useGetLeagueMembersQuery(selectedLeague, {
+    skip: !selectedLeague,
+  });
 
   const rankingEntry = leaderboard?.entries.find((e) => e.player_id === playerId) ?? null;
+
+  const playerMatches = useMemo(() => {
+    if (!playerId) return [];
+    return [...matches]
+      .filter(
+        (m) =>
+          m.team1_player_ids.includes(playerId) ||
+          m.team2_player_ids.includes(playerId),
+      )
+      .sort((a, b) => b.created_at.localeCompare(a.created_at));
+  }, [matches, playerId]);
+
+  const playerNames = useMemo(() => {
+    const map: Record<string, string> = {};
+    for (const m of members) map[m.player_id] = m.display_name;
+    return map;
+  }, [members]);
 
   if (loading) {
     return (
@@ -140,7 +165,7 @@ export const PlayerProfilePage = () => {
 
       {/* ELO History */}
       {sharedLeagues.length > 0 && (
-        <div className="rounded-xl border border-border bg-bg-secondary p-5 shadow-sm">
+        <div className="mb-6 rounded-xl border border-border bg-bg-secondary p-5 shadow-sm">
           <h2 className="mb-4 text-lg font-semibold text-text-primary">
             ELO History
           </h2>
@@ -150,6 +175,16 @@ export const PlayerProfilePage = () => {
             <p className="text-sm text-text-muted">No match history in this league yet.</p>
           )}
         </div>
+      )}
+
+      {/* Recent Matches */}
+      {selectedLeague && playerMatches.length > 0 && (
+        <RecentMatchList
+          key={selectedLeague}
+          matches={playerMatches}
+          playerId={playerId!}
+          playerNames={playerNames}
+        />
       )}
     </div>
   );
