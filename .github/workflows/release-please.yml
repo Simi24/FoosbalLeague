@@ -31,6 +31,8 @@ jobs:
     needs: release-please
     if: ${{ needs.release-please.outputs.release_created == 'true' }}
     runs-on: ubuntu-latest
+    outputs:
+      changelog_sha: ${{ steps.commit-changelog.outputs.sha }}
     permissions:
       contents: write
     steps:
@@ -147,13 +149,15 @@ jobs:
           echo "Generated changelog entry for v${VERSION}"
 
       - name: Commit changelog.json
+        id: commit-changelog
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add frontend/public/changelog.json
-          git diff --cached --quiet && echo "No changes to commit" && exit 0
+          git diff --cached --quiet && echo "No changes to commit" && echo "sha=${{ github.sha }}" >> "$GITHUB_OUTPUT" && exit 0
           git commit -m "chore: update changelog.json for v${{ steps.extract.outputs.version }} [skip ci]"
           git push
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
   deploy-dev:
     needs: [release-please, generate-changelog]
@@ -161,3 +165,4 @@ jobs:
     uses: ./.github/workflows/deploy.yml
     with:
       environment: dev
+      frontend_ref: ${{ needs.generate-changelog.outputs.changelog_sha || github.sha }}
