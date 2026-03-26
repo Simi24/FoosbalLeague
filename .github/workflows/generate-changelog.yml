@@ -1,0 +1,139 @@
+name: Generate Changelog JSON
+
+on:
+  push:
+    branches:
+      - release-please--branches--main--components--foosball-league
+    paths:
+      - CHANGELOG.md
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: release-please--branches--main--components--foosball-league
+          fetch-depth: 0
+
+      - name: Extract latest changelog entry
+        id: extract
+        run: |
+          VERSION=$(awk '/^## \[/{match($0,/\[([0-9.]+)\]/,a); print a[1]; exit}' CHANGELOG.md)
+          DATE=$(awk '/^## \[/{match($0,/\(([0-9-]+)\)/,a); print a[1]; exit}' CHANGELOG.md)
+          ENTRY=$(awk '/^## \[/{n++} n==1{print} n==2{exit}' CHANGELOG.md)
+
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "date=$DATE" >> "$GITHUB_OUTPUT"
+          echo "$ENTRY" > /tmp/changelog-entry.txt
+
+      - name: Get commit context
+        run: |
+          VERSION="${{ steps.extract.outputs.version }}"
+          # Compare against previous tag (PR branch has no tag yet for the new version)
+          PREV_TAG=$(git tag --sort=-version:refname | head -1)
+          if [[ -z "$PREV_TAG" ]]; then
+            PREV_TAG=$(git rev-list --max-parents=0 HEAD)
+          fi
+          git log --oneline "${PREV_TAG}..HEAD" > /tmp/commits.txt 2>/dev/null || echo "No commits" > /tmp/commits.txt
+          git diff --stat "${PREV_TAG}..HEAD" > /tmp/diffstat.txt 2>/dev/null || echo "No diff" > /tmp/diffstat.txt
+
+      - name: Generate human-readable changelog via Gemini
+        env:
+          GOOGLE_AI_API_KEY: ${{ secrets.GOOGLE_AI_API_KEY }}
+        run: |
+          VERSION="${{ steps.extract.outputs.version }}"
+          DATE="${{ steps.extract.outputs.date }}"
+
+          # Build prompt safely via file (avoids shell escaping issues)
+          cat > /tmp/prompt.txt <<'PROMPT_END'
+          You are writing a changelog for end users of a foosball league app called FoosLeague. The users are non-technical office workers who play foosball.
+
+          Transform the developer changelog below into 2-5 bullet points that a regular user would understand and care about. Focus on what changed from the user's perspective (new features, improvements, fixes they'd notice). Skip purely internal/infrastructure changes. If a release is ALL infrastructure, return a single bullet: "Behind-the-scenes improvements for reliability and performance."
+
+          Return ONLY a JSON object: {"summary": ["bullet 1", "bullet 2"]}
+          No markdown, no code fences, just the raw JSON.
+          PROMPT_END
+
+          echo "" >> /tmp/prompt.txt
+          echo "=== CHANGELOG ENTRY ===" >> /tmp/prompt.txt
+          cat /tmp/changelog-entry.txt >> /tmp/prompt.txt
+          echo "" >> /tmp/prompt.txt
+          echo "=== COMMITS ===" >> /tmp/prompt.txt
+          cat /tmp/commits.txt >> /tmp/prompt.txt
+          echo "" >> /tmp/prompt.txt
+          echo "=== FILES CHANGED ===" >> /tmp/prompt.txt
+          cat /tmp/diffstat.txt >> /tmp/prompt.txt
+
+          # Build JSON payload safely with jq (handles all escaping)
+          jq -n --rawfile prompt /tmp/prompt.txt '{
+            "contents": [{"parts": [{"text": $prompt}]}],
+            "generationConfig": {"temperature": 0.3, "maxOutputTokens": 2048, "responseMimeType": "application/json", "thinkingConfig": {"thinkingBudget": 0}}
+          }' > /tmp/payload.json
+
+          # Call Gemini API
+          HTTP_CODE=$(curl -s -o /tmp/gemini-response.json -w "%{http_code}" \
+            "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent" \
+            -H "Content-Type: application/json" \
+            -H "X-goog-api-key: ${GOOGLE_AI_API_KEY}" \
+            -d @/tmp/payload.json)
+
+          echo "Gemini API HTTP status: ${HTTP_CODE}"
+
+          if [[ "$HTTP_CODE" != "200" ]]; then
+            echo "API error response:"
+            cat /tmp/gemini-response.json
+            echo '{"summary": ["Various improvements and bug fixes."]}' > /tmp/summary.json
+          else
+            # Extract the text content and write to file
+            jq -r '.candidates[0].content.parts[0].text // empty' /tmp/gemini-response.json > /tmp/summary-raw.txt
+
+            echo "--- Gemini raw response ---"
+            cat /tmp/summary-raw.txt
+            echo "--- end raw response ---"
+
+            # Try to parse as JSON directly from file
+            if jq -e '.summary' /tmp/summary-raw.txt > /dev/null 2>&1; then
+              cp /tmp/summary-raw.txt /tmp/summary.json
+            else
+              echo "Warning: Invalid JSON from Gemini, using fallback"
+              echo '{"summary": ["Various improvements and bug fixes."]}' > /tmp/summary.json
+            fi
+          fi
+
+          echo "Parsed summary:"
+          jq . /tmp/summary.json
+
+          # Read existing changelog.json or init empty array
+          CHANGELOG_FILE="frontend/public/changelog.json"
+          if [[ -f "$CHANGELOG_FILE" ]]; then
+            EXISTING=$(cat "$CHANGELOG_FILE")
+          else
+            EXISTING="[]"
+          fi
+
+          # Remove existing entry for this version (idempotent re-runs)
+          EXISTING=$(echo "$EXISTING" | jq --arg v "$VERSION" '[.[] | select(.version != $v)]')
+
+          # Prepend new entry
+          NEW_ENTRY=$(jq -n \
+            --arg version "$VERSION" \
+            --arg date "$DATE" \
+            --slurpfile summary /tmp/summary.json \
+            '{version: $version, date: $date, summary: $summary[0].summary}')
+
+          echo "$EXISTING" | jq --argjson entry "$NEW_ENTRY" '[$entry] + .' > "$CHANGELOG_FILE"
+
+          echo "Generated changelog entry for v${VERSION}"
+
+      - name: Commit changelog.json
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add frontend/public/changelog.json
+          git diff --cached --quiet && echo "No changes to commit" && exit 0
+          git commit -m "chore: update changelog.json for v${{ steps.extract.outputs.version }}"
+          git push

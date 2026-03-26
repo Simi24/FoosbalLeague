@@ -12,21 +12,11 @@ on:
           - dev
           - staging
           - prod
-      frontend_ref:
-        description: "Git ref for frontend checkout (defaults to triggering commit)"
-        required: false
-        default: ""
-        type: string
   workflow_call:
     inputs:
       environment:
         description: "Target environment"
         required: true
-        type: string
-      frontend_ref:
-        description: "Git ref for frontend checkout (defaults to triggering commit)"
-        required: false
-        default: ""
         type: string
 
 permissions:
@@ -117,8 +107,6 @@ jobs:
     environment: ${{ inputs.environment }}
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: ${{ inputs.frontend_ref || github.sha }}
 
       - uses: actions/setup-node@v4
         with:
