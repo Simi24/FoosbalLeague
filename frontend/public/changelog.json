@@ -1,5 +1,12 @@
 [
   {
+    "version": "0.13.0",
+    "date": "2026-03-26",
+    "summary": [
+      "You can now view a list of recent matches directly on any player's profile page."
+    ]
+  },
+  {
     "version": "0.12.1",
     "date": "2026-03-25",
     "summary": [
