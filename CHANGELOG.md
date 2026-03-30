@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.14.0](https://github.com/Simi24/FoosbalLeague/compare/foosball-league-v0.13.1...foosball-league-v0.14.0) (2026-03-30)
+
+
+### Features
+
+* allow losing team players to confirm match results ([1fd9a12](https://github.com/Simi24/FoosbalLeague/commit/1fd9a126f07a55f1a96eb4347b8aa46051f52ca6))
+
 ## [0.13.1](https://github.com/Simi24/FoosbalLeague/compare/foosball-league-v0.13.0...foosball-league-v0.13.1) (2026-03-26)
 
 
