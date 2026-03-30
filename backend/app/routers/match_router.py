@@ -77,6 +77,7 @@ async def confirm_match_endpoint(
 
     The confirmer must be either:
     - A player from the opposing team, OR
+    - A player from the losing team, OR
     - A league admin
     """
     player = get_player_by_cognito_sub(tenant_id, user.sub)
@@ -87,7 +88,7 @@ async def confirm_match_endpoint(
     if not match:
         raise HTTPException(status_code=404, detail="Match not found")
 
-    # Authorization: opponent player or league admin
+    # Authorization: opponent player, losing team player, or league admin
     is_opponent = (
         player.player_id in match.team2_player_ids
         and match.submitted_by in match.team1_player_ids
@@ -96,13 +97,20 @@ async def confirm_match_endpoint(
         and match.submitted_by in match.team2_player_ids
     )
 
+    is_loser = False
+    if player.player_id != match.submitted_by:
+        if match.team1_score > match.team2_score:
+            is_loser = player.player_id in match.team2_player_ids
+        elif match.team2_score > match.team1_score:
+            is_loser = player.player_id in match.team1_player_ids
+
     enrollment = get_enrollment(tenant_id, match.league_id, player.player_id)
     is_admin = enrollment is not None and enrollment.role == "admin"
 
-    if not is_opponent and not is_admin:
+    if not is_opponent and not is_admin and not is_loser:
         raise HTTPException(
             status_code=403,
-            detail="Only an opponent player or league admin can confirm",
+            detail="Only an opponent player, losing team player, or league admin can confirm",
         )
 
     try:
