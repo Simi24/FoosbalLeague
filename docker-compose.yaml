@@ -48,7 +48,7 @@ services:
       - VITE_COGNITO_CLIENT_ID=71i6pq68u6ne9sl6lof24u1glj
 
   localstack:
-    image: localstack/localstack
+    image: localstack/localstack:4.4.0
     ports:
       - "127.0.0.1:4566:4566"
     environment:
