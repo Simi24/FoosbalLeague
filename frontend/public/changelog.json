@@ -1,5 +1,14 @@
 [
   {
+    "version": "0.15.0",
+    "date": "2026-04-17",
+    "summary": [
+      "Redesigned the match creation page to make it easier to select players and assign them to teams.",
+      "Added a new search feature to quickly find players when setting up a game.",
+      "Introduced a 'Rematch' button to quickly start a new game with the same players from a previous match."
+    ]
+  },
+  {
     "version": "0.13.1",
     "date": "2026-03-26",
     "summary": [
