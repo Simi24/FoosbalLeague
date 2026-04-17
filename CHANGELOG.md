@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.15.0](https://github.com/Simi24/FoosbalLeague/compare/foosball-league-v0.14.0...foosball-league-v0.15.0) (2026-04-17)
+
+
+### Features
+
+* **match:** slot-driven match creation with search, rematch, and tests ([0c5db37](https://github.com/Simi24/FoosbalLeague/commit/0c5db378abeb9d11ff3fb9e9b8a0e365fe86ae19))
+* mount claude code in devcontainer ([102071a](https://github.com/Simi24/FoosbalLeague/commit/102071ac56361448b2940a249406fd4546f1e77d))
+
 ## [0.14.0](https://github.com/Simi24/FoosbalLeague/compare/foosball-league-v0.13.1...foosball-league-v0.14.0) (2026-03-30)
 
 
