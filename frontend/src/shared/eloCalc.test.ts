@@ -85,4 +85,52 @@ describe("calculateEloPreview", () => {
     expect(result.get("p3")!).toBeLessThan(0);
     expect(result.get("p4")!).toBeLessThan(0);
   });
+
+  it("mirrored outcome produces equal-magnitude, opposite-sign deltas (equal ELO)", () => {
+    const team1 = [{ id: "a", elo: 1200, matchesPlayed: 20 }];
+    const team2 = [{ id: "b", elo: 1200, matchesPlayed: 20 }];
+
+    const aWins = calculateEloPreview(team1, team2, true);
+    const bWins = calculateEloPreview(team1, team2, false);
+
+    expect(aWins.get("a")).toBe(-bWins.get("a")!);
+    expect(aWins.get("b")).toBe(-bWins.get("b")!);
+    // Also check magnitude: at equal ELO, K=32, delta=16
+    expect(Math.abs(aWins.get("a")!)).toBe(16);
+  });
+
+  it("K-factor boundary: 10 matches uses K=40, 11 matches uses K=32", () => {
+    const opp = [{ id: "opp", elo: 1200, matchesPlayed: 50 }];
+    const at10 = calculateEloPreview(
+      [{ id: "p", elo: 1200, matchesPlayed: 10 }],
+      opp,
+      true,
+    );
+    const at11 = calculateEloPreview(
+      [{ id: "p", elo: 1200, matchesPlayed: 11 }],
+      opp,
+      true,
+    );
+
+    // Equal ELO, win → expected 0.5, delta = K * 0.5
+    expect(at10.get("p")).toBe(20); // 40 * 0.5
+    expect(at11.get("p")).toBe(16); // 32 * 0.5
+  });
+
+  it("K-factor boundary: 30 matches uses K=32, 31 matches uses K=24", () => {
+    const opp = [{ id: "opp", elo: 1200, matchesPlayed: 50 }];
+    const at30 = calculateEloPreview(
+      [{ id: "p", elo: 1200, matchesPlayed: 30 }],
+      opp,
+      true,
+    );
+    const at31 = calculateEloPreview(
+      [{ id: "p", elo: 1200, matchesPlayed: 31 }],
+      opp,
+      true,
+    );
+
+    expect(at30.get("p")).toBe(16); // 32 * 0.5
+    expect(at31.get("p")).toBe(12); // 24 * 0.5
+  });
 });
