@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.15.1](https://github.com/Simi24/FoosbalLeague/compare/foosball-league-v0.15.0...foosball-league-v0.15.1) (2026-04-20)
+
+
+### Bug Fixes
+
+* fixed record match button in mobile view. ([7500869](https://github.com/Simi24/FoosbalLeague/commit/750086994a393e98face74f133167ba00a6235bf))
+
 ## [0.15.0](https://github.com/Simi24/FoosbalLeague/compare/foosball-league-v0.14.0...foosball-league-v0.15.0) (2026-04-17)
 
 
