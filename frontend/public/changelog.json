@@ -1,5 +1,12 @@
 [
   {
+    "version": "0.15.1",
+    "date": "2026-04-20",
+    "summary": [
+      "Fixed an issue where the 'Record Match' button was difficult to use or missing on mobile phones."
+    ]
+  },
+  {
     "version": "0.15.0",
     "date": "2026-04-17",
     "summary": [
