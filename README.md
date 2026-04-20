@@ -33,7 +33,7 @@ just dev
 ```
 
 This starts:
-- **Backend** on `http://localhost:9000` (FastAPI + debugpy)
+- **Backend** on `http://localhost:9001` (FastAPI + debugpy)
 - **Frontend** on `http://localhost:5173` (Vite dev server)
 - **LocalStack** on `http://localhost:4566` (DynamoDB, etc.)
 

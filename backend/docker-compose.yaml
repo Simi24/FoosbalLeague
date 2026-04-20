@@ -23,7 +23,7 @@ services:
       - ./app:/var/task
       - ~/.aws:/root/.aws:ro
     ports:
-      - 9000:8080
+      - 9001:8080
       - 5678:5678
     command: >
       sh -c "python -Xfrozen_modules=off -m debugpy --listen 0.0.0.0:5678

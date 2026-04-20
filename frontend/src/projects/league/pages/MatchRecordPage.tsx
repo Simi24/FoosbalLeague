@@ -331,7 +331,7 @@ const MatchRecordForm = ({ leagueId, league }: FormProps) => {
           </p>
         )}
 
-        <div className="fixed inset-x-0 bottom-0 z-20 border-t border-border bg-bg-primary px-4 py-3 md:static md:border-none md:bg-transparent md:p-0">
+        <div className="fixed inset-x-0 bottom-16 z-30 border-t border-border bg-bg-primary px-4 py-3 md:static md:bottom-auto md:border-none md:bg-transparent md:p-0">
           <div className="mx-auto max-w-2xl">
             <button
               type="submit"
