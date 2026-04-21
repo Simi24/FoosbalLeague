@@ -101,11 +101,11 @@ export const PlayerProfilePage = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent border-t-transparent" />
+        <div className="h-8 w-8 animate-spin border-[3px] border-ink border-t-transparent" />
       </div>
     );
   }
-  if (!player) return <p className="text-danger">Player not found</p>;
+  if (!player) return <p className="font-semibold text-danger">Player not found</p>;
 
   const winRate = rankingEntry && rankingEntry.matches_played > 0
     ? (rankingEntry.win_rate * 100).toFixed(0)
@@ -116,49 +116,50 @@ export const PlayerProfilePage = () => {
 
   return (
     <div>
-      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-4">
-          <Avatar name={player.display_name} size="lg" />
-          <div>
-            <h1 className="text-2xl font-bold text-text-primary">
-              {player.display_name}
-            </h1>
-            {player.email && (
-              <p className="text-sm text-text-secondary">{player.email}</p>
-            )}
+      <div className="brut-border brut-shadow mb-6 bg-team-blue-tint p-5">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-4">
+            <Avatar name={player.display_name} size="lg" />
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight text-ink md:text-4xl">
+                {player.display_name}
+              </h1>
+              {player.email && (
+                <p className="font-mono text-xs text-ink-soft">{player.email}</p>
+              )}
+            </div>
           </div>
+          {sharedLeagues.length > 0 && (
+            <Dropdown
+              value={selectedLeague}
+              onChange={setSelectedLeague}
+              options={sharedLeagues.map((lg) => ({ value: lg.league_id, label: lg.name }))}
+              className="w-full sm:w-56"
+            />
+          )}
         </div>
-        {sharedLeagues.length > 0 && (
-          <Dropdown
-            value={selectedLeague}
-            onChange={setSelectedLeague}
-            options={sharedLeagues.map((lg) => ({ value: lg.league_id, label: lg.name }))}
-            className="w-full sm:w-48"
-          />
-        )}
       </div>
 
       {rankingEntry ? (
         <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-5">
-          <StatCard label="ELO" value={rankingEntry.elo} color="text-field-green" />
-          <StatCard label="Rank" value={`#${rankingEntry.rank}`} />
+          <StatCard label="ELO" value={rankingEntry.elo} tone="mint" color="text-ink" />
+          <StatCard label="Rank" value={`#${rankingEntry.rank}`} tone="butter" />
           <StatCard label="Wins" value={rankingEntry.wins} color="text-success" />
           <StatCard label="Losses" value={rankingEntry.losses} color="text-danger" />
-          <StatCard label="Win Rate" value={`${winRate}%`} color="text-field-green" />
+          <StatCard label="Win Rate" value={`${winRate}%`} tone="lavender" />
         </div>
       ) : sharedLeagues.length > 0 ? (
-        <p className="mb-6 text-sm text-text-muted">No stats in this league yet.</p>
+        <p className="mb-6 text-sm font-medium text-ink-muted">No stats in this league yet.</p>
       ) : (
-        <p className="mb-6 text-sm text-text-muted">Not enrolled in any league yet.</p>
+        <p className="mb-6 text-sm font-medium text-ink-muted">Not enrolled in any league yet.</p>
       )}
 
-      {/* Achievements */}
       {achievements.length > 0 && (
-        <div className="mb-6 rounded-xl border border-border bg-bg-secondary p-5 shadow-sm">
-          <h2 className="mb-4 text-lg font-semibold text-text-primary">
+        <div className="brut-border brut-shadow mb-6 bg-card p-5">
+          <h2 className="mb-4 text-lg font-bold uppercase tracking-wide text-ink">
             Achievements
             {unlockedAchievements.length > 0 && (
-              <span className="ml-2 text-sm font-normal text-text-muted">
+              <span className="ml-2 font-mono text-sm font-bold text-ink-muted">
                 {unlockedAchievements.length}/{achievements.length}
               </span>
             )}
@@ -174,16 +175,17 @@ export const PlayerProfilePage = () => {
         </div>
       )}
 
-      {/* ELO History */}
       {sharedLeagues.length > 0 && (
-        <div className="mb-6 rounded-xl border border-border bg-bg-secondary p-5 shadow-sm">
-          <h2 className="mb-4 text-lg font-semibold text-text-primary">
+        <div className="brut-border brut-shadow mb-6 bg-card p-5">
+          <h2 className="mb-4 text-lg font-bold uppercase tracking-wide text-ink">
             ELO History
           </h2>
           {eloHistory.length > 0 ? (
             <EloHistoryChart data={eloHistory} />
           ) : (
-            <p className="text-sm text-text-muted">No match history in this league yet.</p>
+            <p className="text-sm font-medium text-ink-muted">
+              No match history in this league yet.
+            </p>
           )}
         </div>
       )}

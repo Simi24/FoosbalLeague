@@ -12,20 +12,28 @@ export const PasswordRules = ({ password }: { password: string }) => {
   if (!password) return null;
 
   return (
-    <div className="mt-2 space-y-1">
+    <ul className="mt-2 space-y-1">
       {RULES.map((rule) => {
         const passed = rule.test(password);
         return (
-          <div
+          <li
             key={rule.label}
-            className={`flex items-center gap-1.5 text-xs ${passed ? "text-success" : "text-text-muted"}`}
+            className={`flex items-center gap-2 text-xs font-medium ${
+              passed ? "text-ink" : "text-ink-muted"
+            }`}
           >
-            {passed ? <MdCheck size={14} /> : <MdClose size={14} />}
+            <span
+              className={`flex h-5 w-5 items-center justify-center border-2 border-ink ${
+                passed ? "bg-mint" : "bg-coral"
+              }`}
+            >
+              {passed ? <MdCheck size={12} /> : <MdClose size={12} />}
+            </span>
             <span>{rule.label}</span>
-          </div>
+          </li>
         );
       })}
-    </div>
+    </ul>
   );
 };
 

@@ -86,7 +86,7 @@ export const PlayerPicker = ({
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-end justify-center md:items-center">
       <div
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        className="absolute inset-0 bg-ink/40"
         onClick={onDismiss}
         aria-hidden="true"
       />
@@ -99,7 +99,7 @@ export const PlayerPicker = ({
             ? { transform: `translateY(${dragY}px)`, transition: "none" }
             : undefined
         }
-        className="relative z-10 flex max-h-[85vh] w-full flex-col rounded-t-2xl border-t border-border bg-bg-secondary shadow-2xl transition-transform md:max-h-[70vh] md:max-w-md md:rounded-xl md:border"
+        className="relative z-10 flex max-h-[85vh] w-full flex-col border-t-[3px] border-ink bg-card transition-transform md:max-h-[70vh] md:max-w-md md:border-[3px] md:brut-shadow-lg"
       >
         <div
           className="flex justify-center pt-2 md:hidden"
@@ -108,28 +108,28 @@ export const PlayerPicker = ({
           onTouchEnd={handleTouchEnd}
           aria-hidden="true"
         >
-          <span className="h-1 w-10 rounded-full bg-text-muted/40" />
+          <span className="h-1.5 w-12 bg-ink" />
         </div>
-        <div className="flex items-center justify-between border-b border-border px-5 py-4">
-          <h2 className="text-base font-semibold text-text-primary">{title}</h2>
+        <div className="flex items-center justify-between border-b-2 border-ink px-5 py-4">
+          <h2 className="text-base font-bold uppercase tracking-wide text-ink">{title}</h2>
           <button
             type="button"
             onClick={onDismiss}
             aria-label="Close picker"
-            className="rounded-md p-1 text-text-muted transition-colors hover:text-text-primary"
+            className="btn-press border-2 border-transparent p-1 text-ink transition-colors hover:border-ink hover:bg-coral"
           >
             <MdClose size={20} />
           </button>
         </div>
 
-        <div className="flex flex-col gap-2 border-b border-border px-5 py-3 sm:flex-row sm:items-center">
+        <div className="flex flex-col gap-2 border-b-2 border-ink bg-paper-alt px-5 py-3 sm:flex-row sm:items-center">
           <label htmlFor="player-picker-search" className="sr-only">
             Search players
           </label>
           <div className="relative flex-1">
             <MdSearch
               size={18}
-              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-text-muted"
+              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink"
               aria-hidden="true"
             />
             <input
@@ -139,11 +139,11 @@ export const PlayerPicker = ({
               placeholder="Search players..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              className="w-full rounded-lg border border-border bg-bg-tertiary py-2 pl-9 pr-3 text-sm text-text-primary placeholder:text-text-muted outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+              className="brut-border min-h-[44px] w-full bg-card py-2 pl-9 pr-3 text-sm text-ink placeholder:text-ink-muted outline-none"
             />
           </div>
           <div
-            className="inline-flex overflow-hidden rounded-lg border border-border"
+            className="brut-border inline-flex overflow-hidden bg-card"
             role="group"
             aria-label="Sort players"
           >
@@ -151,10 +151,8 @@ export const PlayerPicker = ({
               type="button"
               aria-pressed={sortBy === "alpha"}
               onClick={() => setSortBy("alpha")}
-              className={`px-3 py-1.5 text-xs transition-colors ${
-                sortBy === "alpha"
-                  ? "bg-accent/20 text-accent"
-                  : "text-text-muted hover:text-text-primary"
+              className={`min-h-[36px] px-3 py-1.5 text-xs font-bold transition-colors ${
+                sortBy === "alpha" ? "bg-butter text-ink" : "text-ink-soft hover:bg-paper-alt"
               }`}
             >
               A→Z
@@ -163,10 +161,8 @@ export const PlayerPicker = ({
               type="button"
               aria-pressed={sortBy === "elo"}
               onClick={() => setSortBy("elo")}
-              className={`border-l border-border px-3 py-1.5 text-xs transition-colors ${
-                sortBy === "elo"
-                  ? "bg-accent/20 text-accent"
-                  : "text-text-muted hover:text-text-primary"
+              className={`min-h-[36px] border-l-2 border-ink px-3 py-1.5 text-xs font-bold transition-colors ${
+                sortBy === "elo" ? "bg-butter text-ink" : "text-ink-soft hover:bg-paper-alt"
               }`}
             >
               ELO
@@ -175,12 +171,12 @@ export const PlayerPicker = ({
         </div>
 
         <ul
-          className="flex-1 divide-y divide-border overflow-y-auto"
+          className="flex-1 overflow-y-auto"
           role="listbox"
           aria-label="Available players"
         >
           {filtered.length === 0 && (
-            <li className="px-5 py-8 text-center text-sm text-text-muted">
+            <li className="px-5 py-8 text-center text-sm font-medium text-ink-muted">
               {query ? "No players match your search" : "No players available"}
             </li>
           )}
@@ -190,7 +186,7 @@ export const PlayerPicker = ({
               ? `${p.display_name}, ${p.disabledReason}`
               : p.display_name;
             return (
-              <li key={p.player_id}>
+              <li key={p.player_id} className="border-b-2 border-ink last:border-b-0">
                 <button
                   type="button"
                   role="option"
@@ -199,20 +195,20 @@ export const PlayerPicker = ({
                   aria-label={accessibleName}
                   disabled={disabled}
                   onClick={() => !disabled && onSelect(p.player_id)}
-                  className={`flex w-full items-center justify-between gap-3 px-5 py-3 text-left transition-colors ${
+                  className={`flex min-h-[52px] w-full items-center justify-between gap-3 px-5 py-3 text-left transition-colors ${
                     disabled
-                      ? "cursor-not-allowed text-text-muted opacity-60"
-                      : "text-text-primary hover:bg-bg-tertiary"
+                      ? "cursor-not-allowed bg-paper-alt text-ink-muted"
+                      : "text-ink hover:bg-butter"
                   }`}
                 >
                   <span className="flex items-baseline gap-2">
-                    <span className="text-sm font-medium">{p.display_name}</span>
-                    <span className="font-mono text-xs text-text-muted">
+                    <span className="text-sm font-bold">{p.display_name}</span>
+                    <span className="font-mono text-xs font-semibold text-ink-soft">
                       {p.current_elo}
                     </span>
                   </span>
                   {disabled && (
-                    <span className="font-mono text-xs text-text-muted">
+                    <span className="font-mono text-xs font-bold uppercase text-ink-soft">
                       {p.disabledReason}
                     </span>
                   )}

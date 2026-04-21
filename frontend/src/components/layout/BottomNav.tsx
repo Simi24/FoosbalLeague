@@ -8,35 +8,37 @@ import {
 } from "react-icons/md";
 
 const navItems = [
-  { to: "/dashboard", icon: MdDashboard, label: "Dashboard" },
-  { to: "/leagues", icon: MdSportsSoccer, label: "Leagues" },
-  { to: "/leaderboard", icon: MdLeaderboard, label: "Board" },
-  { to: "/profile", icon: MdPerson, label: "Profile" },
-  { to: "/settings", icon: MdSettings, label: "Settings" },
+  { to: "/dashboard", icon: MdDashboard, label: "Home", fill: "bg-butter" },
+  { to: "/leagues", icon: MdSportsSoccer, label: "Leagues", fill: "bg-team-red-tint" },
+  { to: "/leaderboard", icon: MdLeaderboard, label: "Board", fill: "bg-mint" },
+  { to: "/profile", icon: MdPerson, label: "Profile", fill: "bg-team-blue-tint" },
+  { to: "/settings", icon: MdSettings, label: "Set", fill: "bg-lavender" },
 ];
 
 export const BottomNav = () => (
-  <nav className="fixed bottom-0 left-0 right-0 z-40 flex h-16 items-center justify-around border-t border-border bg-bg-secondary md:hidden">
-    {navItems.map(({ to, icon: Icon, label }) => (
+  <nav className="fixed bottom-0 left-0 right-0 z-40 flex h-16 items-stretch justify-around border-t-2 border-ink bg-paper md:hidden">
+    {navItems.map(({ to, icon: Icon, label, fill }) => (
       <NavLink
         key={to}
         to={to}
         end
         className={({ isActive }) =>
-          `relative flex flex-col items-center gap-0.5 px-2 py-1 transition-colors duration-200 ${
-            isActive
-              ? "text-accent font-medium"
-              : "text-text-muted"
+          `relative flex flex-1 flex-col items-center justify-center gap-1 border-l-2 text-ink transition-colors duration-100 first:border-l-0 ${
+            isActive ? "bg-paper-alt border-ink font-bold" : "border-ink/10 text-ink-soft"
           }`
         }
       >
         {({ isActive }) => (
           <>
-            <Icon size={20} />
-            <span className="text-[10px]">{label}</span>
-            {isActive && (
-              <span className="absolute bottom-1 h-1 w-1 rounded-full bg-accent" />
-            )}
+            <span
+              className={`flex h-8 w-8 items-center justify-center border-2 border-ink text-ink transition-transform ${fill} ${
+                isActive ? "brut-shadow -translate-y-0.5" : ""
+              }`}
+              aria-hidden="true"
+            >
+              <Icon size={18} />
+            </span>
+            <span className="text-[10px] font-bold uppercase tracking-wide">{label}</span>
           </>
         )}
       </NavLink>

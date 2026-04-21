@@ -114,8 +114,8 @@ export const EloHistoryChart = ({
     >
       <defs>
         <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.25} />
-          <stop offset="100%" stopColor="#3b82f6" stopOpacity={0} />
+          <stop offset="0%" stopColor="#2B6BE8" stopOpacity={0.22} />
+          <stop offset="100%" stopColor="#2B6BE8" stopOpacity={0} />
         </linearGradient>
       </defs>
 
@@ -123,8 +123,8 @@ export const EloHistoryChart = ({
         {/* Grid lines */}
         {yTicks.map(({ y, elo }) => (
           <g key={elo}>
-            <line x1={0} y1={y} x2={chartWidth} y2={y} stroke="#252b38" strokeDasharray="4" />
-            <text x={-10} y={y + 4} textAnchor="end" fill="#5a6373" fontSize={10} fontFamily="monospace">
+            <line x1={0} y1={y} x2={chartWidth} y2={y} stroke="#1A1A1A" strokeOpacity={0.15} strokeDasharray="4" />
+            <text x={-10} y={y + 4} textAnchor="end" fill="#4A4A4A" fontSize={10} fontFamily="JetBrains Mono, monospace" fontWeight={600}>
               {elo}
             </text>
           </g>
@@ -138,33 +138,32 @@ export const EloHistoryChart = ({
           <path
             d={linePath}
             fill="none"
-            stroke="#3b82f6"
+            stroke="#1A1A1A"
             strokeWidth={2.5}
-            strokeLinecap="round"
-            strokeLinejoin="round"
+            strokeLinecap="square"
+            strokeLinejoin="miter"
           />
         ) : (
-          <circle cx={points[0]![0]} cy={points[0]![1]} r={5} fill="#3b82f6" />
+          <rect x={points[0]![0] - 5} y={points[0]![1] - 5} width={10} height={10} fill="#2B6BE8" stroke="#1A1A1A" strokeWidth={2} />
         )}
 
-        {/* Dots */}
+        {/* Dots — square markers (brutalist) */}
         {data.length > 1 &&
           points.map(([x, y], i) => {
             const isLast = i === points.length - 1;
             const isActive = hovered === i;
+            const size = isActive ? 10 : isLast ? 9 : 6;
 
             return (
               <g key={data[i]!.match_id}>
-                {(isLast || isActive) && (
-                  <circle cx={x} cy={y} r={8} fill="#3b82f6" opacity={0.15} />
-                )}
-                <circle
-                  cx={x}
-                  cy={y}
-                  r={isActive ? 5 : isLast ? 4.5 : 3}
-                  fill="#3b82f6"
-                  stroke="#151921"
-                  strokeWidth={isActive || isLast ? 2 : 0}
+                <rect
+                  x={x - size / 2}
+                  y={y - size / 2}
+                  width={size}
+                  height={size}
+                  fill={isLast || isActive ? "#2B6BE8" : "#FAF7F2"}
+                  stroke="#1A1A1A"
+                  strokeWidth={2}
                 />
               </g>
             );
@@ -178,13 +177,12 @@ export const EloHistoryChart = ({
               y1={0}
               x2={points[hovered]![0]}
               y2={chartHeight}
-              stroke="#3b82f6"
-              strokeWidth={1}
-              strokeDasharray="3"
-              opacity={0.5}
+              stroke="#1A1A1A"
+              strokeWidth={1.5}
+              strokeDasharray="4"
             />
 
-            {/* Tooltip */}
+            {/* Tooltip — brutalist paper card */}
             {(() => {
               const tx = points[hovered]![0];
               const flipLeft = tx > chartWidth - 120;
@@ -193,21 +191,22 @@ export const EloHistoryChart = ({
 
               return (
                 <g transform={`translate(${tooltipX}, ${tooltipY})`}>
-                  <rect width={108} height={52} rx={8} fill="#1e2330" />
-                  <text x={12} y={20} fill="white" fontSize={14} fontWeight="bold" fontFamily="monospace">
+                  <rect x={3} y={3} width={108} height={52} fill="#1A1A1A" />
+                  <rect width={108} height={52} fill="#FFFFFF" stroke="#1A1A1A" strokeWidth={2} />
+                  <text x={10} y={22} fill="#1A1A1A" fontSize={14} fontWeight="bold" fontFamily="JetBrains Mono, monospace">
                     {hoveredPoint.elo}
                   </text>
                   <text
-                    x={12}
-                    y={38}
-                    fill={hoveredPoint.delta >= 0 ? "#4ade80" : "#f87171"}
+                    x={10}
+                    y={42}
+                    fill={hoveredPoint.delta >= 0 ? "#2E9E54" : "#C93838"}
                     fontSize={12}
                     fontWeight="bold"
-                    fontFamily="monospace"
+                    fontFamily="JetBrains Mono, monospace"
                   >
                     {hoveredPoint.delta >= 0 ? "+" : ""}{hoveredPoint.delta}
                   </text>
-                  <text x={52} y={38} fill="#5a6373" fontSize={10}>
+                  <text x={52} y={42} fill="#4A4A4A" fontSize={10} fontFamily="Space Grotesk, sans-serif" fontWeight={500}>
                     {formatDate(hoveredPoint.timestamp)}
                   </text>
                 </g>
@@ -218,7 +217,16 @@ export const EloHistoryChart = ({
 
         {/* X-axis labels */}
         {xLabels.map(({ i, label }) => (
-          <text key={i} x={xScale(i)} y={chartHeight + 20} textAnchor="middle" fill="#5a6373" fontSize={9}>
+          <text
+            key={i}
+            x={xScale(i)}
+            y={chartHeight + 20}
+            textAnchor="middle"
+            fill="#4A4A4A"
+            fontSize={10}
+            fontFamily="Space Grotesk, sans-serif"
+            fontWeight={600}
+          >
             {label}
           </text>
         ))}

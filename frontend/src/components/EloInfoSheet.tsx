@@ -9,9 +9,9 @@ export const EloInfoTrigger = ({ onClick }: { onClick: () => void }) => (
     type="button"
     onClick={onClick}
     aria-label="How ELO ranking works"
-    className="inline-flex items-center justify-center rounded-md p-1 text-text-muted transition-colors hover:text-accent"
+    className="btn-press inline-flex items-center justify-center border-2 border-transparent p-1 text-ink transition-colors hover:border-ink hover:bg-butter"
   >
-    <MdInfoOutline size={18} />
+    <MdInfoOutline size={20} />
   </button>
 );
 
@@ -41,24 +41,23 @@ const EloInfoSheetOverlay = ({ open, onClose }: EloInfoSheetProps) => {
 
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-end justify-center md:items-center">
-      <div
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-        onClick={onClose}
-      />
+      <div className="absolute inset-0 bg-ink/40" onClick={onClose} />
 
       <div
         ref={sheetRef}
         role="dialog"
         aria-modal="true"
         aria-label="How ELO ranking works"
-        className="relative z-10 flex max-h-[85vh] w-full flex-col rounded-t-2xl border-t border-border bg-bg-secondary shadow-2xl md:max-h-[70vh] md:max-w-md md:rounded-xl md:border"
+        className="relative z-10 flex max-h-[85vh] w-full flex-col border-t-[3px] border-ink bg-card md:max-h-[70vh] md:max-w-md md:border-[3px] md:brut-shadow-lg"
       >
-        <div className="flex items-center justify-between border-b border-border px-5 py-4">
-          <h2 className="text-lg font-bold text-text-primary">How ELO Works</h2>
+        <div className="flex items-center justify-between border-b-2 border-ink px-5 py-4">
+          <h2 className="text-lg font-bold uppercase tracking-wide text-ink">
+            How ELO Works
+          </h2>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-md p-1 text-text-muted transition-colors hover:text-text-primary"
+            className="btn-press border-2 border-transparent p-1 text-ink transition-colors hover:border-ink hover:bg-coral"
             aria-label="Close"
           >
             <MdClose size={20} />

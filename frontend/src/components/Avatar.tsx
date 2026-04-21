@@ -1,8 +1,11 @@
-const COLORS = [
-  "bg-red-400", "bg-orange-400", "bg-amber-400", "bg-yellow-400",
-  "bg-lime-400", "bg-green-400", "bg-emerald-400", "bg-teal-400",
-  "bg-cyan-400", "bg-sky-400", "bg-blue-400", "bg-indigo-400",
-  "bg-violet-400", "bg-purple-400", "bg-fuchsia-400", "bg-pink-400",
+const PASTELS = [
+  "bg-team-blue-tint",
+  "bg-team-red-tint",
+  "bg-mint",
+  "bg-butter",
+  "bg-lavender",
+  "bg-peach",
+  "bg-coral",
 ];
 
 const hashName = (name: string): number => {
@@ -25,18 +28,18 @@ type AvatarProps = {
 };
 
 const SIZES = {
-  sm: "h-7 w-7 text-[10px]",
-  md: "h-8 w-8 text-xs",
-  lg: "h-12 w-12 text-base",
+  sm: "h-7 w-7 text-[10px] border-[1.5px]",
+  md: "h-9 w-9 text-xs border-2",
+  lg: "h-14 w-14 text-base border-2",
 };
 
 export const Avatar = ({ name, size = "md" }: AvatarProps) => {
-  const color = COLORS[hashName(name) % COLORS.length]!;
+  const fill = PASTELS[hashName(name) % PASTELS.length]!;
   const initials = getInitials(name);
 
   return (
     <div
-      className={`flex shrink-0 items-center justify-center rounded-full font-bold text-white ${color} ${SIZES[size]}`}
+      className={`flex shrink-0 items-center justify-center border-ink font-bold text-ink ${fill} ${SIZES[size]}`}
     >
       {initials}
     </div>

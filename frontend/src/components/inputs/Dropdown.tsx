@@ -34,29 +34,29 @@ export const Dropdown = ({ value, options, onChange, className = "" }: DropdownP
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="flex w-full items-center justify-between gap-2 rounded-lg border border-border bg-bg-tertiary px-3 py-2.5 text-left text-sm text-text-primary outline-none transition-colors focus:border-accent focus:ring-2 focus:ring-accent/20"
+        className="brut-border btn-press flex min-h-[44px] w-full items-center justify-between gap-2 bg-card px-3 py-2 text-left text-sm font-medium text-ink outline-none transition-colors hover:bg-paper-alt"
       >
         <span className="truncate">{selected?.label ?? "Select..."}</span>
         <MdExpandMore
-          size={18}
-          className={`shrink-0 text-text-muted transition-transform ${open ? "rotate-180" : ""}`}
+          size={20}
+          className={`shrink-0 text-ink transition-transform ${open ? "rotate-180" : ""}`}
         />
       </button>
 
       {open && (
-        <ul className="absolute left-0 right-0 z-50 mt-1 max-h-60 overflow-y-auto rounded-lg border border-border bg-bg-secondary shadow-lg">
+        <ul className="brut-border brut-shadow absolute left-0 right-0 z-50 mt-2 max-h-60 overflow-y-auto bg-card">
           {options.map((opt) => (
-            <li key={opt.value}>
+            <li key={opt.value} className="border-b-2 border-ink last:border-b-0">
               <button
                 type="button"
                 onClick={() => {
                   onChange(opt.value);
                   setOpen(false);
                 }}
-                className={`flex w-full items-center px-3 py-3 text-left text-sm transition-colors sm:py-2.5 ${
+                className={`flex min-h-[44px] w-full items-center px-3 py-2 text-left text-sm transition-colors ${
                   opt.value === value
-                    ? "bg-accent-light font-medium text-accent"
-                    : "text-text-primary hover:bg-bg-tertiary"
+                    ? "bg-butter font-semibold text-ink"
+                    : "text-ink hover:bg-paper-alt"
                 }`}
               >
                 {opt.label}

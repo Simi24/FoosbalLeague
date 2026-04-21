@@ -58,7 +58,16 @@
       "Bash(/Users/admintemp/.claude/plugins/cache/claude-plugins-official/ralph-loop/*/scripts/setup-ralph-loop.sh*)",
       "Bash(*/setup-ralph-loop.sh*)",
       "Bash(yarn add *)",
-      "Bash(yarn lint *)"
+      "Bash(yarn lint *)",
+      "Bash(curl -sSfL -o space-grotesk-400.ttf \"https://github.com/floriankarsten/space-grotesk/raw/master/fonts/ttf/SpaceGrotesk-Regular.ttf\")",
+      "Bash(curl -sSfL -o space-grotesk-500.ttf \"https://github.com/floriankarsten/space-grotesk/raw/master/fonts/ttf/SpaceGrotesk-Medium.ttf\")",
+      "Bash(curl -sSfL -o space-grotesk-600.ttf \"https://github.com/floriankarsten/space-grotesk/raw/master/fonts/ttf/SpaceGrotesk-SemiBold.ttf\")",
+      "Bash(curl -sSfL -o space-grotesk-700.ttf \"https://github.com/floriankarsten/space-grotesk/raw/master/fonts/ttf/SpaceGrotesk-Bold.ttf\")",
+      "Bash(curl -sSfL -o jetbrains-mono-400.ttf \"https://github.com/JetBrains/JetBrainsMono/raw/master/fonts/ttf/JetBrainsMono-Regular.ttf\")",
+      "Bash(curl -sSfL -o space-grotesk-400.ttf \"https://github.com/floriankarsten/space-grotesk/raw/main/fonts/ttf/SpaceGrotesk-Regular.ttf\")",
+      "Bash(curl -sSfL -I \"https://github.com/floriankarsten/space-grotesk/raw/main/fonts/ttf/SpaceGrotesk-Regular.ttf\")",
+      "Bash(curl -sSfL -o space-grotesk-400.ttf \"https://raw.githubusercontent.com/google/fonts/main/ofl/spacegrotesk/SpaceGrotesk%5Bwght%5D.ttf\")",
+      "Bash(curl -sSfLI \"https://raw.githubusercontent.com/google/fonts/main/ofl/spacegrotesk/SpaceGrotesk%5Bwght%5D.ttf\")"
     ]
   }
 }

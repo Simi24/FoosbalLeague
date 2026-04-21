@@ -2,10 +2,15 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 import { CognitoError, cognitoConfirmForgotPassword, cognitoForgotPassword } from "@/features/auth/cognito";
+import { BrandMark } from "@/components/layout";
 import { PasswordInput } from "@/components/inputs/PasswordInput";
 import { PasswordRules, isPasswordValid } from "@/components/inputs/PasswordRules";
 
 type Step = "email" | "reset";
+
+const inputClass =
+  "brut-border min-h-[44px] w-full bg-card px-3 py-2 text-sm text-ink outline-none";
+const labelClass = "mb-1.5 block text-xs font-bold uppercase tracking-wide text-ink";
 
 export const ForgotPasswordPage = () => {
   const navigate = useNavigate();
@@ -60,29 +65,29 @@ export const ForgotPasswordPage = () => {
     }
   };
 
-  const inputClass =
-    "w-full rounded-lg border border-border bg-bg-tertiary px-3 py-2.5 text-sm text-text-primary outline-none focus:border-accent focus:ring-2 focus:ring-accent/20";
-
   return (
-    <div className="flex min-h-screen items-center justify-center bg-bg-primary">
-      <div className="animate-in w-full max-w-sm rounded-xl border border-border bg-bg-secondary p-8 shadow-sm">
-        <h1 className="brand-gradient mb-2 text-center text-3xl font-bold">
-          FoosLeague
+    <div className="flex min-h-screen items-center justify-center bg-paper p-4">
+      <div className="animate-in brut-border brut-shadow-lg w-full max-w-sm bg-card p-8">
+        <div className="mb-4 flex justify-center">
+          <BrandMark size="lg" />
+        </div>
+        <h1 className="mb-2 text-center text-4xl font-bold tracking-tight text-ink">
+          Foos<span className="text-team-red">League</span>
         </h1>
-        <p className="mb-8 text-center text-sm text-text-secondary">
+        <p className="mb-8 text-center text-xs font-semibold uppercase tracking-wider text-ink-soft">
           {step === "email" ? "Reset your password" : "Enter the code sent to your email"}
         </p>
 
         {error && (
-          <div className="mb-4 rounded-lg border border-danger/30 bg-danger/5 px-3 py-2 text-sm text-danger">
+          <div className="brut-border mb-4 bg-coral px-3 py-2 text-sm font-semibold text-ink">
             {error}
           </div>
         )}
 
         {step === "email" ? (
-          <form onSubmit={handleSendCode}>
-            <div className="mb-6">
-              <label className="mb-1 block text-sm font-medium text-text-secondary">Email</label>
+          <form onSubmit={handleSendCode} className="space-y-4">
+            <div>
+              <label className={labelClass}>Email</label>
               <input
                 type="email"
                 value={email}
@@ -95,26 +100,26 @@ export const ForgotPasswordPage = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full rounded-lg bg-accent px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-hover disabled:opacity-50"
+              className="brut-border btn-press brut-shadow min-h-[48px] w-full bg-ink px-4 py-2 text-sm font-bold uppercase tracking-wide text-paper transition-colors disabled:bg-ink-muted"
             >
               {loading ? "Sending..." : "Send reset code"}
             </button>
           </form>
         ) : (
-          <form onSubmit={handleReset}>
-            <div className="mb-4">
-              <label className="mb-1 block text-sm font-medium text-text-secondary">Verification Code</label>
+          <form onSubmit={handleReset} className="space-y-4">
+            <div>
+              <label className={labelClass}>Verification Code</label>
               <input
                 type="text"
                 value={code}
                 onChange={(e) => setCode(e.target.value)}
-                className={inputClass}
+                className={`${inputClass} font-mono tracking-[0.3em]`}
                 required
                 autoComplete="one-time-code"
                 placeholder="123456"
               />
             </div>
-            <div className="mb-4">
+            <div>
               <PasswordInput
                 value={newPassword}
                 onChange={setNewPassword}
@@ -124,7 +129,7 @@ export const ForgotPasswordPage = () => {
               />
               <PasswordRules password={newPassword} />
             </div>
-            <div className="mb-6">
+            <div>
               <PasswordInput
                 value={confirmPassword}
                 onChange={setConfirmPassword}
@@ -133,21 +138,23 @@ export const ForgotPasswordPage = () => {
                 minLength={8}
               />
               {confirmPassword && newPassword !== confirmPassword && (
-                <p className="mt-1 text-xs text-danger">Passwords do not match</p>
+                <p className="mt-1 text-xs font-semibold text-danger">
+                  Passwords do not match
+                </p>
               )}
             </div>
             <button
               type="submit"
               disabled={loading || !isPasswordValid(newPassword)}
-              className="w-full rounded-lg bg-accent px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-hover disabled:opacity-50"
+              className="brut-border btn-press brut-shadow min-h-[48px] w-full bg-ink px-4 py-2 text-sm font-bold uppercase tracking-wide text-paper transition-colors disabled:bg-ink-muted"
             >
               {loading ? "Resetting..." : "Reset password"}
             </button>
           </form>
         )}
 
-        <p className="mt-6 text-center text-sm text-text-secondary">
-          <Link to="/login" className="font-medium text-accent hover:text-accent-hover">
+        <p className="mt-6 text-center text-sm font-medium text-ink-soft">
+          <Link to="/login" className="font-bold text-ink underline">
             Back to sign in
           </Link>
         </p>

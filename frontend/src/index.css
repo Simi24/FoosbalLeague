@@ -1,93 +1,99 @@
-/* Self-hosted Outfit font — no external CDN dependency */
+/* Self-hosted variable fonts — one TTF per family, all weights */
 @font-face {
-  font-family: "Outfit";
-  font-weight: 400;
+  font-family: "Space Grotesk";
+  font-weight: 300 700;
   font-style: normal;
   font-display: swap;
-  src: url("/fonts/outfit-400.ttf") format("truetype");
+  src: url("/fonts/space-grotesk-var.ttf") format("truetype-variations");
 }
+
 @font-face {
-  font-family: "Outfit";
-  font-weight: 500;
+  font-family: "JetBrains Mono";
+  font-weight: 100 800;
   font-style: normal;
   font-display: swap;
-  src: url("/fonts/outfit-500.ttf") format("truetype");
-}
-@font-face {
-  font-family: "Outfit";
-  font-weight: 600;
-  font-style: normal;
-  font-display: swap;
-  src: url("/fonts/outfit-600.ttf") format("truetype");
-}
-@font-face {
-  font-family: "Outfit";
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-  src: url("/fonts/outfit-700.ttf") format("truetype");
+  src: url("/fonts/jetbrains-mono-var.ttf") format("truetype-variations");
 }
 
 @import "tailwindcss";
 
 @theme {
-  /* Backgrounds — dark game room */
-  --color-bg-primary: #0c0f14;
-  --color-bg-secondary: #151921;
-  --color-bg-tertiary: #1e2330;
+  /* Paper surfaces — warm cream base */
+  --color-paper: #faf7f2;
+  --color-paper-alt: #f3eee3;
+  --color-card: #ffffff;
 
-  /* Accent — foosball blue team */
-  --color-accent: #3b82f6;
-  --color-accent-hover: #2563eb;
-  --color-accent-light: #172241;
+  /* Legacy bg-* tokens mapped onto paper palette so stragglers don't break */
+  --color-bg-primary: #faf7f2;
+  --color-bg-secondary: #f3eee3;
+  --color-bg-tertiary: #ffffff;
 
-  /* Text — light on dark */
-  --color-text-primary: #f1f3f5;
-  --color-text-secondary: #8b95a5;
-  --color-text-muted: #5a6373;
+  /* Ink — borders + text */
+  --color-ink: #1a1a1a;
+  --color-ink-soft: #4a4a4a;
+  --color-ink-muted: #7a7a7a;
 
-  /* Borders */
-  --color-border: #252b38;
+  /* Legacy text-* tokens */
+  --color-text-primary: #1a1a1a;
+  --color-text-secondary: #4a4a4a;
+  --color-text-muted: #7a7a7a;
 
-  /* Status */
-  --color-danger: #ef4444;
-  --color-warning: #eab308;
-  --color-success: #22c55e;
+  --color-border: #1a1a1a;
 
-  /* Foosball team colors */
-  --color-team-blue: #3b82f6;
-  --color-team-red: #ef4444;
-  --color-field-green: #22c55e;
+  /* Accent = team blue (kept as generic accent for links/focus) */
+  --color-accent: #2b6be8;
+  --color-accent-hover: #1e52c0;
+  --color-accent-light: #d6e4ff;
 
-  --font-sans: "Outfit", ui-sans-serif, system-ui, sans-serif;
+  /* Foosball identity */
+  --color-team-blue: #2b6be8;
+  --color-team-blue-tint: #d6e4ff;
+  --color-team-red: #e84a4a;
+  --color-team-red-tint: #ffd6d6;
+  --color-field-green: #2e9e54;
+
+  /* Pastel palette */
+  --color-mint: #c7f0d8;
+  --color-butter: #fff4b8;
+  --color-lavender: #e4d4ff;
+  --color-peach: #ffdcc7;
+  --color-coral: #ffb8b8;
+
+  /* Status ink (on pastel fills) */
+  --color-success: #2e9e54;
+  --color-warning: #b8860b;
+  --color-danger: #c93838;
+
+  --font-sans: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", "Fira Code", "Cascadia Code", monospace;
 }
 
 body {
-  @apply bg-bg-primary text-text-primary font-sans antialiased;
+  @apply bg-paper text-ink font-sans antialiased;
   margin: 0;
 }
 
+html {
+  color-scheme: light;
+}
+
+/* Native scrollbar — thin ink line on cream */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--color-bg-primary);
+  background: var(--color-paper);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--color-bg-tertiary);
-  border-radius: 3px;
+  background: var(--color-ink);
+  border: 2px solid var(--color-paper);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-text-muted);
-}
-
-/* Color scheme hint for native elements */
-html {
-  color-scheme: dark;
+  background: var(--color-ink-soft);
 }
 
 /* Entrance animation */
@@ -106,25 +112,112 @@ html {
   animation: fadeInUp 0.35s ease-out both;
 }
 
-/* Card hover — lift + glow */
+@keyframes confettiFall {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(110vh) rotate(720deg);
+    opacity: 0;
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-slide-in-right {
+  animation: slideInRight 0.22s ease-out both;
+}
+
+@keyframes slideUpSheet {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-up-sheet {
+  animation: slideUpSheet 0.22s ease-out both;
+}
+
+/* ───────────────────────────────────────────────────────
+   Neo-brutalist primitives
+   ─────────────────────────────────────────────────────── */
+
+/* Base border (ink, 2px) */
+.brut-border {
+  border: 2px solid var(--color-ink);
+}
+.brut-border-3 {
+  border: 3px solid var(--color-ink);
+}
+
+/* Hard offset shadow. Mobile: 3px. md+: 4px. */
+.brut-shadow {
+  box-shadow: 3px 3px 0 0 var(--color-ink);
+}
+.brut-shadow-lg {
+  box-shadow: 4px 4px 0 0 var(--color-ink);
+}
+@media (min-width: 768px) {
+  .brut-shadow {
+    box-shadow: 4px 4px 0 0 var(--color-ink);
+  }
+  .brut-shadow-lg {
+    box-shadow: 6px 6px 0 0 var(--color-ink);
+  }
+}
+
+/* Interactive card — grows shadow on hover, shrinks on press */
 .card-interactive {
-  @apply transition-all duration-200 ease-out;
+  transition: transform 0.12s ease-out, box-shadow 0.12s ease-out;
 }
-
 .card-interactive:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px -8px rgba(59, 130, 246, 0.12);
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0 0 var(--color-ink);
+}
+@media (min-width: 768px) {
+  .card-interactive:hover {
+    box-shadow: 5px 5px 0 0 var(--color-ink);
+  }
+}
+.card-interactive:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 0 var(--color-ink);
 }
 
-/* Button press feedback */
+/* Button press — translate instead of scale */
+.btn-press {
+  transition: transform 0.08s ease-out, box-shadow 0.08s ease-out;
+}
 .btn-press:active {
-  transform: scale(0.97);
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 0 var(--color-ink) !important;
 }
 
-/* Brand gradient: blue → red (foosball teams) */
-.brand-gradient {
-  background: linear-gradient(135deg, var(--color-team-blue), #a855f7, var(--color-team-red));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+/* Brand title: solid ink, bold, tight tracking */
+.brand-gradient,
+.brand-title {
+  color: var(--color-ink);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  background: none;
+  -webkit-text-fill-color: currentColor;
+}
+
+/* Focus ring — offset hard square, not soft blur */
+*:focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 2px;
 }

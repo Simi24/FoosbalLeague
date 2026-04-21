@@ -11,10 +11,15 @@ import {
   saveTokens,
   initAuth,
 } from "@/features/auth";
+import { BrandMark } from "@/components/layout";
 import { PasswordInput } from "@/components/inputs/PasswordInput";
 import { PasswordRules, isPasswordValid } from "@/components/inputs/PasswordRules";
 
 type Step = "register" | "verify";
+
+const inputClass =
+  "brut-border min-h-[44px] w-full bg-card px-3 py-2 text-sm text-ink outline-none";
+const labelClass = "mb-1.5 block text-xs font-bold uppercase tracking-wide text-ink";
 
 export const SignupPage = () => {
   const dispatch = useAppDispatch();
@@ -81,29 +86,29 @@ export const SignupPage = () => {
     }
   };
 
-  const inputClass =
-    "w-full rounded-lg border border-border bg-bg-tertiary px-3 py-2.5 text-sm text-text-primary outline-none focus:border-accent focus:ring-2 focus:ring-accent/20";
-
   return (
-    <div className="flex min-h-screen items-center justify-center bg-bg-primary">
-      <div className="animate-in w-full max-w-sm rounded-xl border border-border bg-bg-secondary p-8 shadow-sm">
-        <h1 className="brand-gradient mb-2 text-center text-3xl font-bold">
-          FoosLeague
+    <div className="flex min-h-screen items-center justify-center bg-paper p-4">
+      <div className="animate-in brut-border brut-shadow-lg w-full max-w-sm bg-card p-8">
+        <div className="mb-4 flex justify-center">
+          <BrandMark size="lg" />
+        </div>
+        <h1 className="mb-2 text-center text-4xl font-bold tracking-tight text-ink">
+          Foos<span className="text-team-red">League</span>
         </h1>
-        <p className="mb-8 text-center text-sm text-text-secondary">
+        <p className="mb-8 text-center text-xs font-semibold uppercase tracking-wider text-ink-soft">
           {step === "register" ? "Create your account" : "Verify your email"}
         </p>
 
         {error && (
-          <div className="mb-4 rounded-lg border border-danger/30 bg-danger/5 px-3 py-2 text-sm text-danger">
+          <div className="brut-border mb-4 bg-coral px-3 py-2 text-sm font-semibold text-ink">
             {error}
           </div>
         )}
 
         {step === "register" ? (
-          <form onSubmit={handleRegister}>
-            <div className="mb-4">
-              <label className="mb-1 block text-sm font-medium text-text-secondary">Email</label>
+          <form onSubmit={handleRegister} className="space-y-4">
+            <div>
+              <label className={labelClass}>Email</label>
               <input
                 type="email"
                 value={email}
@@ -113,8 +118,8 @@ export const SignupPage = () => {
                 autoComplete="email"
               />
             </div>
-            <div className="mb-4">
-              <label className="mb-1 block text-sm font-medium text-text-secondary">Display Name</label>
+            <div>
+              <label className={labelClass}>Display Name</label>
               <input
                 type="text"
                 value={displayName}
@@ -125,7 +130,7 @@ export const SignupPage = () => {
                 maxLength={50}
               />
             </div>
-            <div className="mb-4">
+            <div>
               <PasswordInput
                 value={password}
                 onChange={setPassword}
@@ -135,7 +140,7 @@ export const SignupPage = () => {
               />
               <PasswordRules password={password} />
             </div>
-            <div className="mb-6">
+            <div>
               <PasswordInput
                 value={confirmPassword}
                 onChange={setConfirmPassword}
@@ -144,29 +149,32 @@ export const SignupPage = () => {
                 minLength={8}
               />
               {confirmPassword && !passwordsMatch && (
-                <p className="mt-1 text-xs text-danger">Passwords do not match</p>
+                <p className="mt-1 text-xs font-semibold text-danger">
+                  Passwords do not match
+                </p>
               )}
             </div>
             <button
               type="submit"
               disabled={loading || !passwordValid}
-              className="w-full rounded-lg bg-accent px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-hover disabled:opacity-50"
+              className="brut-border btn-press brut-shadow min-h-[48px] w-full bg-ink px-4 py-2 text-sm font-bold uppercase tracking-wide text-paper transition-colors disabled:cursor-not-allowed disabled:bg-ink-muted"
             >
               {loading ? "Creating account..." : "Sign up"}
             </button>
           </form>
         ) : (
-          <form onSubmit={handleVerify}>
-            <p className="mb-4 text-sm text-text-secondary">
-              A verification code was sent to <span className="font-medium text-accent">{email}</span>
+          <form onSubmit={handleVerify} className="space-y-4">
+            <p className="text-sm font-medium text-ink-soft">
+              A verification code was sent to{" "}
+              <span className="font-mono font-bold text-ink">{email}</span>
             </p>
-            <div className="mb-6">
-              <label className="mb-1 block text-sm font-medium text-text-secondary">Verification Code</label>
+            <div>
+              <label className={labelClass}>Verification Code</label>
               <input
                 type="text"
                 value={code}
                 onChange={(e) => setCode(e.target.value)}
-                className={inputClass}
+                className={`${inputClass} font-mono tracking-[0.3em]`}
                 required
                 autoComplete="one-time-code"
               />
@@ -174,16 +182,16 @@ export const SignupPage = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full rounded-lg bg-accent px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-hover disabled:opacity-50"
+              className="brut-border btn-press brut-shadow min-h-[48px] w-full bg-ink px-4 py-2 text-sm font-bold uppercase tracking-wide text-paper transition-colors disabled:bg-ink-muted"
             >
               {loading ? "Verifying..." : "Verify & Sign in"}
             </button>
           </form>
         )}
 
-        <p className="mt-6 text-center text-sm text-text-secondary">
+        <p className="mt-6 text-center text-sm font-medium text-ink-soft">
           Already have an account?{" "}
-          <Link to="/login" className="font-medium text-accent hover:text-accent-hover">
+          <Link to="/login" className="font-bold text-ink underline">
             Sign in
           </Link>
         </p>

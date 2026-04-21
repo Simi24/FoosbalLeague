@@ -33,57 +33,61 @@ export const SettingsPage = () => {
   };
 
   return (
-    <div>
-      <h1 className="mb-6 text-2xl font-bold text-text-primary">Settings</h1>
+    <div className="mx-auto max-w-2xl">
+      <h1 className="mb-6 text-3xl font-bold tracking-tight text-ink md:text-4xl">
+        Settings
+      </h1>
 
-      <div className="mb-6 rounded-xl border border-border bg-bg-secondary p-5 shadow-sm">
-        <h2 className="mb-4 text-lg font-semibold text-text-primary">Account</h2>
+      <div className="brut-border brut-shadow mb-6 bg-card p-5">
+        <h2 className="mb-4 text-lg font-bold uppercase tracking-wide text-ink">Account</h2>
         <div className="space-y-4">
           <div>
-            <label className="mb-1 block text-sm font-medium text-text-secondary">Display Name</label>
-            <div className="flex flex-col gap-2 sm:flex-row sm:gap-2">
+            <label className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-ink">
+              Display Name
+            </label>
+            <div className="flex flex-col gap-2 sm:flex-row">
               <input
                 type="text"
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
-                className="flex-1 rounded-lg border border-border bg-bg-tertiary px-3 py-2.5 text-sm text-text-primary outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                className="brut-border min-h-[44px] flex-1 bg-card px-3 py-2 text-sm text-ink outline-none"
                 minLength={2}
                 maxLength={50}
               />
               <button
                 onClick={handleSave}
                 disabled={saving || displayName === user?.name || displayName.length < 2}
-                className="w-full rounded-lg bg-accent px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-hover disabled:opacity-50 sm:w-auto"
+                className="brut-border btn-press brut-shadow min-h-[44px] w-full bg-ink px-4 py-2 text-sm font-bold uppercase tracking-wide text-paper transition-colors disabled:cursor-not-allowed disabled:bg-ink-muted sm:w-auto"
               >
                 {saving ? "Saving..." : saved ? "Saved!" : "Save"}
               </button>
             </div>
           </div>
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-text-secondary">Email</span>
-            <span className="text-text-primary">{user?.email ?? "—"}</span>
+          <div className="flex items-center justify-between border-t-2 border-ink/10 pt-3 text-sm">
+            <span className="font-semibold uppercase tracking-wide text-ink-soft">Email</span>
+            <span className="font-medium text-ink">{user?.email ?? "—"}</span>
           </div>
           <div className="flex items-center justify-between text-sm">
-            <span className="text-text-secondary">Player ID</span>
-            <span className="font-mono text-text-muted">{user?.player_id ?? "Not registered"}</span>
+            <span className="font-semibold uppercase tracking-wide text-ink-soft">Player ID</span>
+            <span className="font-mono text-xs text-ink-muted">{user?.player_id ?? "Not registered"}</span>
           </div>
         </div>
       </div>
 
-      <div className="mb-6 rounded-xl border-2 border-danger/30 bg-danger/5 p-5">
-        <h2 className="mb-2 text-lg font-semibold text-danger">Session</h2>
+      <div className="border-[3px] border-ink bg-coral p-5">
+        <h2 className="mb-2 text-lg font-bold uppercase tracking-wide text-ink">Session</h2>
         <button
           onClick={handleLogout}
-          className="rounded-lg border border-danger px-4 py-2.5 text-sm font-medium text-danger transition-colors hover:bg-danger hover:text-white"
+          className="brut-border btn-press brut-shadow min-h-[44px] bg-ink px-4 py-2 text-sm font-bold uppercase tracking-wide text-paper transition-colors"
         >
           Sign out
         </button>
       </div>
 
-      <div className="text-center">
+      <div className="mt-6 text-center">
         <Link
           to="/changelog"
-          className="text-xs text-text-muted transition-colors hover:text-text-secondary"
+          className="font-mono text-xs text-ink-muted transition-colors hover:text-ink"
         >
           FoosLeague v{__APP_VERSION__}
         </Link>

@@ -11,16 +11,37 @@ interface Props {
   onSlotRemove: (slotIndex: number) => void;
 }
 
-const labelColor: Record<TeamNumber, string> = {
-  1: "text-team-blue",
-  2: "text-team-red",
+const teamStyle: Record<
+  TeamNumber,
+  { headerBg: string; border: string; labelText: string }
+> = {
+  1: {
+    headerBg: "bg-team-blue-tint",
+    border: "border-team-blue",
+    labelText: "text-team-blue",
+  },
+  2: {
+    headerBg: "bg-team-red-tint",
+    border: "border-team-red",
+    labelText: "text-team-red",
+  },
 };
 
 export const TeamCard = ({ team, label, slots, deltas, onSlotTap, onSlotRemove }: Props) => {
+  const s = teamStyle[team];
   return (
-    <section className="flex-1" aria-label={label}>
-      <h3 className={`mb-2 text-sm font-semibold ${labelColor[team]}`}>{label}</h3>
-      <div className="space-y-2">
+    <section
+      aria-label={label}
+      className={`flex-1 border-[3px] ${s.border} bg-card brut-shadow`}
+    >
+      <header
+        className={`border-b-[3px] ${s.border} ${s.headerBg} px-3 py-2`}
+      >
+        <h3 className={`text-sm font-bold uppercase tracking-wide ${s.labelText}`}>
+          {label}
+        </h3>
+      </header>
+      <div className="space-y-2 p-3">
         {slots.map((player, idx) => (
           <PlayerSlot
             key={idx}

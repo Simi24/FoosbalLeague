@@ -124,7 +124,7 @@ describe("PlayerPicker", () => {
     const user = userEvent.setup();
     const { onDismiss, container } = renderPicker();
     const backdrop = container.ownerDocument.querySelector(
-      '[aria-hidden="true"].bg-black\\/50',
+      '[aria-hidden="true"].bg-ink\\/40',
     ) as HTMLElement;
     await user.click(backdrop);
     expect(onDismiss).toHaveBeenCalled();

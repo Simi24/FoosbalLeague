@@ -45,18 +45,20 @@ export const RematchCard = ({
   return (
     <section
       aria-label="Rematch shortcut"
-      className="mb-6 flex flex-col gap-3 rounded-xl border border-accent/30 bg-accent/5 p-4 sm:flex-row sm:items-center sm:justify-between"
+      className="brut-border brut-shadow mb-6 flex flex-col gap-3 bg-lavender p-4 sm:flex-row sm:items-center sm:justify-between"
     >
       <div className="flex-1">
-        <p className="text-sm font-semibold text-text-primary">
+        <p className="text-sm font-bold uppercase tracking-wide text-ink">
           Rematch vs {opponentLabel}
         </p>
-        <p className="mt-0.5 text-xs text-text-muted">
+        <p className="mt-1 text-xs font-medium text-ink-soft">
           {teammateLabel ? `With ${teammateLabel} · ` : ""}
-          Last result: {score} {userWon ? "win" : "loss"}
+          Last result:{" "}
+          <span className="font-mono font-semibold">{score}</span>{" "}
+          {userWon ? "win" : "loss"}
         </p>
         {hasMissing && (
-          <p className="mt-1 text-xs text-warning">
+          <p className="mt-1 text-xs font-semibold text-warning">
             Some players are no longer in this league — their slots will be left empty.
           </p>
         )}
@@ -64,9 +66,9 @@ export const RematchCard = ({
       <button
         type="button"
         onClick={onApply}
-        className="inline-flex items-center justify-center gap-2 rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-accent-hover"
+        className="brut-border btn-press brut-shadow inline-flex min-h-[44px] items-center justify-center gap-2 bg-butter px-4 py-2 text-sm font-bold text-ink transition-colors"
       >
-        <MdReplay size={16} />
+        <MdReplay size={18} />
         Fill teams
       </button>
     </section>

@@ -13,6 +13,12 @@ import {
 import { useAppSelector } from "@/app/hooks";
 import { Avatar } from "@/components/Avatar";
 
+const STATUS_FILL: Record<string, string> = {
+  CONFIRMED: "bg-mint",
+  DISPUTED: "bg-coral",
+  PENDING: "bg-butter",
+};
+
 export const LeagueDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -62,166 +68,168 @@ export const LeagueDetailPage = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent border-t-transparent" />
+        <div className="h-8 w-8 animate-spin border-[3px] border-ink border-t-transparent" />
       </div>
     );
   }
-  if (!league) return <p className="text-danger">League not found</p>;
+  if (!league) return <p className="font-semibold text-danger">League not found</p>;
 
   return (
     <div>
-      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-text-primary">
-            {league.name}
-          </h1>
-          <p className="text-sm text-text-secondary">
-            {league.league_type} &middot; {league.member_count} members &middot;{" "}
-            {league.match_count} matches
-          </p>
-        </div>
-        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-          {currentMember && !isAdmin && (
-            <button
-              onClick={handleLeave}
-              className="flex items-center justify-center gap-2 rounded-lg border border-danger/30 px-3 py-3 text-sm text-danger transition-colors hover:bg-danger/5 sm:py-2.5"
-            >
-              <MdLogout size={16} /> Leave
-            </button>
-          )}
-          {isAdmin && (
+      <div className="brut-border brut-shadow mb-6 bg-peach p-5">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight text-ink md:text-4xl">
+              {league.name}
+            </h1>
+            <p className="mt-1 text-sm font-semibold uppercase tracking-wide text-ink-soft">
+              {league.league_type} · {league.member_count} members · {league.match_count} matches
+            </p>
+          </div>
+          <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+            {currentMember && !isAdmin && (
+              <button
+                onClick={handleLeave}
+                className="brut-border btn-press flex min-h-[44px] items-center justify-center gap-2 bg-coral px-3 py-2 text-sm font-bold text-ink transition-colors"
+              >
+                <MdLogout size={16} /> Leave
+              </button>
+            )}
+            {isAdmin && (
+              <Link
+                to={`/leagues/${id}/settings`}
+                aria-label="League settings"
+                className="brut-border btn-press flex min-h-[44px] items-center justify-center gap-2 bg-card px-3 py-2 text-sm font-bold text-ink transition-colors hover:bg-paper-alt"
+              >
+                <MdSettings size={18} />
+              </Link>
+            )}
             <Link
-              to={`/leagues/${id}/settings`}
-              className="flex items-center justify-center gap-2 rounded-lg border border-border px-3 py-3 text-sm text-text-secondary transition-colors hover:bg-bg-tertiary hover:text-text-primary sm:py-2.5"
+              to={`/leagues/${id}/leaderboard`}
+              className="brut-border btn-press flex min-h-[44px] items-center justify-center gap-2 bg-card px-3 py-2 text-sm font-bold text-ink transition-colors hover:bg-paper-alt"
             >
-              <MdSettings size={16} />
+              <MdLeaderboard size={16} /> Leaderboard
             </Link>
-          )}
-          <Link
-            to={`/leagues/${id}/leaderboard`}
-            className="flex items-center justify-center gap-2 rounded-lg border border-border px-3 py-3 text-sm text-text-secondary transition-colors hover:bg-bg-tertiary hover:text-text-primary sm:py-2.5"
-          >
-            <MdLeaderboard size={16} /> Leaderboard
-          </Link>
-          <Link
-            to={`/leagues/${id}/match/new`}
-            className="flex items-center justify-center gap-2 rounded-lg bg-accent px-3 py-3 text-sm font-medium text-white transition-colors hover:bg-accent-hover sm:py-2.5"
-          >
-            <MdAdd size={16} /> Record Match
-          </Link>
+            <Link
+              to={`/leagues/${id}/match/new`}
+              className="brut-border btn-press brut-shadow flex min-h-[44px] items-center justify-center gap-2 bg-ink px-3 py-2 text-sm font-bold uppercase tracking-wide text-paper transition-colors"
+            >
+              <MdAdd size={18} /> Record Match
+            </Link>
+          </div>
         </div>
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        {/* Members */}
-        <div className="rounded-xl border border-border bg-bg-secondary p-5 shadow-sm">
-          <h2 className="mb-4 text-lg font-semibold text-text-primary">
+        <div className="brut-border brut-shadow bg-card p-5">
+          <h2 className="mb-4 text-lg font-bold uppercase tracking-wide text-ink">
             Members
           </h2>
           {members.length === 0 ? (
-            <p className="text-sm text-text-muted">No members yet.</p>
+            <p className="text-sm font-medium text-ink-muted">No members yet.</p>
           ) : (
-            <div className="space-y-1">
+            <ul className="divide-y-2 divide-ink/10">
               {members.map((m) => (
-                <Link
-                  key={m.player_id}
-                  to={`/players/${m.player_id}`}
-                  className="flex items-center justify-between rounded-lg px-3 py-2 transition-colors hover:bg-bg-tertiary"
-                >
-                  <div className="flex items-center gap-2">
-                    <Avatar name={m.display_name} size="sm" />
-                    <span className="text-sm text-text-primary">
-                      {m.display_name}
-                      {m.role === "admin" && (
-                        <span className="ml-2 rounded-full bg-accent-light px-2 py-0.5 text-xs font-medium text-accent">admin</span>
-                      )}
+                <li key={m.player_id}>
+                  <Link
+                    to={`/players/${m.player_id}`}
+                    className="flex items-center justify-between py-2 transition-colors hover:bg-paper-alt"
+                  >
+                    <div className="flex items-center gap-2">
+                      <Avatar name={m.display_name} size="sm" />
+                      <span className="text-sm font-semibold text-ink">
+                        {m.display_name}
+                        {m.role === "admin" && (
+                          <span className="ml-2 border-2 border-ink bg-butter px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-ink">
+                            admin
+                          </span>
+                        )}
+                      </span>
+                    </div>
+                    <span className="font-mono text-sm font-bold text-team-blue">
+                      {m.current_elo}
                     </span>
-                  </div>
-                  <span className="text-sm font-mono font-semibold text-accent">
-                    {m.current_elo}
-                  </span>
-                </Link>
+                  </Link>
+                </li>
               ))}
-            </div>
+            </ul>
           )}
         </div>
 
-        {/* Recent Matches */}
-        <div className="rounded-xl border border-border bg-bg-secondary p-5 shadow-sm">
+        <div className="brut-border brut-shadow bg-card p-5">
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-text-primary">
+            <h2 className="text-lg font-bold uppercase tracking-wide text-ink">
               Recent Matches
             </h2>
             {matches.length > 5 && (
               <Link
                 to={`/leagues/${id}/matches`}
-                className="flex items-center gap-1 text-xs font-medium text-accent hover:text-accent-hover"
+                className="btn-press flex items-center gap-1 border-b-2 border-ink pb-0.5 text-xs font-bold uppercase tracking-wide text-ink"
               >
                 <MdHistory size={14} /> View all
               </Link>
             )}
           </div>
           {matches.length === 0 ? (
-            <p className="text-sm text-text-muted">No matches yet.</p>
+            <p className="text-sm font-medium text-ink-muted">No matches yet.</p>
           ) : (
-            <div className="space-y-1">
-              {recentMatches.map((m) => (
-                <div
-                  key={m.match_id}
-                  className="flex min-w-0 items-center justify-between gap-2 rounded-lg px-3 py-2 text-sm hover:bg-bg-tertiary"
-                >
-                  <div className="min-w-0">
-                    <span className="block truncate text-text-primary">
-                      {m.team1_player_ids.map(resolveName).join(", ")} vs{" "}
-                      {m.team2_player_ids.map(resolveName).join(", ")}
-                    </span>
-                    <span className="text-xs text-text-muted">
-                      {new Date(m.created_at).toLocaleDateString()}
-                    </span>
-                  </div>
-                  <div className="flex shrink-0 items-center gap-3">
-                    <span className="font-mono font-semibold text-accent">
-                      {m.team1_score} &ndash; {m.team2_score}
-                    </span>
-                    {m.status === "PENDING" && (isAdmin || (
-                      user?.player_id !== m.submitted_by && (
-                        m.team1_player_ids.includes(user?.player_id ?? "") ||
-                        m.team2_player_ids.includes(user?.player_id ?? "")
-                      )
-                    )) ? (
-                      <div className="flex items-center gap-1">
-                        <button
-                          onClick={() => handleConfirm(m.match_id)}
-                          className="rounded-full bg-success/10 p-2 text-success transition-colors hover:bg-success/20"
-                          title="Confirm"
-                        >
-                          <MdCheck size={16} />
-                        </button>
-                        <button
-                          onClick={() => handleDispute(m.match_id)}
-                          className="rounded-full bg-danger/10 p-2 text-danger transition-colors hover:bg-danger/20"
-                          title="Dispute"
-                        >
-                          <MdClose size={16} />
-                        </button>
-                      </div>
-                    ) : (
-                      <span
-                        className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-                          m.status === "CONFIRMED"
-                            ? "bg-success/10 text-success"
-                            : m.status === "DISPUTED"
-                              ? "bg-danger/10 text-danger"
-                              : "bg-warning/10 text-warning"
-                        }`}
-                      >
-                        {m.status}
+            <ul className="divide-y-2 divide-ink/10">
+              {recentMatches.map((m) => {
+                const canAct =
+                  m.status === "PENDING" &&
+                  (isAdmin ||
+                    (user?.player_id !== m.submitted_by &&
+                      (m.team1_player_ids.includes(user?.player_id ?? "") ||
+                        m.team2_player_ids.includes(user?.player_id ?? ""))));
+                return (
+                  <li
+                    key={m.match_id}
+                    className="flex min-w-0 items-center justify-between gap-2 py-2 text-sm"
+                  >
+                    <div className="min-w-0">
+                      <span className="block truncate font-medium text-ink">
+                        {m.team1_player_ids.map(resolveName).join(", ")} vs{" "}
+                        {m.team2_player_ids.map(resolveName).join(", ")}
                       </span>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
+                      <span className="font-mono text-xs text-ink-muted">
+                        {new Date(m.created_at).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <div className="flex shrink-0 items-center gap-2">
+                      <span className="font-mono font-bold text-ink">
+                        {m.team1_score}&ndash;{m.team2_score}
+                      </span>
+                      {canAct ? (
+                        <div className="flex items-center gap-1">
+                          <button
+                            onClick={() => handleConfirm(m.match_id)}
+                            className="brut-border btn-press bg-mint p-1.5 text-ink"
+                            title="Confirm"
+                          >
+                            <MdCheck size={16} />
+                          </button>
+                          <button
+                            onClick={() => handleDispute(m.match_id)}
+                            className="brut-border btn-press bg-coral p-1.5 text-ink"
+                            title="Dispute"
+                          >
+                            <MdClose size={16} />
+                          </button>
+                        </div>
+                      ) : (
+                        <span
+                          className={`border-2 border-ink px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-ink ${
+                            STATUS_FILL[m.status] ?? "bg-paper-alt"
+                          }`}
+                        >
+                          {m.status}
+                        </span>
+                      )}
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
           )}
         </div>
       </div>

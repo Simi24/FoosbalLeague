@@ -28,11 +28,11 @@ export const MatchRecordPage = () => {
     skip: !leagueId,
   });
 
-  if (!leagueId) return <p className="text-danger">Missing league id</p>;
+  if (!leagueId) return <p className="font-semibold text-danger">Missing league id</p>;
   if (leagueLoading || !league) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent border-t-transparent" />
+        <div className="h-8 w-8 animate-spin border-[3px] border-ink border-t-transparent" />
       </div>
     );
   }
@@ -180,8 +180,10 @@ const MatchRecordForm = ({ leagueId, league }: FormProps) => {
       : undefined;
 
   return (
-    <div className="mx-auto max-w-2xl pb-24 md:pb-0">
-      <h1 className="mb-6 text-2xl font-bold text-text-primary">Record Match</h1>
+    <div className="mx-auto max-w-2xl pb-28 md:pb-0">
+      <h1 className="mb-6 text-3xl font-bold tracking-tight text-ink md:text-4xl">
+        Record Match
+      </h1>
 
       {rematch && currentPlayerId && (
         <RematchCard
@@ -193,7 +195,7 @@ const MatchRecordForm = ({ leagueId, league }: FormProps) => {
       )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="flex flex-col gap-4 md:flex-row md:gap-6">
+        <div className="flex flex-col gap-4 md:flex-row md:items-stretch md:gap-6">
           <TeamCard
             team={1}
             label="Team 1"
@@ -202,8 +204,12 @@ const MatchRecordForm = ({ leagueId, league }: FormProps) => {
             onSlotTap={(idx) => picker.openFor(1, idx)}
             onSlotRemove={(idx) => form.removeFromSlot(1, idx)}
           />
-          <div className="flex items-center justify-center md:pt-6">
-            <span className="text-lg font-bold text-text-muted">vs</span>
+          <div className="flex items-center justify-center">
+            <span className="brut-border brut-shadow flex h-12 w-12 rotate-45 items-center justify-center bg-butter md:h-14 md:w-14">
+              <span className="-rotate-45 font-mono text-sm font-bold text-ink md:text-base">
+                VS
+              </span>
+            </span>
           </div>
           <TeamCard
             team={2}
@@ -216,11 +222,11 @@ const MatchRecordForm = ({ leagueId, league }: FormProps) => {
         </div>
 
         <div>
-          <div className="grid grid-cols-[1fr_auto_1fr] items-end gap-4">
+          <div className="grid grid-cols-[1fr_auto_1fr] items-end gap-3">
             <div>
               <label
                 htmlFor="score1"
-                className="mb-1 block text-sm font-medium text-team-blue"
+                className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-team-blue"
               >
                 Team 1 Score
               </label>
@@ -232,15 +238,15 @@ const MatchRecordForm = ({ leagueId, league }: FormProps) => {
                 inputMode="numeric"
                 value={form.score1}
                 onChange={(e) => form.setScore1(e.target.value)}
-                className="w-full rounded-lg border border-team-blue/30 bg-bg-tertiary px-3 py-3 text-center font-mono text-2xl text-team-blue outline-none focus:border-team-blue focus:ring-2 focus:ring-team-blue/20"
+                className="min-h-[56px] w-full border-[3px] border-team-blue bg-team-blue-tint px-3 py-3 text-center font-mono text-3xl font-bold text-team-blue outline-none"
                 required
               />
             </div>
-            <span className="pb-3 text-lg font-bold text-text-muted">&ndash;</span>
+            <span className="pb-4 font-mono text-2xl font-bold text-ink">–</span>
             <div>
               <label
                 htmlFor="score2"
-                className="mb-1 block text-sm font-medium text-team-red"
+                className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-team-red"
               >
                 Team 2 Score
               </label>
@@ -252,7 +258,7 @@ const MatchRecordForm = ({ leagueId, league }: FormProps) => {
                 inputMode="numeric"
                 value={form.score2}
                 onChange={(e) => form.setScore2(e.target.value)}
-                className="w-full rounded-lg border border-team-red/30 bg-bg-tertiary px-3 py-3 text-center font-mono text-2xl text-team-red outline-none focus:border-team-red focus:ring-2 focus:ring-team-red/20"
+                className="min-h-[56px] w-full border-[3px] border-team-red bg-team-red-tint px-3 py-3 text-center font-mono text-3xl font-bold text-team-red outline-none"
                 required
               />
             </div>
@@ -260,7 +266,7 @@ const MatchRecordForm = ({ leagueId, league }: FormProps) => {
           {form.tieError && (
             <p
               role="alert"
-              className="mt-2 text-center text-xs text-danger"
+              className="mt-2 text-center text-xs font-semibold text-danger"
             >
               Scores must differ — there are no ties in foosball.
             </p>
@@ -268,8 +274,8 @@ const MatchRecordForm = ({ leagueId, league }: FormProps) => {
         </div>
 
         {preview.size > 0 && (
-          <div className="rounded-xl border border-field-green/20 bg-field-green/5 p-4">
-            <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-field-green">
+          <div className="brut-border brut-shadow bg-mint p-4">
+            <h3 className="mb-3 text-xs font-bold uppercase tracking-wide text-ink">
               ELO Preview
             </h3>
             <div className="grid grid-cols-2 gap-4">
@@ -282,11 +288,11 @@ const MatchRecordForm = ({ leagueId, league }: FormProps) => {
                       key={id}
                       className="flex items-center justify-between text-sm"
                     >
-                      <span className="text-text-primary">
+                      <span className="font-medium text-ink">
                         {p?.display_name ?? id}
                       </span>
                       <span
-                        className={`font-mono font-semibold ${
+                        className={`font-mono font-bold ${
                           d >= 0 ? "text-success" : "text-danger"
                         }`}
                       >
@@ -306,11 +312,11 @@ const MatchRecordForm = ({ leagueId, league }: FormProps) => {
                       key={id}
                       className="flex items-center justify-between text-sm"
                     >
-                      <span className="text-text-primary">
+                      <span className="font-medium text-ink">
                         {p?.display_name ?? id}
                       </span>
                       <span
-                        className={`font-mono font-semibold ${
+                        className={`font-mono font-bold ${
                           d >= 0 ? "text-success" : "text-danger"
                         }`}
                       >
@@ -326,19 +332,22 @@ const MatchRecordForm = ({ leagueId, league }: FormProps) => {
         )}
 
         {submitErrorMsg && (
-          <p role="alert" className="text-sm text-danger">
+          <p
+            role="alert"
+            className="brut-border bg-coral px-3 py-2 text-sm font-semibold text-ink"
+          >
             {submitErrorMsg}
           </p>
         )}
 
-        <div className="fixed inset-x-0 bottom-16 z-30 border-t border-border bg-bg-primary px-4 py-3 md:static md:bottom-auto md:border-none md:bg-transparent md:p-0">
+        <div className="fixed inset-x-0 bottom-16 z-30 border-t-2 border-ink bg-paper px-4 py-3 md:static md:bottom-auto md:border-none md:bg-transparent md:p-0">
           <div className="mx-auto max-w-2xl">
             <button
               type="submit"
               disabled={submitting || !form.canSubmit}
-              className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
+              className="brut-border btn-press brut-shadow-lg flex min-h-[52px] w-full items-center justify-center gap-2 bg-ink px-4 py-3 text-base font-bold uppercase tracking-wide text-paper transition-colors disabled:cursor-not-allowed disabled:bg-ink-muted disabled:text-paper"
             >
-              <MdSportsSoccer size={18} />
+              <MdSportsSoccer size={20} />
               {submitting ? "Recording..." : "Record Match"}
             </button>
           </div>

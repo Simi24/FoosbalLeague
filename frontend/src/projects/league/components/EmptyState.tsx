@@ -8,10 +8,16 @@ type EmptyStateProps = {
 };
 
 export const EmptyState = ({ icon, title, description, action }: EmptyStateProps) => (
-  <div className="flex flex-col items-center justify-center rounded-xl border border-border bg-bg-secondary px-4 py-8 text-center sm:px-6 sm:py-12">
-    <div className="mb-3 text-text-muted">{icon}</div>
-    <h3 className="mb-1 text-lg font-semibold text-text-primary">{title}</h3>
-    {description && <p className="mb-4 text-sm text-text-secondary">{description}</p>}
+  <div className="brut-border brut-shadow flex flex-col items-center justify-center bg-card px-4 py-10 text-center sm:px-6 sm:py-14">
+    <div className="mb-4 flex h-14 w-14 items-center justify-center border-2 border-ink bg-butter text-ink">
+      {icon}
+    </div>
+    <h3 className="mb-1 text-lg font-bold uppercase tracking-wide text-ink">
+      {title}
+    </h3>
+    {description && (
+      <p className="mb-4 max-w-sm text-sm font-medium text-ink-soft">{description}</p>
+    )}
     {action}
   </div>
 );

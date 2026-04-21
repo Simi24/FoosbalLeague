@@ -23,12 +23,18 @@ export const CreateLeagueForm = ({ onCreated }: { onCreated?: (lg: League) => vo
   };
 
   const inputClass =
-    "w-full rounded-lg border border-border bg-bg-tertiary px-3 py-2.5 text-sm text-text-primary outline-none focus:border-accent focus:ring-2 focus:ring-accent/20";
+    "brut-border min-h-[44px] w-full bg-card px-3 py-2 text-sm text-ink outline-none placeholder:text-ink-muted";
+
+  const labelClass =
+    "mb-1.5 block text-xs font-bold uppercase tracking-wide text-ink";
 
   return (
-    <form onSubmit={handleSubmit} className="mb-6 rounded-xl border border-border bg-bg-secondary p-5 shadow-sm">
+    <form
+      onSubmit={handleSubmit}
+      className="brut-border brut-shadow mb-6 bg-card p-5"
+    >
       <div className="mb-4">
-        <label className="mb-1 block text-sm font-medium text-text-secondary">Name</label>
+        <label className={labelClass}>Name</label>
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
@@ -36,28 +42,28 @@ export const CreateLeagueForm = ({ onCreated }: { onCreated?: (lg: League) => vo
           required
         />
       </div>
-      <div className="mb-4 flex gap-4">
-        <label className="flex items-center gap-2 text-sm text-text-secondary">
-          <input
-            type="radio"
-            checked={leagueType === "2v2"}
-            onChange={() => setLeagueType("2v2")}
-            className="accent-accent"
-          />
-          2v2
-        </label>
-        <label className="flex items-center gap-2 text-sm text-text-secondary">
-          <input
-            type="radio"
-            checked={leagueType === "1v1"}
-            onChange={() => setLeagueType("1v1")}
-            className="accent-accent"
-          />
-          1v1
-        </label>
+      <div className="mb-4">
+        <span className={labelClass}>League Type</span>
+        <div className="flex gap-2">
+          {(["2v2", "1v1"] as const).map((t) => (
+            <button
+              key={t}
+              type="button"
+              onClick={() => setLeagueType(t)}
+              aria-pressed={leagueType === t}
+              className={`brut-border btn-press min-h-[44px] flex-1 px-4 py-2 text-sm font-bold transition-colors ${
+                leagueType === t
+                  ? "bg-butter text-ink brut-shadow"
+                  : "bg-card text-ink-soft hover:bg-paper-alt"
+              }`}
+            >
+              {t}
+            </button>
+          ))}
+        </div>
       </div>
       <div className="mb-4">
-        <label className="mb-1 block text-sm font-medium text-text-secondary">Description</label>
+        <label className={labelClass}>Description</label>
         <input
           value={description}
           onChange={(e) => setDescription(e.target.value)}
@@ -66,7 +72,7 @@ export const CreateLeagueForm = ({ onCreated }: { onCreated?: (lg: League) => vo
       </div>
       <button
         type="submit"
-        className="w-full rounded-lg bg-accent px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-hover sm:w-auto"
+        className="brut-border btn-press brut-shadow min-h-[44px] w-full bg-ink px-4 py-2 text-sm font-bold uppercase tracking-wide text-paper transition-colors sm:w-auto"
       >
         Create
       </button>

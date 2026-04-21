@@ -22,30 +22,33 @@ type AchievementBadgeProps = {
   compact?: boolean;
 };
 
-const RARITY_STYLES: Record<string, { bg: string; border: string; glow: string; label: string }> = {
+const RARITY_STYLES: Record<
+  string,
+  { fill: string; border: string; label: string; chipFill: string }
+> = {
   common: {
-    bg: "from-slate-800 to-slate-700",
-    border: "border-slate-500",
-    glow: "",
+    fill: "bg-paper-alt",
+    border: "border-2 border-ink",
     label: "Common",
+    chipFill: "bg-paper-alt",
   },
   rare: {
-    bg: "from-blue-900 to-blue-800",
-    border: "border-blue-500",
-    glow: "shadow-blue-500/20",
+    fill: "bg-team-blue-tint",
+    border: "border-2 border-ink",
     label: "Rare",
+    chipFill: "bg-team-blue-tint",
   },
   epic: {
-    bg: "from-purple-900 to-purple-800",
-    border: "border-purple-500",
-    glow: "shadow-purple-500/20",
+    fill: "bg-lavender",
+    border: "border-[3px] border-ink",
     label: "Epic",
+    chipFill: "bg-lavender",
   },
   legendary: {
-    bg: "from-amber-900 via-yellow-900 to-amber-800",
-    border: "border-amber-500",
-    glow: "shadow-amber-500/20",
+    fill: "bg-butter",
+    border: "border-[3px] border-ink",
     label: "Legendary",
+    chipFill: "bg-butter",
   },
 };
 
@@ -77,16 +80,14 @@ export const AchievementBadge = ({
   if (compact) {
     return (
       <div
-        className={`group relative flex h-14 w-14 items-center justify-center rounded-xl border-2 bg-gradient-to-br transition-transform hover:scale-110 ${
-          unlocked
-            ? `${style.bg} ${style.border} ${style.glow} shadow-md`
-            : "from-gray-800 to-gray-900 border-gray-700 opacity-40"
+        className={`relative flex h-14 w-14 items-center justify-center ${style.border} ${
+          unlocked ? `${style.fill} brut-shadow` : "bg-paper-alt opacity-40"
         }`}
         title={`${name} — ${description}`}
       >
         <IconComponent
-          size={24}
-          className={unlocked ? "text-gray-200" : "text-gray-500"}
+          size={26}
+          className={unlocked ? "text-ink" : "text-ink-muted"}
         />
       </div>
     );
@@ -94,51 +95,41 @@ export const AchievementBadge = ({
 
   return (
     <div
-      className={`relative overflow-hidden rounded-xl border-2 bg-gradient-to-br p-4 transition-transform hover:scale-[1.02] ${
-        unlocked
-          ? `${style.bg} ${style.border} ${style.glow} shadow-md`
-          : "from-gray-800 to-gray-900 border-gray-700 opacity-50"
+      className={`relative overflow-hidden ${style.border} p-4 ${
+        unlocked ? `${style.fill} brut-shadow` : "bg-paper-alt opacity-60"
       }`}
     >
       <div className="flex items-start gap-3">
         <div
-          className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-lg ${
-            unlocked ? "bg-white/10" : "bg-gray-700/40"
+          className={`flex h-12 w-12 shrink-0 items-center justify-center border-2 border-ink ${
+            unlocked ? "bg-card" : "bg-paper"
           }`}
         >
           <IconComponent
             size={28}
-            className={unlocked ? "text-gray-200" : "text-gray-500"}
+            className={unlocked ? "text-ink" : "text-ink-muted"}
           />
         </div>
         <div className="min-w-0">
           <div className="flex items-center gap-2">
             <h3
               className={`text-sm font-bold ${
-                unlocked ? "text-gray-100" : "text-gray-500"
+                unlocked ? "text-ink" : "text-ink-muted"
               }`}
             >
               {name}
             </h3>
             {unlocked && (
               <span
-                className={`rounded-full px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
-                  rarity === "legendary"
-                    ? "bg-amber-500/20 text-amber-300"
-                    : rarity === "epic"
-                      ? "bg-purple-500/20 text-purple-300"
-                      : rarity === "rare"
-                        ? "bg-blue-500/20 text-blue-300"
-                        : "bg-slate-500/20 text-slate-400"
-                }`}
+                className={`border-2 border-ink px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-ink ${style.chipFill}`}
               >
                 {style.label}
               </span>
             )}
           </div>
           <p
-            className={`mt-0.5 text-xs ${
-              unlocked ? "text-gray-400" : "text-gray-500"
+            className={`mt-1 text-xs font-medium ${
+              unlocked ? "text-ink-soft" : "text-ink-muted"
             }`}
           >
             {description}
@@ -146,8 +137,8 @@ export const AchievementBadge = ({
         </div>
       </div>
       {!unlocked && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-          <MdLock size={20} className="text-gray-600" />
+        <div className="absolute inset-0 flex items-center justify-center bg-paper/60">
+          <MdLock size={22} className="text-ink" />
         </div>
       )}
     </div>

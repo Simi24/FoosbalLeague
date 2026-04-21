@@ -44,45 +44,52 @@ const MatchCard = ({ left, right, score, insight }: MatchExampleData) => {
 
   return (
     <div className="w-full shrink-0 snap-center px-2">
-      <div className="rounded-xl border border-border bg-bg-secondary p-5 shadow-sm">
-        {/* Players & score */}
+      <div className="brut-border brut-shadow bg-card p-5">
         <div className="mb-4 flex items-center gap-3">
           <div className="flex flex-1 flex-col items-center gap-1.5">
             <Avatar name={left.name} size="lg" />
-            <span className="text-sm font-semibold text-text-primary">{left.name}</span>
-            <span className="font-mono text-xs text-text-muted">{left.before} ELO</span>
+            <span className="text-sm font-bold text-ink">{left.name}</span>
+            <span className="font-mono text-xs font-semibold text-ink-muted">
+              {left.before} ELO
+            </span>
           </div>
 
           <div className="flex flex-col items-center gap-1">
             <div className="flex items-baseline gap-1.5">
-              <span className={`font-mono text-2xl font-bold ${leftWon ? "text-success" : "text-text-muted"}`}>
+              <span
+                className={`font-mono text-3xl font-bold ${leftWon ? "text-team-blue" : "text-ink-muted"}`}
+              >
                 {score[0]}
               </span>
-              <span className="text-sm text-text-muted">-</span>
-              <span className={`font-mono text-2xl font-bold ${!leftWon ? "text-success" : "text-text-muted"}`}>
+              <span className="text-sm font-bold text-ink">–</span>
+              <span
+                className={`font-mono text-3xl font-bold ${!leftWon ? "text-team-red" : "text-ink-muted"}`}
+              >
                 {score[1]}
               </span>
             </div>
-            <span className="text-[10px] uppercase tracking-wider text-text-muted">final</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-ink-muted">
+              final
+            </span>
           </div>
 
           <div className="flex flex-1 flex-col items-center gap-1.5">
             <Avatar name={right.name} size="lg" />
-            <span className="text-sm font-semibold text-text-primary">{right.name}</span>
-            <span className="font-mono text-xs text-text-muted">{right.before} ELO</span>
+            <span className="text-sm font-bold text-ink">{right.name}</span>
+            <span className="font-mono text-xs font-semibold text-ink-muted">
+              {right.before} ELO
+            </span>
           </div>
         </div>
 
-        <div className="mb-4 border-t border-border/50" />
+        <div className="mb-4 border-t-2 border-ink/10" />
 
-        {/* Results */}
         <div className="mb-3 grid grid-cols-2 gap-3">
           <ResultBadge name={left.name} before={left.before} after={left.after} delta={leftDelta} />
           <ResultBadge name={right.name} before={right.before} after={right.after} delta={rightDelta} />
         </div>
 
-        {/* Insight */}
-        <p className="text-center text-xs leading-relaxed text-text-muted">
+        <p className="text-center text-xs font-medium leading-relaxed text-ink-soft">
           {insight}
         </p>
       </div>
@@ -94,13 +101,17 @@ const ResultBadge = ({ name, before, after, delta }: { name: string; before: num
   const isGain = delta > 0;
 
   return (
-    <div className={`rounded-lg p-2.5 ${isGain ? "bg-success/5" : "bg-danger/5"}`}>
-      <div className="mb-1 text-center text-[10px] font-medium text-text-muted">{name}</div>
+    <div className={`border-2 border-ink p-2.5 ${isGain ? "bg-mint" : "bg-coral"}`}>
+      <div className="mb-1 text-center text-[10px] font-bold uppercase tracking-wider text-ink">
+        {name}
+      </div>
       <div className="flex items-center justify-center gap-1.5">
-        <span className="font-mono text-xs text-text-muted">{before}</span>
-        <span className="text-text-muted">&rarr;</span>
-        <span className="font-mono text-xs font-semibold text-text-primary">{after}</span>
-        <span className={`flex items-center font-mono text-xs font-bold ${isGain ? "text-success" : "text-danger"}`}>
+        <span className="font-mono text-xs text-ink-muted">{before}</span>
+        <span className="text-ink">&rarr;</span>
+        <span className="font-mono text-xs font-bold text-ink">{after}</span>
+        <span
+          className={`flex items-center font-mono text-xs font-bold ${isGain ? "text-success" : "text-danger"}`}
+        >
           {isGain ? <MdArrowUpward size={12} /> : <MdArrowDownward size={12} />}
           {Math.abs(delta)}
         </span>
@@ -126,7 +137,6 @@ export const EloExample = () => {
     el.scrollTo({ left: index * el.offsetWidth, behavior: "smooth" });
   }, []);
 
-  // Auto-advance every 6s, pause on interaction
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const resetTimer = useCallback(() => {
@@ -168,7 +178,6 @@ export const EloExample = () => {
         ))}
       </div>
 
-      {/* Dots */}
       <div className="mt-4 flex justify-center gap-2">
         {matches.map((_, i) => (
           <button
@@ -176,10 +185,8 @@ export const EloExample = () => {
             type="button"
             onClick={() => handleDotClick(i)}
             aria-label={`Example ${i + 1}`}
-            className={`h-2 rounded-full transition-all duration-300 ${
-              i === active
-                ? "w-6 bg-accent"
-                : "w-2 bg-border hover:bg-text-muted"
+            className={`h-3 border-2 border-ink transition-all duration-200 ${
+              i === active ? "w-8 bg-ink" : "w-3 bg-card hover:bg-paper-alt"
             }`}
           />
         ))}

@@ -8,25 +8,26 @@ interface ToastProps {
   onClose: () => void;
 }
 
-const TOAST_CONFIG: Record<ToastType, { icon: React.ElementType; border: string; iconColor: string }> = {
-  success: { icon: MdCheckCircle, border: "border-success/40", iconColor: "text-success" },
-  error: { icon: MdError, border: "border-danger/40", iconColor: "text-danger" },
-  info: { icon: MdInfo, border: "border-tertiary/40", iconColor: "text-tertiary" },
-  warning: { icon: MdWarning, border: "border-warning/40", iconColor: "text-warning" },
+const TOAST_CONFIG: Record<ToastType, { icon: React.ElementType; stripe: string }> = {
+  success: { icon: MdCheckCircle, stripe: "bg-mint" },
+  error: { icon: MdError, stripe: "bg-coral" },
+  info: { icon: MdInfo, stripe: "bg-lavender" },
+  warning: { icon: MdWarning, stripe: "bg-butter" },
 };
 
 export const Toast = ({ message, type, onClose }: ToastProps) => {
-  const { icon: Icon, border, iconColor } = TOAST_CONFIG[type];
+  const { icon: Icon, stripe } = TOAST_CONFIG[type];
 
   return (
-    <div
-      className={`pointer-events-auto flex items-center gap-3 rounded-xl border ${border} bg-bg-secondary px-4 py-3 shadow-lg animate-slide-in-right`}
-    >
-      <Icon size={20} className={iconColor} />
-      <p className="flex-1 text-sm text-text-primary">{message}</p>
+    <div className="brut-border brut-shadow animate-slide-in-right pointer-events-auto flex items-stretch overflow-hidden bg-card">
+      <div className={`flex w-10 shrink-0 items-center justify-center border-r-2 border-ink ${stripe}`}>
+        <Icon size={20} className="text-ink" />
+      </div>
+      <p className="flex-1 px-3 py-3 text-sm font-medium text-ink">{message}</p>
       <button
         onClick={onClose}
-        className="shrink-0 rounded-md p-1 text-text-muted transition-colors hover:bg-bg-tertiary hover:text-text-secondary"
+        className="btn-press shrink-0 border-l-2 border-ink px-3 text-ink transition-colors hover:bg-paper-alt"
+        aria-label="Close"
       >
         <MdClose size={16} />
       </button>

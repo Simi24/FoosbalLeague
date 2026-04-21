@@ -11,6 +11,7 @@ import {
 
 import { useAppSelector } from "@/app/hooks";
 import { EloExample } from "@/components/EloExample";
+import { BrandMark } from "@/components/layout";
 
 interface ChangelogEntry {
   version: string;
@@ -32,43 +33,43 @@ const features = [
     icon: MdLeaderboard,
     title: "ELO Rankings",
     description: "Fair skill-based ratings powered by the same system used in chess.",
-    gradient: "from-blue-500/20 to-blue-600/5",
-    iconColor: "text-blue-400",
+    fill: "bg-team-blue-tint",
+    rotate: "rotate-[-1deg]",
   },
   {
     icon: MdGroups,
     title: "1v1 & 2v2",
     description: "Singles or doubles — team ratings adjust individually.",
-    gradient: "from-purple-500/20 to-purple-600/5",
-    iconColor: "text-purple-400",
+    fill: "bg-lavender",
+    rotate: "rotate-[1deg]",
   },
   {
     icon: MdEmojiEvents,
     title: "Achievements",
     description: "10 badges from common to legendary. First Blood, Giant Killer, Top Dog...",
-    gradient: "from-amber-500/20 to-amber-600/5",
-    iconColor: "text-amber-400",
+    fill: "bg-butter",
+    rotate: "rotate-[-1deg]",
   },
   {
     icon: MdVpnKey,
     title: "Private Leagues",
     description: "Create invite-only leagues for your office, friend group, or team.",
-    gradient: "from-emerald-500/20 to-emerald-600/5",
-    iconColor: "text-emerald-400",
+    fill: "bg-mint",
+    rotate: "rotate-[1deg]",
   },
   {
     icon: MdTimeline,
     title: "ELO History",
     description: "Interactive charts tracking your rating over time.",
-    gradient: "from-red-500/20 to-red-600/5",
-    iconColor: "text-red-400",
+    fill: "bg-team-red-tint",
+    rotate: "rotate-[-1deg]",
   },
   {
     icon: MdSportsSoccer,
     title: "Match Confirmation",
     description: "Opponents confirm or dispute results — no cheating allowed.",
-    gradient: "from-cyan-500/20 to-cyan-600/5",
-    iconColor: "text-cyan-400",
+    fill: "bg-peach",
+    rotate: "rotate-[1deg]",
   },
 ];
 
@@ -85,8 +86,8 @@ export const LandingPage = () => {
 
   if (status === "idle" || status === "loading") {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-bg-primary">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent border-t-transparent" />
+      <div className="flex min-h-screen items-center justify-center bg-paper">
+        <div className="h-8 w-8 animate-spin border-[3px] border-ink border-t-transparent" />
       </div>
     );
   }
@@ -96,32 +97,27 @@ export const LandingPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-bg-primary">
+    <div className="min-h-screen bg-paper">
       {/* Hero */}
-      <section className="relative overflow-hidden px-4 pt-20 pb-16 sm:pt-28 sm:pb-20">
-        {/* Glow effect behind logo */}
-        <div className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 h-[500px] w-[600px] rounded-full bg-accent/5 blur-[120px]" />
-
-        <div className="relative flex flex-col items-center text-center">
-          <div
-            className="animate-in mb-8 flex h-20 w-20 items-center justify-center rounded-3xl border border-border bg-gradient-to-br from-accent/20 to-transparent shadow-lg shadow-accent/10"
-          >
-            <MdSportsSoccer size={40} className="text-accent" />
+      <section className="relative overflow-hidden px-4 pt-16 pb-12 sm:pt-24 sm:pb-16">
+        <div className="relative mx-auto flex max-w-3xl flex-col items-center text-center">
+          <div className="animate-in brut-shadow-lg mb-8">
+            <BrandMark size="lg" />
           </div>
 
-          <h1 className="animate-in brand-gradient mb-4 text-5xl font-bold tracking-tight sm:text-6xl">
-            FoosLeague
+          <h1 className="animate-in mb-4 text-5xl font-bold tracking-tight text-ink sm:text-7xl">
+            Foos<span className="text-team-red">League</span>
           </h1>
 
           <p
-            className="animate-in mb-3 text-xl text-text-secondary"
+            className="animate-in mb-3 text-lg font-semibold text-ink-soft sm:text-xl"
             style={{ animationDelay: "50ms" }}
           >
             ELO-based office foosball rankings
           </p>
 
           <p
-            className="animate-in mb-10 max-w-lg text-sm leading-relaxed text-text-muted"
+            className="animate-in mb-10 max-w-lg text-sm font-medium leading-relaxed text-ink-muted"
             style={{ animationDelay: "100ms" }}
           >
             Create leagues, record matches, track your rating, and earn achievements.
@@ -129,18 +125,18 @@ export const LandingPage = () => {
           </p>
 
           <div
-            className="animate-in flex flex-col gap-3 sm:flex-row"
+            className="animate-in flex w-full flex-col gap-3 sm:w-auto sm:flex-row"
             style={{ animationDelay: "150ms" }}
           >
             <Link
               to="/login"
-              className="btn-press rounded-xl bg-accent px-8 py-3 text-sm font-semibold text-white shadow-lg shadow-accent/25 transition-all hover:bg-accent-hover hover:shadow-accent/40"
+              className="brut-border btn-press brut-shadow-lg min-h-[48px] bg-ink px-8 py-3 text-sm font-bold uppercase tracking-wide text-paper transition-colors"
             >
               Sign in
             </Link>
             <Link
               to="/signup"
-              className="btn-press rounded-xl border border-border bg-bg-secondary px-8 py-3 text-sm font-semibold text-text-primary transition-all hover:bg-bg-tertiary"
+              className="brut-border btn-press brut-shadow-lg min-h-[48px] bg-team-blue-tint px-8 py-3 text-sm font-bold uppercase tracking-wide text-ink transition-colors"
             >
               Create account
             </Link>
@@ -151,28 +147,23 @@ export const LandingPage = () => {
       {/* Features grid */}
       <section className="px-4 py-12 sm:py-16">
         <div className="mx-auto max-w-4xl">
-          <h2 className="animate-in mb-10 text-center text-2xl font-bold text-text-primary">
+          <h2 className="animate-in mb-10 text-center text-3xl font-bold tracking-tight text-ink sm:text-4xl">
             Everything you need to run a league
           </h2>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {features.map((feat, i) => (
               <div
                 key={feat.title}
-                className="animate-in card-interactive rounded-xl border border-border bg-gradient-to-br p-5"
-                style={{
-                  animationDelay: `${i * 60}ms`,
-                  backgroundImage: `linear-gradient(to bottom right, var(--tw-gradient-stops))`,
-                }}
+                className={`animate-in card-interactive brut-border brut-shadow ${feat.fill} ${feat.rotate} p-5`}
+                style={{ animationDelay: `${i * 60}ms` }}
               >
-                <div
-                  className={`bg-gradient-to-br ${feat.gradient} mb-3 flex h-10 w-10 items-center justify-center rounded-lg`}
-                >
-                  <feat.icon size={22} className={feat.iconColor} />
+                <div className="mb-3 flex h-11 w-11 items-center justify-center border-2 border-ink bg-card text-ink">
+                  <feat.icon size={24} />
                 </div>
-                <h3 className="mb-1 text-sm font-semibold text-text-primary">
+                <h3 className="mb-1 text-base font-bold text-ink">
                   {feat.title}
                 </h3>
-                <p className="text-xs leading-relaxed text-text-secondary">
+                <p className="text-sm font-medium leading-relaxed text-ink-soft">
                   {feat.description}
                 </p>
               </div>
@@ -181,13 +172,13 @@ export const LandingPage = () => {
         </div>
       </section>
 
-      {/* How ELO works — by example */}
-      <section className="border-y border-border bg-bg-secondary px-4 py-12 sm:py-16">
+      {/* How ELO works */}
+      <section className="border-y-2 border-ink bg-paper-alt px-4 py-12 sm:py-16">
         <div className="mx-auto max-w-lg">
-          <h2 className="mb-2 text-center text-2xl font-bold text-text-primary">
+          <h2 className="mb-2 text-center text-3xl font-bold tracking-tight text-ink sm:text-4xl">
             How ELO Works
           </h2>
-          <p className="mb-8 text-center text-sm text-text-muted">
+          <p className="mb-8 text-center text-sm font-medium text-ink-soft">
             Everyone starts at 1200. Win and go up, lose and go down.
           </p>
           <EloExample />
@@ -198,26 +189,28 @@ export const LandingPage = () => {
       {changelog.length > 0 && (
         <section className="px-4 py-12 sm:py-16">
           <div className="mx-auto max-w-2xl">
-            <h2 className="mb-8 text-center text-2xl font-bold text-text-primary">
+            <h2 className="mb-8 text-center text-3xl font-bold tracking-tight text-ink sm:text-4xl">
               What&apos;s New
             </h2>
             <div className="space-y-4">
               {changelog.map((entry, i) => (
                 <div
                   key={entry.version}
-                  className="animate-in rounded-xl border border-border bg-bg-secondary p-4 shadow-sm"
+                  className="animate-in brut-border brut-shadow bg-card p-4"
                   style={{ animationDelay: `${i * 60}ms` }}
                 >
                   <div className="mb-2 flex items-center gap-3">
-                    <span className="rounded-full bg-accent-light px-2.5 py-0.5 text-xs font-semibold text-accent">
+                    <span className="border-2 border-ink bg-butter px-2 py-0.5 font-mono text-xs font-bold text-ink">
                       v{entry.version}
                     </span>
-                    <span className="text-xs text-text-muted">{formatDate(entry.date)}</span>
+                    <span className="font-mono text-xs font-semibold text-ink-muted">
+                      {formatDate(entry.date)}
+                    </span>
                   </div>
                   <ul className="space-y-1">
                     {entry.summary.map((item, j) => (
-                      <li key={j} className="flex gap-2 text-sm text-text-secondary">
-                        <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent/50" />
+                      <li key={j} className="flex gap-2 text-sm font-medium text-ink-soft">
+                        <span className="mt-1.5 h-1.5 w-1.5 shrink-0 bg-ink" />
                         {item}
                       </li>
                     ))}
@@ -228,7 +221,7 @@ export const LandingPage = () => {
             <div className="mt-6 text-center">
               <Link
                 to="/changelog"
-                className="text-sm text-text-secondary transition-colors hover:text-accent"
+                className="text-sm font-bold uppercase tracking-wide text-ink underline"
               >
                 View all updates
               </Link>
@@ -237,9 +230,8 @@ export const LandingPage = () => {
         </section>
       )}
 
-      {/* Footer */}
-      <footer className="border-t border-border px-4 py-6 text-center text-xs text-text-muted">
-        <Link to="/changelog" className="transition-colors hover:text-text-secondary">
+      <footer className="border-t-2 border-ink px-4 py-6 text-center font-mono text-xs text-ink-muted">
+        <Link to="/changelog" className="transition-colors hover:text-ink">
           FoosLeague v{__APP_VERSION__}
         </Link>
       </footer>

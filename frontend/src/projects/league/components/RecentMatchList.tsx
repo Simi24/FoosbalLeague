@@ -17,12 +17,12 @@ export const RecentMatchList = ({ matches, playerId, playerNames }: RecentMatchL
   const visible = expanded ? matches : matches.slice(0, INITIAL_COUNT);
 
   return (
-    <div className="mb-6 rounded-xl border border-border bg-bg-secondary p-5 shadow-sm">
-      <h2 className="mb-4 text-lg font-semibold text-text-primary">
+    <div className="brut-border brut-shadow mb-6 bg-card p-5">
+      <h2 className="mb-4 text-lg font-bold uppercase tracking-wide text-ink">
         Recent Matches
       </h2>
 
-      <div className="space-y-1">
+      <div className="divide-y-2 divide-ink/10">
         {visible.map((m) => {
           const isTeam1 = m.team1_player_ids.includes(playerId);
           const playerScore = isTeam1 ? m.team1_score : m.team2_score;
@@ -37,36 +37,37 @@ export const RecentMatchList = ({ matches, playerId, playerNames }: RecentMatchL
             .map((id) => playerNames[id] ?? id)
             .join(", ");
 
+          const chipFill =
+            m.status === "CONFIRMED"
+              ? won
+                ? "bg-mint"
+                : "bg-coral"
+              : "bg-butter";
+
           return (
             <div
               key={m.match_id}
-              className="flex min-w-0 items-center justify-between gap-2 rounded-lg px-3 py-2 text-sm hover:bg-bg-tertiary"
+              className="flex min-w-0 items-center justify-between gap-2 px-1 py-2 text-sm transition-colors hover:bg-paper-alt"
             >
               <div className="flex min-w-0 items-center gap-2">
                 <span
-                  className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${
-                    m.status === "CONFIRMED"
-                      ? won
-                        ? "bg-success/10 text-success"
-                        : "bg-danger/10 text-danger"
-                      : "bg-warning/10 text-warning"
-                  }`}
+                  className={`flex h-6 w-6 shrink-0 items-center justify-center border-2 border-ink text-xs font-bold text-ink ${chipFill}`}
                 >
                   {m.status === "CONFIRMED" ? (won ? "W" : "L") : m.status.charAt(0)}
                 </span>
-                <span className="truncate text-text-primary">
+                <span className="truncate font-medium text-ink">
                   vs {opponentNames}
                 </span>
               </div>
 
               <div className="flex shrink-0 items-center gap-3">
-                <span className="font-mono font-semibold text-accent">
-                  {playerScore} &ndash; {opponentScore}
+                <span className="font-mono font-bold text-ink">
+                  {playerScore}&ndash;{opponentScore}
                 </span>
                 <span
-                  className={`w-10 text-right text-xs font-medium ${
+                  className={`w-10 text-right font-mono text-xs font-bold ${
                     delta === undefined
-                      ? "text-text-muted"
+                      ? "text-ink-muted"
                       : delta >= 0
                         ? "text-success"
                         : "text-danger"
@@ -74,7 +75,7 @@ export const RecentMatchList = ({ matches, playerId, playerNames }: RecentMatchL
                 >
                   {delta === undefined ? "--" : `${delta >= 0 ? "+" : ""}${delta}`}
                 </span>
-                <span className="w-16 text-right text-xs text-text-muted">
+                <span className="hidden w-16 text-right font-mono text-xs text-ink-muted sm:block">
                   {new Date(m.created_at).toLocaleDateString()}
                 </span>
               </div>
@@ -86,7 +87,7 @@ export const RecentMatchList = ({ matches, playerId, playerNames }: RecentMatchL
       {matches.length > INITIAL_COUNT && (
         <button
           onClick={() => setExpanded((prev) => !prev)}
-          className="mt-3 flex items-center gap-1 text-xs font-medium text-accent hover:text-accent-hover"
+          className="btn-press mt-3 flex items-center gap-1 border-b-2 border-ink pb-0.5 text-xs font-bold uppercase tracking-wide text-ink hover:text-ink-soft"
         >
           {expanded ? (
             <>
@@ -94,7 +95,7 @@ export const RecentMatchList = ({ matches, playerId, playerNames }: RecentMatchL
             </>
           ) : (
             <>
-              <MdExpandMore size={14} /> Show all {matches.length} matches
+              <MdExpandMore size={14} /> Show all {matches.length}
             </>
           )}
         </button>

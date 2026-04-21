@@ -15,6 +15,10 @@ import {
 } from "@/api/baseApi";
 import { useAppSelector } from "@/app/hooks";
 
+const inputClass =
+  "brut-border min-h-[44px] w-full bg-card px-3 py-2 text-sm text-ink outline-none placeholder:text-ink-muted";
+const labelClass = "mb-1.5 block text-xs font-bold uppercase tracking-wide text-ink";
+
 export const LeagueSettingsPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -61,13 +65,13 @@ export const LeagueSettingsPage = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent border-t-transparent" />
+        <div className="h-8 w-8 animate-spin border-[3px] border-ink border-t-transparent" />
       </div>
     );
   }
 
   if (!league || !isAdmin) {
-    return <p className="text-danger">Access denied</p>;
+    return <p className="font-semibold text-danger">Access denied</p>;
   }
 
   return (
@@ -75,66 +79,67 @@ export const LeagueSettingsPage = () => {
       <div className="mb-6 flex items-center gap-3">
         <button
           onClick={() => navigate(`/leagues/${id}`)}
-          className="rounded-lg border border-border p-2 text-text-secondary transition-colors hover:bg-bg-tertiary hover:text-text-primary"
+          aria-label="Back"
+          className="brut-border btn-press bg-card p-2 text-ink transition-colors hover:bg-paper-alt"
         >
           <MdArrowBack size={18} />
         </button>
-        <h1 className="text-2xl font-bold text-text-primary">League Settings</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-ink md:text-4xl">
+          League Settings
+        </h1>
       </div>
 
-      {/* League Info */}
-      <div className="mb-6 rounded-xl border border-border bg-bg-secondary p-5 shadow-sm">
-        <h2 className="mb-4 text-lg font-semibold text-text-primary">League Info</h2>
+      <div className="brut-border brut-shadow mb-6 bg-card p-5">
+        <h2 className="mb-4 text-lg font-bold uppercase tracking-wide text-ink">League Info</h2>
         <div className="space-y-3">
           <div>
-            <label className="mb-1 block text-sm font-medium text-text-secondary">Name</label>
+            <label className={labelClass}>Name</label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full rounded-lg border border-border bg-bg-tertiary px-3 py-2.5 text-sm text-text-primary outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+              className={inputClass}
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-text-secondary">Description</label>
+            <label className={labelClass}>Description</label>
             <input
               type="text"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full rounded-lg border border-border bg-bg-tertiary px-3 py-2.5 text-sm text-text-primary outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+              className={inputClass}
             />
           </div>
           <button
             onClick={handleSave}
-            className="w-full rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-accent-hover sm:w-auto"
+            className="brut-border btn-press brut-shadow min-h-[44px] w-full bg-ink px-4 py-2 text-sm font-bold uppercase tracking-wide text-paper transition-colors sm:w-auto"
           >
             Save
           </button>
         </div>
       </div>
 
-      {/* Invite Code */}
       {inviteCode && (
-        <div className="mb-6 rounded-xl border border-border bg-bg-secondary p-5 shadow-sm">
-          <h2 className="mb-2 text-lg font-semibold text-text-primary">Invite Code</h2>
-          <p className="mb-3 text-sm text-text-secondary">
+        <div className="brut-border brut-shadow mb-6 bg-card p-5">
+          <h2 className="mb-2 text-lg font-bold uppercase tracking-wide text-ink">Invite Code</h2>
+          <p className="mb-3 text-sm font-medium text-ink-soft">
             Share this code with others so they can join your league.
           </p>
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-            <div className="flex-1 rounded-lg border border-accent/30 bg-accent-light/30 px-4 py-3 text-center font-mono text-xl font-bold tracking-[0.2em] text-accent sm:text-2xl sm:tracking-[0.3em]">
+            <div className="flex-1 border-[3px] border-ink bg-butter px-4 py-3 text-center font-mono text-xl font-bold tracking-[0.2em] text-ink sm:text-2xl sm:tracking-[0.3em]">
               {inviteCode}
             </div>
             <div className="flex justify-center gap-2">
               <button
                 onClick={() => navigator.clipboard.writeText(inviteCode)}
-                className="rounded-lg border border-border p-3 text-text-secondary transition-colors hover:bg-bg-tertiary hover:text-text-primary"
+                className="brut-border btn-press bg-card p-3 text-ink transition-colors hover:bg-paper-alt"
                 title="Copy code"
               >
                 <MdContentCopy size={18} />
               </button>
               <button
                 onClick={() => regenerateCode(id!)}
-                className="rounded-lg border border-border p-3 text-text-secondary transition-colors hover:bg-bg-tertiary hover:text-text-primary"
+                className="brut-border btn-press bg-card p-3 text-ink transition-colors hover:bg-paper-alt"
                 title="Generate new code"
               >
                 <MdRefresh size={18} />
@@ -144,21 +149,20 @@ export const LeagueSettingsPage = () => {
         </div>
       )}
 
-      {/* Members */}
-      <div className="mb-6 rounded-xl border border-border bg-bg-secondary p-5 shadow-sm">
-        <h2 className="mb-4 text-lg font-semibold text-text-primary">
+      <div className="brut-border brut-shadow mb-6 bg-card p-5">
+        <h2 className="mb-4 text-lg font-bold uppercase tracking-wide text-ink">
           Members ({members.length})
         </h2>
-        <div className="space-y-1">
+        <ul className="divide-y-2 divide-ink/10">
           {members.map((m) => (
-            <div
+            <li
               key={m.player_id}
-              className="flex items-center justify-between rounded-lg px-3 py-2 hover:bg-bg-tertiary"
+              className="flex items-center justify-between py-2"
             >
               <div className="flex items-center gap-2">
-                <span className="text-sm font-medium text-text-primary">{m.display_name}</span>
+                <span className="text-sm font-semibold text-ink">{m.display_name}</span>
                 {m.role === "admin" && (
-                  <span className="rounded-full bg-accent-light px-2 py-0.5 text-xs font-medium text-accent">
+                  <span className="border-2 border-ink bg-butter px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-ink">
                     admin
                   </span>
                 )}
@@ -168,62 +172,61 @@ export const LeagueSettingsPage = () => {
                   {m.role === "player" ? (
                     <button
                       onClick={() => handlePromote(m.player_id)}
-                      className="rounded-lg p-2 text-text-muted transition-colors hover:bg-accent-light hover:text-accent"
+                      className="brut-border btn-press bg-butter p-1.5 text-ink"
                       title="Promote to admin"
                     >
-                      <MdStar size={18} />
+                      <MdStar size={16} />
                     </button>
                   ) : (
                     <button
                       onClick={() => handleDemote(m.player_id)}
-                      className="rounded-lg p-2 text-accent transition-colors hover:bg-accent-light"
+                      className="brut-border btn-press bg-paper-alt p-1.5 text-ink"
                       title="Demote to player"
                     >
-                      <MdStarBorder size={18} />
+                      <MdStarBorder size={16} />
                     </button>
                   )}
                   <button
                     onClick={() => handleKick(m.player_id)}
-                    className="rounded-lg p-2 text-text-muted transition-colors hover:bg-danger/10 hover:text-danger"
+                    className="brut-border btn-press bg-coral p-1.5 text-ink"
                     title="Remove from league"
                   >
-                    <MdPersonRemove size={18} />
+                    <MdPersonRemove size={16} />
                   </button>
                 </div>
               )}
-            </div>
+            </li>
           ))}
-        </div>
+        </ul>
       </div>
 
-      {/* Danger Zone */}
-      <div className="rounded-xl border-2 border-danger/30 bg-danger/5 p-5">
-        <h2 className="mb-2 text-lg font-semibold text-danger">Danger Zone</h2>
-        <p className="mb-4 text-sm text-text-secondary">
+      <div className="border-[3px] border-ink bg-coral p-5">
+        <h2 className="mb-2 text-lg font-bold uppercase tracking-wide text-ink">Danger Zone</h2>
+        <p className="mb-4 text-sm font-medium text-ink">
           Deleting a league removes all members, matches, and rankings permanently.
         </p>
         {!confirmDelete ? (
           <button
             onClick={() => setConfirmDelete(true)}
-            className="flex items-center gap-2 rounded-lg bg-danger px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-danger/80"
+            className="brut-border btn-press brut-shadow flex min-h-[44px] items-center gap-2 bg-ink px-4 py-2 text-sm font-bold uppercase tracking-wide text-paper transition-colors"
           >
             <MdDelete size={16} /> Delete League
           </button>
         ) : (
-          <div className="animate-in flex flex-col gap-3 rounded-lg border border-danger/30 bg-bg-secondary p-4">
-            <p className="text-sm font-medium text-text-primary">
+          <div className="animate-in brut-border flex flex-col gap-3 bg-card p-4">
+            <p className="text-sm font-bold text-ink">
               Are you sure? This action cannot be undone.
             </p>
             <div className="flex gap-2">
               <button
                 onClick={handleDelete}
-                className="btn-press flex items-center gap-2 rounded-lg bg-danger px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-danger/80"
+                className="brut-border btn-press brut-shadow flex min-h-[44px] items-center gap-2 bg-ink px-4 py-2 text-sm font-bold uppercase tracking-wide text-paper transition-colors"
               >
                 <MdDelete size={16} /> Yes, delete
               </button>
               <button
                 onClick={() => setConfirmDelete(false)}
-                className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-secondary transition-colors hover:bg-bg-tertiary"
+                className="brut-border btn-press min-h-[44px] bg-card px-4 py-2 text-sm font-bold text-ink transition-colors hover:bg-paper-alt"
               >
                 Cancel
               </button>

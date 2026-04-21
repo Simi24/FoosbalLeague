@@ -11,6 +11,12 @@ import {
 } from "@/api/baseApi";
 import { useAppSelector } from "@/app/hooks";
 
+const STATUS_FILL: Record<string, string> = {
+  CONFIRMED: "bg-mint",
+  DISPUTED: "bg-coral",
+  PENDING: "bg-butter",
+};
+
 export const MatchHistoryPage = () => {
   const { id } = useParams<{ id: string }>();
   const user = useAppSelector((state) => state.auth.user);
@@ -55,7 +61,7 @@ export const MatchHistoryPage = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent border-t-transparent" />
+        <div className="h-8 w-8 animate-spin border-[3px] border-ink border-t-transparent" />
       </div>
     );
   }
@@ -65,25 +71,30 @@ export const MatchHistoryPage = () => {
       <div className="mb-6 flex items-center gap-3">
         <Link
           to={`/leagues/${id}`}
-          className="rounded-lg border border-border p-2 text-text-secondary transition-colors hover:bg-bg-tertiary hover:text-text-primary"
+          aria-label="Back"
+          className="brut-border btn-press bg-card p-2 text-ink transition-colors hover:bg-paper-alt"
         >
           <MdArrowBack size={18} />
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-text-primary">Match History</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-ink md:text-4xl">
+            Match History
+          </h1>
           {league && (
-            <p className="text-sm text-text-secondary">{league.name} &middot; {matches.length} matches</p>
+            <p className="font-mono text-xs font-semibold uppercase tracking-wide text-ink-soft">
+              {league.name} · {matches.length} matches
+            </p>
           )}
         </div>
       </div>
 
       {matches.length === 0 ? (
-        <p className="text-sm text-text-muted">No matches yet.</p>
+        <p className="text-sm font-medium text-ink-muted">No matches yet.</p>
       ) : (
         <div className="space-y-6">
           {groupedMatches.map(([dateKey, dayMatches]) => (
             <div key={dateKey}>
-              <h3 className="mb-2 text-sm font-semibold text-text-secondary">
+              <h3 className="mb-2 text-xs font-bold uppercase tracking-wider text-ink-soft">
                 {new Date(dateKey + "T00:00:00").toLocaleDateString(undefined, {
                   weekday: "long",
                   year: "numeric",
@@ -91,52 +102,64 @@ export const MatchHistoryPage = () => {
                   day: "numeric",
                 })}
               </h3>
-              <div className="overflow-x-auto rounded-xl border border-border bg-bg-secondary shadow-sm">
-                <table className="w-full">
+              <div className="brut-border brut-shadow overflow-x-auto bg-card">
+                <table className="w-full min-w-[600px]">
                   <thead>
-                    <tr className="border-b border-border text-left text-sm text-text-secondary">
-                      <th className="px-4 py-3">Team 1</th>
-                      <th className="px-4 py-3 text-center">Score</th>
-                      <th className="px-4 py-3">Team 2</th>
-                      <th className="px-4 py-3 text-center">Status</th>
+                    <tr className="border-b-2 border-ink bg-paper-alt text-left text-xs font-bold uppercase tracking-wider text-ink">
+                      <th className="px-3 py-2">Team 1</th>
+                      <th className="px-3 py-2 text-center">Score</th>
+                      <th className="px-3 py-2">Team 2</th>
+                      <th className="px-3 py-2 text-center">Status</th>
                     </tr>
                   </thead>
                   <tbody>
                     {dayMatches.map((m) => {
                       const isTeam1Winner = m.team1_score > m.team2_score;
-                      const canAct = isAdmin || (
-                        user?.player_id !== m.submitted_by && (
-                          m.team1_player_ids.includes(user?.player_id ?? "") ||
-                          m.team2_player_ids.includes(user?.player_id ?? "")
-                        )
-                      );
+                      const canAct =
+                        m.status === "PENDING" &&
+                        (isAdmin ||
+                          (user?.player_id !== m.submitted_by &&
+                            (m.team1_player_ids.includes(user?.player_id ?? "") ||
+                              m.team2_player_ids.includes(user?.player_id ?? ""))));
                       return (
                         <tr
                           key={m.match_id}
-                          className="border-b border-border/50 transition-colors hover:bg-bg-tertiary"
+                          className="border-b-2 border-ink/10 last:border-b-0 transition-colors hover:bg-paper-alt"
                         >
-                          <td className={`px-4 py-3 text-sm ${isTeam1Winner && m.status === "CONFIRMED" ? "font-semibold text-text-primary" : "text-text-secondary"}`}>
+                          <td
+                            className={`px-3 py-3 text-sm ${
+                              isTeam1Winner && m.status === "CONFIRMED"
+                                ? "bg-team-blue-tint font-bold text-ink"
+                                : "font-medium text-ink-soft"
+                            }`}
+                          >
                             {m.team1_player_ids.map(resolveName).join(", ")}
                           </td>
-                          <td className="px-4 py-3 text-center font-mono text-sm font-semibold text-accent">
-                            {m.team1_score} &ndash; {m.team2_score}
+                          <td className="px-3 py-3 text-center font-mono text-sm font-bold text-ink">
+                            {m.team1_score}&ndash;{m.team2_score}
                           </td>
-                          <td className={`px-4 py-3 text-sm ${!isTeam1Winner && m.status === "CONFIRMED" ? "font-semibold text-text-primary" : "text-text-secondary"}`}>
+                          <td
+                            className={`px-3 py-3 text-sm ${
+                              !isTeam1Winner && m.status === "CONFIRMED"
+                                ? "bg-team-red-tint font-bold text-ink"
+                                : "font-medium text-ink-soft"
+                            }`}
+                          >
                             {m.team2_player_ids.map(resolveName).join(", ")}
                           </td>
-                          <td className="px-4 py-3 text-center">
-                            {m.status === "PENDING" && canAct ? (
+                          <td className="px-3 py-3 text-center">
+                            {canAct ? (
                               <div className="flex items-center justify-center gap-1">
                                 <button
                                   onClick={() => handleConfirm(m.match_id)}
-                                  className="rounded-full bg-success/10 p-2 text-success transition-colors hover:bg-success/20"
+                                  className="brut-border btn-press bg-mint p-1.5 text-ink"
                                   title="Confirm"
                                 >
                                   <MdCheck size={16} />
                                 </button>
                                 <button
                                   onClick={() => handleDispute(m.match_id)}
-                                  className="rounded-full bg-danger/10 p-2 text-danger transition-colors hover:bg-danger/20"
+                                  className="brut-border btn-press bg-coral p-1.5 text-ink"
                                   title="Dispute"
                                 >
                                   <MdClose size={16} />
@@ -144,12 +167,8 @@ export const MatchHistoryPage = () => {
                               </div>
                             ) : (
                               <span
-                                className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-                                  m.status === "CONFIRMED"
-                                    ? "bg-success/10 text-success"
-                                    : m.status === "DISPUTED"
-                                      ? "bg-danger/10 text-danger"
-                                      : "bg-warning/10 text-warning"
+                                className={`inline-block border-2 border-ink px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-ink ${
+                                  STATUS_FILL[m.status] ?? "bg-paper-alt"
                                 }`}
                               >
                                 {m.status}

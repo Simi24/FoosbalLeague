@@ -12,8 +12,8 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
 
   if (status === "idle" || status === "loading") {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-bg-primary">
-        <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-accent border-t-transparent" />
+      <div className="flex min-h-screen items-center justify-center bg-paper">
+        <div className="mx-auto h-8 w-8 animate-spin border-[3px] border-ink border-t-transparent" />
       </div>
     );
   }

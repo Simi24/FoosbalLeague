@@ -17,18 +17,25 @@ interface Props {
   onRemove: () => void;
 }
 
-const teamBorderFilled: Record<TeamNumber, string> = {
-  1: "border-team-blue/40 bg-team-blue/5",
-  2: "border-team-red/40 bg-team-red/5",
-};
-
-const teamBorderEmpty: Record<TeamNumber, string> = {
-  1: "border-team-blue/30 hover:border-team-blue/60 hover:bg-team-blue/5",
-  2: "border-team-red/30 hover:border-team-red/60 hover:bg-team-red/5",
+const slotStyle: Record<
+  TeamNumber,
+  { filled: string; empty: string }
+> = {
+  1: {
+    filled: "border-team-blue bg-team-blue-tint",
+    empty:
+      "border-team-blue bg-card hover:bg-team-blue-tint text-team-blue",
+  },
+  2: {
+    filled: "border-team-red bg-team-red-tint",
+    empty:
+      "border-team-red bg-card hover:bg-team-red-tint text-team-red",
+  },
 };
 
 export const PlayerSlot = ({ team, slotIndex, player, delta, onTap, onRemove }: Props) => {
   const teamLabel = `Team ${team}`;
+  const s = slotStyle[team];
 
   if (!player) {
     return (
@@ -36,9 +43,9 @@ export const PlayerSlot = ({ team, slotIndex, player, delta, onTap, onRemove }: 
         type="button"
         onClick={onTap}
         aria-label={`Add player to ${teamLabel}, slot ${slotIndex + 1}`}
-        className={`flex min-h-[56px] w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed ${teamBorderEmpty[team]} px-3 py-3 text-sm text-text-muted transition-colors`}
+        className={`btn-press flex min-h-[56px] w-full items-center justify-center gap-2 border-[2px] border-dashed ${s.empty} px-3 py-3 text-sm font-semibold uppercase tracking-wide transition-colors`}
       >
-        <MdAdd size={18} />
+        <MdAdd size={20} />
         <span>Add player</span>
       </button>
     );
@@ -53,7 +60,7 @@ export const PlayerSlot = ({ team, slotIndex, player, delta, onTap, onRemove }: 
 
   return (
     <div
-      className={`flex min-h-[56px] w-full items-center gap-3 rounded-xl border ${teamBorderFilled[team]} px-3 py-2`}
+      className={`flex min-h-[56px] w-full items-center gap-3 border-2 ${s.filled} px-3 py-2`}
     >
       <button
         type="button"
@@ -61,14 +68,12 @@ export const PlayerSlot = ({ team, slotIndex, player, delta, onTap, onRemove }: 
         aria-label={`Change player in ${teamLabel}, slot ${slotIndex + 1}`}
         className="flex flex-1 items-center gap-2 text-left"
       >
-        <span className="text-sm font-medium text-text-primary">
-          {player.display_name}
-        </span>
-        <span className="font-mono text-xs text-text-muted">
+        <span className="text-sm font-bold text-ink">{player.display_name}</span>
+        <span className="font-mono text-xs font-semibold text-ink-soft">
           {player.current_elo}
         </span>
         {delta !== undefined && (
-          <span className={`ml-auto font-mono text-xs font-semibold ${deltaClass}`}>
+          <span className={`ml-auto font-mono text-xs font-bold ${deltaClass}`}>
             {delta >= 0 ? `+${delta}` : delta}
           </span>
         )}
@@ -77,7 +82,7 @@ export const PlayerSlot = ({ team, slotIndex, player, delta, onTap, onRemove }: 
         type="button"
         onClick={onRemove}
         aria-label={`Remove player from ${teamLabel}, slot ${slotIndex + 1}`}
-        className="rounded-full p-1 text-text-muted transition-colors hover:bg-bg-secondary hover:text-danger"
+        className="btn-press border-2 border-transparent p-1 text-ink transition-colors hover:border-ink hover:bg-coral"
       >
         <MdClose size={16} />
       </button>

@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 
 import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import { loginWithCredentials } from "@/features/auth";
+import { BrandMark } from "@/components/layout";
 import { PasswordInput } from "@/components/inputs/PasswordInput";
 
 export const LoginPage = () => {
@@ -29,41 +30,49 @@ export const LoginPage = () => {
   const isLoading = authStatus === "loading";
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-bg-primary">
-      <div className="animate-in w-full max-w-sm rounded-xl border border-border bg-bg-secondary p-8 shadow-sm">
-        <h1 className="brand-gradient mb-2 text-center text-3xl font-bold">
-          FoosLeague
+    <div className="flex min-h-screen items-center justify-center bg-paper p-4">
+      <div className="animate-in brut-border brut-shadow-lg w-full max-w-sm bg-card p-8">
+        <div className="mb-4 flex justify-center">
+          <BrandMark size="lg" />
+        </div>
+        <h1 className="mb-2 text-center text-4xl font-bold tracking-tight text-ink">
+          Foos<span className="text-team-red">League</span>
         </h1>
-        <p className="mb-8 text-center text-sm text-text-secondary">
+        <p className="mb-8 text-center text-xs font-semibold uppercase tracking-wider text-ink-soft">
           ELO-based office foosball rankings
         </p>
 
         {error && (
-          <div className="mb-4 rounded-lg border border-danger/30 bg-danger/5 px-3 py-2 text-sm text-danger">
+          <div className="brut-border mb-4 bg-coral px-3 py-2 text-sm font-semibold text-ink">
             {error}
           </div>
         )}
 
-        <form onSubmit={handleLogin}>
-          <div className="mb-4">
-            <label className="mb-1 block text-sm font-medium text-text-secondary">Email</label>
+        <form onSubmit={handleLogin} className="space-y-4">
+          <div>
+            <label className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-ink">
+              Email
+            </label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full rounded-lg border border-border bg-bg-tertiary px-3 py-2.5 text-sm text-text-primary outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+              className="brut-border min-h-[44px] w-full bg-card px-3 py-2 text-sm text-ink outline-none"
               required
               autoComplete="email"
             />
           </div>
-          <div className="mb-6">
+          <div>
             <PasswordInput
               value={password}
               onChange={setPassword}
               label="Password"
               labelRight={
-                <Link to="/forgot-password" className="text-xs text-accent hover:text-accent-hover">
-                  Forgot password?
+                <Link
+                  to="/forgot-password"
+                  className="text-xs font-bold uppercase tracking-wide text-ink hover:underline"
+                >
+                  Forgot?
                 </Link>
               }
             />
@@ -71,20 +80,20 @@ export const LoginPage = () => {
           <button
             type="submit"
             disabled={isLoading}
-            className="btn-press w-full rounded-lg bg-accent px-4 py-2.5 text-sm font-medium text-white transition-all hover:bg-accent-hover disabled:opacity-50"
+            className="brut-border btn-press brut-shadow min-h-[48px] w-full bg-ink px-4 py-2 text-sm font-bold uppercase tracking-wide text-paper transition-colors disabled:cursor-not-allowed disabled:bg-ink-muted"
           >
             {isLoading ? "Signing in..." : "Sign in"}
           </button>
         </form>
 
-        <p className="mt-6 text-center text-sm text-text-secondary">
+        <p className="mt-6 text-center text-sm font-medium text-ink-soft">
           Don't have an account?{" "}
-          <Link to="/signup" className="font-medium text-accent hover:text-accent-hover">
+          <Link to="/signup" className="font-bold text-ink underline">
             Sign up
           </Link>
         </p>
 
-        <p className="mt-4 text-center text-xs text-text-muted">
+        <p className="mt-4 text-center font-mono text-[10px] uppercase tracking-wider text-ink-muted">
           Internal use only
         </p>
       </div>
