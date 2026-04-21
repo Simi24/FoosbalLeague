@@ -3,9 +3,17 @@ import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from mangum import Mangum
-
 from middlewares.aws_api_gateway_path import AWSAPIGatewayMiddleware
-from routers import achievement_router, auth_router, player_router, league_router, match_router, ranking_router, admin_router
+from routers import (
+    achievement_router,
+    admin_router,
+    auth_router,
+    league_router,
+    match_router,
+    notification_router,
+    player_router,
+    ranking_router,
+)
 from version import __version__
 
 IS_LOCAL = os.getenv("LOCAL", "false").lower() == "true"
@@ -39,6 +47,7 @@ app.include_router(league_router.router)
 app.include_router(match_router.router)
 app.include_router(ranking_router.router)
 app.include_router(achievement_router.router)
+app.include_router(notification_router.router)
 app.include_router(admin_router.router)
 
 

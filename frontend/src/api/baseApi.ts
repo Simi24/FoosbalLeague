@@ -13,6 +13,25 @@ import type {
   Player,
 } from "@/projects/league/types";
 
+export type NotificationType =
+  | "MATCH_PENDING"
+  | "MATCH_CONFIRMED"
+  | "MATCH_DISPUTED"
+  | "ACHIEVEMENT_UNLOCKED";
+
+export interface NotificationItem {
+  notif_id: string;
+  type: NotificationType;
+  payload: Record<string, unknown>;
+  read: boolean;
+  created_at: string;
+}
+
+export interface NotificationListResponse {
+  notifications: NotificationItem[];
+  unread_count: number;
+}
+
 const API_BASE_URL = import.meta.env.VITE_API_URL
   ? `${import.meta.env.VITE_API_URL}/api/v1`
   : "/api/v1";
@@ -37,6 +56,7 @@ export const api = createApi({
     "PlayerProfile",
     "EloHistory",
     "Achievements",
+    "Notifications",
   ],
   endpoints: (build) => ({
     // ─── Leagues ───────────────────────────────────────────
@@ -169,6 +189,23 @@ export const api = createApi({
       ],
     }),
 
+    // ─── Notifications ─────────────────────────────────────
+    getNotifications: build.query<NotificationListResponse, void>({
+      query: () => "/notifications",
+      providesTags: ["Notifications"],
+    }),
+    markNotificationRead: build.mutation<void, string>({
+      query: (notifId) => ({
+        url: `/notifications/${notifId}/read`,
+        method: "POST",
+      }),
+      invalidatesTags: ["Notifications"],
+    }),
+    markAllNotificationsRead: build.mutation<void, void>({
+      query: () => ({ url: "/notifications/read-all", method: "POST" }),
+      invalidatesTags: ["Notifications"],
+    }),
+
     // ─── Auth ──────────────────────────────────────────────
     registerPlayer: build.mutation<void, { display_name: string }>({
       query: (body) => ({ url: "/auth/register", method: "POST", body }),
@@ -205,6 +242,10 @@ export const {
   useUpdateMeMutation,
   // Achievements
   useGetAchievementsQuery,
+  // Notifications
+  useGetNotificationsQuery,
+  useMarkNotificationReadMutation,
+  useMarkAllNotificationsReadMutation,
   // Auth
   useRegisterPlayerMutation,
 } = api;

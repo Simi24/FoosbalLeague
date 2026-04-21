@@ -161,7 +161,7 @@ async def dispute_match_endpoint(
             detail="Only a match participant or league admin can dispute",
         )
 
-    disputed = dispute_match(tenant_id, match_id)
+    disputed = dispute_match(tenant_id, match_id, player.player_id)
     if not disputed:
         raise HTTPException(status_code=400, detail="Cannot dispute this match")
 

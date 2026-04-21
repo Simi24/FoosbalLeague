@@ -19,3 +19,4 @@ class PlayerModel(BaseEntity):
     total_matches: int = 0
     total_wins: int = 0
     total_losses: int = 0
+    notifications_read_until: str | None = None

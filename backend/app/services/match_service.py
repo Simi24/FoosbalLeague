@@ -18,6 +18,10 @@ from services.achievement_service import ACHIEVEMENT_CATALOG, evaluate_achieveme
 from services.elo_service import calculate_elo_changes
 from services.exceptions import MatchNotFoundError, MissingRatingsError
 from services.league_service import get_league
+from services.notification_service import (
+    create_notification,
+    create_notifications_bulk,
+)
 
 
 def record_match(
@@ -62,6 +66,11 @@ def record_match(
         ).set("updated_at", now).execute()
 
     logger.info(f"Recorded match {match_id} in league {league_id}")
+
+    _notify_match_pending(
+        tenant_id, match, league.name if league else league_id, submitted_by
+    )
+
     return match
 
 
@@ -229,6 +238,13 @@ def confirm_match(
 
     newly_unlocked = _build_unlocked_achievements(raw_unlocked)
 
+    league = get_league(tenant_id, match.league_id)
+    league_name = league.name if league else match.league_id
+    _notify_match_confirmed(
+        tenant_id, confirmed, league_name, confirmed_by, elo_details
+    )
+    _notify_achievements_unlocked(tenant_id, confirmed, league_name, newly_unlocked)
+
     return ConfirmationResult(
         match=confirmed,
         elo_changes=elo_details,
@@ -239,6 +255,7 @@ def confirm_match(
 def dispute_match(
     tenant_id: str,
     match_id: str,
+    disputed_by: str,
 ) -> MatchModel | None:
     """Dispute a pending match."""
     match = get_match(tenant_id, match_id)
@@ -251,7 +268,14 @@ def dispute_match(
     ).execute()
 
     logger.info(f"Disputed match {match_id}")
-    return get_match(tenant_id, match_id)
+    disputed = get_match(tenant_id, match_id)
+
+    if disputed:
+        league = get_league(tenant_id, match.league_id)
+        league_name = league.name if league else match.league_id
+        _notify_match_disputed(tenant_id, disputed, league_name, disputed_by)
+
+    return disputed
 
 
 def list_matches_by_league(league_id: str) -> list[MatchModel]:
@@ -376,3 +400,114 @@ def _write_elo_history(
         updated_at=now,
     )
     history.save()
+
+
+# ---------------------------------------------------------------------------
+# Notification triggers
+# ---------------------------------------------------------------------------
+
+
+def _notify_match_pending(
+    tenant_id: str,
+    match: MatchModel,
+    league_name: str,
+    submitter_id: str,
+) -> None:
+    """Notify all participants (except submitter) that a match awaits their action."""
+    try:
+        recipients = [
+            pid
+            for pid in match.team1_player_ids + match.team2_player_ids
+            if pid != submitter_id
+        ]
+        payload = {
+            "league_id": match.league_id,
+            "league_name": league_name,
+            "match_id": match.match_id,
+            "team1_score": match.team1_score,
+            "team2_score": match.team2_score,
+            "submitter_id": submitter_id,
+        }
+        create_notifications_bulk(tenant_id, recipients, "MATCH_PENDING", payload)
+    except Exception:
+        logger.exception(f"Failed to emit MATCH_PENDING for match {match.match_id}")
+
+
+def _notify_match_confirmed(
+    tenant_id: str,
+    match: MatchModel,
+    league_name: str,
+    confirmed_by: str,
+    elo_details: list["EloChangeDetail"],
+) -> None:
+    """Notify each participant (except confirmer) with their personal ELO delta."""
+    try:
+        deltas = {d.player_id: d.delta for d in elo_details}
+        is_team1_winner = match.team1_score > match.team2_score
+        for pid in match.team1_player_ids + match.team2_player_ids:
+            if pid == confirmed_by:
+                continue
+            won = (pid in match.team1_player_ids and is_team1_winner) or (
+                pid in match.team2_player_ids and not is_team1_winner
+            )
+            payload = {
+                "league_id": match.league_id,
+                "league_name": league_name,
+                "match_id": match.match_id,
+                "won": won,
+                "delta": deltas.get(pid, 0),
+            }
+            create_notification(tenant_id, pid, "MATCH_CONFIRMED", payload)
+    except Exception:
+        logger.exception(f"Failed to emit MATCH_CONFIRMED for match {match.match_id}")
+
+
+def _notify_match_disputed(
+    tenant_id: str,
+    match: MatchModel,
+    league_name: str,
+    disputed_by: str,
+) -> None:
+    """Notify the submitter + all participants (except the disputer)."""
+    try:
+        recipients = set(match.team1_player_ids + match.team2_player_ids)
+        if match.submitted_by:
+            recipients.add(match.submitted_by)
+        recipients.discard(disputed_by)
+        payload = {
+            "league_id": match.league_id,
+            "league_name": league_name,
+            "match_id": match.match_id,
+        }
+        create_notifications_bulk(
+            tenant_id, list(recipients), "MATCH_DISPUTED", payload
+        )
+    except Exception:
+        logger.exception(f"Failed to emit MATCH_DISPUTED for match {match.match_id}")
+
+
+def _notify_achievements_unlocked(
+    tenant_id: str,
+    match: MatchModel,
+    league_name: str,
+    newly_unlocked: list["UnlockedAchievement"],
+) -> None:
+    """Notify each player about their freshly-unlocked achievements."""
+    try:
+        for ach in newly_unlocked:
+            payload = {
+                "league_id": match.league_id,
+                "league_name": league_name,
+                "achievement_type": ach.achievement_type,
+                "name": ach.name,
+                "description": ach.description,
+                "icon": ach.icon,
+                "rarity": ach.rarity,
+            }
+            create_notification(
+                tenant_id, ach.player_id, "ACHIEVEMENT_UNLOCKED", payload
+            )
+    except Exception:
+        logger.exception(
+            f"Failed to emit ACHIEVEMENT_UNLOCKED for match {match.match_id}"
+        )

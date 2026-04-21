@@ -45,6 +45,13 @@ awslocal dynamodb create-table \
 
 echo "[OK] DynamoDB table created"
 
+awslocal dynamodb update-time-to-live \
+    --table-name foosball-league \
+    --time-to-live-specification "Enabled=true, AttributeName=expires_at" \
+    >/dev/null
+
+echo "[OK] DynamoDB TTL enabled on 'expires_at'"
+
 # --------------------------------------------------
 # Constants
 # --------------------------------------------------

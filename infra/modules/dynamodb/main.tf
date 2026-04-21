@@ -46,6 +46,11 @@ resource "aws_dynamodb_table" "main" {
     projection_type = "ALL"
   }
 
+  ttl {
+    attribute_name = "expires_at"
+    enabled        = true
+  }
+
   point_in_time_recovery {
     enabled = var.environment == "prod"
   }

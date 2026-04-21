@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 
 import { useAppSelector } from "@/app/hooks";
 import { Avatar } from "@/components/Avatar";
+import { NotificationBell } from "@/components/notifications";
 import { BrandMark } from "./BrandMark";
 
 export const Topbar = () => {
@@ -16,13 +17,18 @@ export const Topbar = () => {
         </span>
       </Link>
       <div className="hidden md:block" />
-      <Link
-        to="/profile"
-        className="btn-press flex items-center gap-3 border-2 border-transparent px-2 py-1 text-ink transition-colors hover:border-ink hover:bg-butter"
-      >
-        <span className="text-sm font-medium">{user?.name ?? "Guest"}</span>
-        <Avatar name={user?.name ?? "?"} />
-      </Link>
+      <div className="flex items-center gap-2">
+        <NotificationBell />
+        <Link
+          to="/profile"
+          className="btn-press flex items-center gap-3 border-2 border-transparent px-2 py-1 text-ink transition-colors hover:border-ink hover:bg-butter"
+        >
+          <span className="hidden text-sm font-medium sm:inline">
+            {user?.name ?? "Guest"}
+          </span>
+          <Avatar name={user?.name ?? "?"} />
+        </Link>
+      </div>
     </header>
   );
 };
