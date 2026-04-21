@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.16.0](https://github.com/Simi24/FoosbalLeague/compare/foosball-league-v0.15.1...foosball-league-v0.16.0) (2026-04-21)
+
+
+### Features
+
+* in-app notifications with polling drawer ([5889d17](https://github.com/Simi24/FoosbalLeague/commit/5889d177f3a9a72096fb0603d71b6d2ecfec0652))
+* refactor fe ([f86f238](https://github.com/Simi24/FoosbalLeague/commit/f86f238cf8bbbfe2d829f15e53b8c8f09bc97bb6))
+
 ## [0.15.1](https://github.com/Simi24/FoosbalLeague/compare/foosball-league-v0.15.0...foosball-league-v0.15.1) (2026-04-20)
 
 
