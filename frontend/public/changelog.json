@@ -1,5 +1,14 @@
 [
   {
+    "version": "0.17.0",
+    "date": "2026-04-24",
+    "summary": [
+      "New 'Player Insights' section featuring detailed stats like win streaks, dream partners, and head-to-head records.",
+      "Redesigned player profile pages with a cleaner look and better layout for mobile users.",
+      "Added 'Extreme Match' highlights to showcase your most notable wins and losses."
+    ]
+  },
+  {
     "version": "0.16.0",
     "date": "2026-04-21",
     "summary": [
