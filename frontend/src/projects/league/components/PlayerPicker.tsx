@@ -99,7 +99,7 @@ export const PlayerPicker = ({
             ? { transform: `translateY(${dragY}px)`, transition: "none" }
             : undefined
         }
-        className="relative z-10 flex max-h-[85vh] w-full flex-col border-t-[3px] border-ink bg-card transition-transform md:max-h-[70vh] md:max-w-md md:border-[3px] md:brut-shadow-lg"
+        className="relative z-10 flex max-h-[85dvh] w-full flex-col border-t-[3px] border-ink bg-card transition-transform md:max-h-[70dvh] md:max-w-md md:border-[3px] md:brut-shadow-lg"
       >
         <div
           className="flex justify-center pt-2 md:hidden"

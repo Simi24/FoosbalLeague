@@ -92,3 +92,47 @@ export type Achievement = {
   unlocked: boolean;
   unlocked_at: string | null;
 };
+
+export type StreakInfo = {
+  current: number;
+  longest_win: number;
+};
+
+export type ExtremeMatch = {
+  match_id: string;
+  delta: number;
+  opponent_ids: string[];
+  opponent_names: string[];
+  team_score: number;
+  opponent_score: number;
+  created_at: string;
+};
+
+export type HeadToHead = {
+  opponent_id: string;
+  opponent_name: string;
+  wins: number;
+  losses: number;
+  games: number;
+  elo_swing: number;
+};
+
+export type DreamPartner = {
+  partner_id: string;
+  partner_name: string;
+  wins: number;
+  losses: number;
+  games: number;
+  win_rate: number;
+};
+
+export type PlayerInsights = {
+  player_id: string;
+  league_id: string;
+  league_type: "1v1" | "2v2";
+  streak: StreakInfo;
+  best_win: ExtremeMatch | null;
+  worst_loss: ExtremeMatch | null;
+  head_to_head: HeadToHead[];
+  dream_partners: DreamPartner[];
+};

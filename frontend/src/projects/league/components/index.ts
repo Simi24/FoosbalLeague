@@ -8,3 +8,9 @@ export { Podium } from "./Podium";
 export { PodiumCard } from "./PodiumCard";
 export { RecentMatchList } from "./RecentMatchList";
 export { StatCard } from "./StatCard";
+export {
+  DreamPartnerList,
+  ExtremeMatchCard,
+  HeadToHeadPanel,
+  StreakCard,
+} from "./insights";

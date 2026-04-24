@@ -60,6 +60,11 @@ export const LeagueDetailPage = () => {
     [matches],
   );
 
+  const rankedMembers = useMemo(
+    () => [...members].sort((a, b) => b.current_elo - a.current_elo),
+    [members],
+  );
+
   const handleLeave = async () => {
     await leaveLeague(id!).unwrap();
     navigate("/dashboard");
@@ -129,7 +134,7 @@ export const LeagueDetailPage = () => {
             <p className="text-sm font-medium text-ink-muted">No members yet.</p>
           ) : (
             <ul className="divide-y-2 divide-ink/10">
-              {members.map((m) => (
+              {rankedMembers.map((m) => (
                 <li key={m.player_id}>
                   <Link
                     to={`/players/${m.player_id}`}
@@ -181,26 +186,40 @@ export const LeagueDetailPage = () => {
                     (user?.player_id !== m.submitted_by &&
                       (m.team1_player_ids.includes(user?.player_id ?? "") ||
                         m.team2_player_ids.includes(user?.player_id ?? ""))));
+                const team1Won = m.team1_score > m.team2_score;
+                const team2Won = m.team2_score > m.team1_score;
                 return (
-                  <li
-                    key={m.match_id}
-                    className="flex min-w-0 items-center justify-between gap-2 py-2 text-sm"
-                  >
-                    <div className="min-w-0">
-                      <span className="block truncate font-medium text-ink">
-                        {m.team1_player_ids.map(resolveName).join(", ")} vs{" "}
-                        {m.team2_player_ids.map(resolveName).join(", ")}
+                  <li key={m.match_id} className="flex flex-col gap-1 py-2 text-sm">
+                    <div className="flex items-baseline justify-between gap-2 leading-tight">
+                      <span className="min-w-0 flex-1 truncate font-medium text-ink">
+                        {m.team1_player_ids.map(resolveName).join(", ")}
                       </span>
+                      <span
+                        className={`shrink-0 font-mono font-bold ${
+                          team1Won ? "text-ink" : "text-ink-soft"
+                        }`}
+                      >
+                        {m.team1_score}
+                      </span>
+                    </div>
+                    <div className="flex items-baseline justify-between gap-2 leading-tight">
+                      <span className="min-w-0 flex-1 truncate font-medium text-ink-soft">
+                        vs {m.team2_player_ids.map(resolveName).join(", ")}
+                      </span>
+                      <span
+                        className={`shrink-0 font-mono font-bold ${
+                          team2Won ? "text-ink" : "text-ink-soft"
+                        }`}
+                      >
+                        {m.team2_score}
+                      </span>
+                    </div>
+                    <div className="mt-0.5 flex items-center justify-between gap-2">
                       <span className="font-mono text-xs text-ink-muted">
                         {new Date(m.created_at).toLocaleDateString()}
                       </span>
-                    </div>
-                    <div className="flex shrink-0 items-center gap-2">
-                      <span className="font-mono font-bold text-ink">
-                        {m.team1_score}&ndash;{m.team2_score}
-                      </span>
                       {canAct ? (
-                        <div className="flex items-center gap-1">
+                        <div className="flex shrink-0 items-center gap-1">
                           <button
                             onClick={() => handleConfirm(m.match_id)}
                             className="brut-border btn-press bg-mint p-1.5 text-ink"
@@ -218,7 +237,7 @@ export const LeagueDetailPage = () => {
                         </div>
                       ) : (
                         <span
-                          className={`border-2 border-ink px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-ink ${
+                          className={`shrink-0 border-2 border-ink px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-ink ${
                             STATUS_FILL[m.status] ?? "bg-paper-alt"
                           }`}
                         >

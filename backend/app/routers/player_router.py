@@ -1,7 +1,15 @@
 from dependencies.auth import AuthenticatedUser, get_current_user
 from dependencies.tenant import get_tenant_id
 from fastapi import APIRouter, Depends, HTTPException
-from schemas.player import PlayerListItem, PlayerResponse, PlayerStatsResponse, UpdatePlayerRequest
+from schemas.insights import PlayerInsightsResponse
+from schemas.player import (
+    PlayerListItem,
+    PlayerResponse,
+    PlayerStatsResponse,
+    UpdatePlayerRequest,
+)
+from services.insights_service import compute_player_insights
+from services.league_service import get_enrollment
 from services.player_service import (
     get_player,
     get_player_by_cognito_sub,
@@ -101,4 +109,29 @@ async def read_player_stats(
         win_rate=round(player.total_wins / total, 2)
         if player.total_matches > 0
         else 0.0,
+    )
+
+
+@router.get("/{player_id}/insights", response_model=PlayerInsightsResponse)
+async def read_player_insights(
+    player_id: str,
+    league_id: str,
+    user: AuthenticatedUser = Depends(get_current_user),
+    tenant_id: str = Depends(get_tenant_id),
+) -> PlayerInsightsResponse:
+    """Aggregated insights for a player in a league: streak, best/worst, H2H, dream partners."""
+    caller = get_player_by_cognito_sub(tenant_id, user.sub)
+    if not caller:
+        raise HTTPException(status_code=400, detail="Player not registered")
+
+    if not get_enrollment(tenant_id, league_id, caller.player_id):
+        raise HTTPException(status_code=403, detail="Not a league member")
+
+    if not get_enrollment(tenant_id, league_id, player_id):
+        raise HTTPException(status_code=404, detail="Player not in this league")
+
+    return compute_player_insights(
+        tenant_id=tenant_id,
+        league_id=league_id,
+        player_id=player_id,
     )

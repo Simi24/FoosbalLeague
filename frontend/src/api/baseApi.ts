@@ -11,6 +11,7 @@ import type {
   Match,
   MyLeague,
   Player,
+  PlayerInsights,
 } from "@/projects/league/types";
 
 export type NotificationType =
@@ -56,6 +57,7 @@ export const api = createApi({
     "PlayerProfile",
     "EloHistory",
     "Achievements",
+    "PlayerInsights",
     "Notifications",
   ],
   endpoints: (build) => ({
@@ -189,6 +191,18 @@ export const api = createApi({
       ],
     }),
 
+    // ─── Player insights ───────────────────────────────────
+    getPlayerInsights: build.query<
+      PlayerInsights,
+      { playerId: string; leagueId: string }
+    >({
+      query: ({ playerId, leagueId }) =>
+        `/players/${playerId}/insights?league_id=${leagueId}`,
+      providesTags: (_, __, { playerId, leagueId }) => [
+        { type: "PlayerInsights", id: `${playerId}-${leagueId}` },
+      ],
+    }),
+
     // ─── Notifications ─────────────────────────────────────
     getNotifications: build.query<NotificationListResponse, void>({
       query: () => "/notifications",
@@ -242,6 +256,8 @@ export const {
   useUpdateMeMutation,
   // Achievements
   useGetAchievementsQuery,
+  // Player insights
+  useGetPlayerInsightsQuery,
   // Notifications
   useGetNotificationsQuery,
   useMarkNotificationReadMutation,

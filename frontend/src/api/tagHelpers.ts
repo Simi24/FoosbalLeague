@@ -7,10 +7,11 @@ export type Tag =
   | "Players"
   | "PlayerProfile"
   | "EloHistory"
-  | "Achievements";
+  | "Achievements"
+  | "PlayerInsights";
 
 const TAG_EFFECTS: Partial<Record<Tag, Tag[]>> = {
-  Matches: ["Leaderboard", "EloHistory", "Achievements"],
+  Matches: ["Leaderboard", "EloHistory", "Achievements", "PlayerInsights"],
   Leaderboard: ["Members"],
   Members: ["League"],
   League: ["MyLeagues"],

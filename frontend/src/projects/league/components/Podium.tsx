@@ -11,7 +11,8 @@ const FILLS: Record<number, string> = {
   3: "bg-peach",
 };
 
-// Visual order on sm+: 2 · 1 · 3 (classic podium). Mobile: 1 · 2 · 3 stacked.
+// Mobile: #1 full-width hero on top, #2/#3 side-by-side below.
+// sm+: classic 2 · 1 · 3 podium, #1 elevated.
 const SM_ORDER: Record<number, string> = {
   1: "sm:order-2",
   2: "sm:order-1",
@@ -25,12 +26,14 @@ export const Podium = ({ entries }: PodiumProps) => {
   return (
     <section
       aria-label="Top players"
-      className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-3 sm:items-end sm:gap-4"
+      className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:items-end sm:gap-4"
     >
       {top3.map((entry) => (
         <div
           key={entry.player_id}
-          className={`${SM_ORDER[entry.rank]} ${entry.rank === 1 ? "sm:-mt-4" : ""}`}
+          className={`${SM_ORDER[entry.rank]} ${
+            entry.rank === 1 ? "col-span-2 sm:col-span-1 sm:-mt-4" : ""
+          }`}
         >
           <PodiumCard
             entry={entry}

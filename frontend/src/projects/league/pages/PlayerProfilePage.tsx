@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { MdExpandLess, MdExpandMore } from "react-icons/md";
 import { useParams } from "react-router-dom";
 
 import {
@@ -10,11 +11,21 @@ import {
   useGetAchievementsQuery,
   useGetLeagueMatchesQuery,
   useGetLeagueMembersQuery,
+  useGetPlayerInsightsQuery,
 } from "@/api/baseApi";
 import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import { Avatar } from "@/components/Avatar";
 import { Dropdown } from "@/components/inputs";
-import { AchievementBadge, EloHistoryChart, RecentMatchList, StatCard } from "../components";
+import {
+  AchievementBadge,
+  DreamPartnerList,
+  EloHistoryChart,
+  ExtremeMatchCard,
+  HeadToHeadPanel,
+  RecentMatchList,
+  StatCard,
+  StreakCard,
+} from "../components";
 import type { MyLeague } from "../types";
 
 export const PlayerProfilePage = () => {
@@ -28,6 +39,13 @@ export const PlayerProfilePage = () => {
 
   const [sharedLeagues, setSharedLeagues] = useState<MyLeague[]>([]);
   const [selectedLeague, setSelectedLeague] = useState("");
+  const [opponentId, setOpponentId] = useState("");
+  const [achievementsExpanded, setAchievementsExpanded] = useState(false);
+
+  // Reset opponent when switching league
+  useEffect(() => {
+    setOpponentId("");
+  }, [selectedLeague]);
 
   // Own profile: use all my leagues. Other player: find shared leagues via leaderboard check.
   useEffect(() => {
@@ -78,6 +96,10 @@ export const PlayerProfilePage = () => {
   const { data: members = [] } = useGetLeagueMembersQuery(selectedLeague, {
     skip: !selectedLeague,
   });
+  const { data: insights } = useGetPlayerInsightsQuery(
+    { playerId: playerId!, leagueId: selectedLeague },
+    { skip: !playerId || !selectedLeague },
+  );
 
   const rankingEntry = leaderboard?.entries.find((e) => e.player_id === playerId) ?? null;
 
@@ -113,6 +135,8 @@ export const PlayerProfilePage = () => {
 
   const unlockedAchievements = achievements.filter((a) => a.unlocked);
   const lockedAchievements = achievements.filter((a) => !a.unlocked);
+  const hasInsights = !!insights && !!rankingEntry;
+  const is2v2 = insights?.league_type === "2v2";
 
   return (
     <div>
@@ -138,43 +162,82 @@ export const PlayerProfilePage = () => {
             />
           )}
         </div>
+
+        {rankingEntry && (
+          <div className="mt-5 grid grid-cols-3 gap-2 sm:grid-cols-6">
+            <StatCard label="ELO" value={rankingEntry.elo} tone="mint" size="compact" />
+            <StatCard
+              label="Rank"
+              value={`#${rankingEntry.rank}`}
+              tone="butter"
+              size="compact"
+            />
+            {insights ? (
+              <StreakCard streak={insights.streak} size="compact" />
+            ) : (
+              <StatCard label="Streak" value="–" size="compact" />
+            )}
+            <StatCard
+              label="Wins"
+              value={rankingEntry.wins}
+              color="text-success"
+              size="compact"
+            />
+            <StatCard
+              label="Losses"
+              value={rankingEntry.losses}
+              color="text-danger"
+              size="compact"
+            />
+            <StatCard
+              label="Win Rate"
+              value={`${winRate}%`}
+              tone="lavender"
+              size="compact"
+            />
+          </div>
+        )}
       </div>
 
-      {rankingEntry ? (
-        <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-5">
-          <StatCard label="ELO" value={rankingEntry.elo} tone="mint" color="text-ink" />
-          <StatCard label="Rank" value={`#${rankingEntry.rank}`} tone="butter" />
-          <StatCard label="Wins" value={rankingEntry.wins} color="text-success" />
-          <StatCard label="Losses" value={rankingEntry.losses} color="text-danger" />
-          <StatCard label="Win Rate" value={`${winRate}%`} tone="lavender" />
-        </div>
-      ) : sharedLeagues.length > 0 ? (
+      {!rankingEntry && sharedLeagues.length > 0 && (
         <p className="mb-6 text-sm font-medium text-ink-muted">No stats in this league yet.</p>
-      ) : (
+      )}
+      {!rankingEntry && sharedLeagues.length === 0 && (
         <p className="mb-6 text-sm font-medium text-ink-muted">Not enrolled in any league yet.</p>
       )}
 
-      {achievements.length > 0 && (
-        <div className="brut-border brut-shadow mb-6 bg-card p-5">
-          <h2 className="mb-4 text-lg font-bold uppercase tracking-wide text-ink">
-            Achievements
-            {unlockedAchievements.length > 0 && (
-              <span className="ml-2 font-mono text-sm font-bold text-ink-muted">
-                {unlockedAchievements.length}/{achievements.length}
-              </span>
-            )}
-          </h2>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            {unlockedAchievements.map((a) => (
-              <AchievementBadge key={a.type} {...a} />
-            ))}
-            {lockedAchievements.map((a) => (
-              <AchievementBadge key={a.type} {...a} />
-            ))}
-          </div>
+      {/* ── HIGHLIGHTS ── */}
+      {hasInsights && (insights!.best_win || insights!.worst_loss) && (
+        <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
+          {insights!.best_win ? (
+            <ExtremeMatchCard label="Best win" match={insights!.best_win} tone="win" />
+          ) : (
+            <HighlightEmpty label="Best win" tone="win" />
+          )}
+          {insights!.worst_loss ? (
+            <ExtremeMatchCard label="Worst loss" match={insights!.worst_loss} tone="loss" />
+          ) : (
+            <HighlightEmpty label="Worst loss" tone="loss" />
+          )}
         </div>
       )}
 
+      {/* ── COMPARE ── */}
+      {hasInsights && (
+        <div
+          className={`mb-6 grid grid-cols-1 gap-4 ${is2v2 ? "lg:grid-cols-2" : ""}`}
+        >
+          <HeadToHeadPanel
+            records={insights!.head_to_head}
+            playerName={player.display_name}
+            opponentId={opponentId}
+            onOpponentChange={setOpponentId}
+          />
+          {is2v2 && <DreamPartnerList partners={insights!.dream_partners} />}
+        </div>
+      )}
+
+      {/* ── HISTORY ── */}
       {sharedLeagues.length > 0 && (
         <div className="brut-border brut-shadow mb-6 bg-card p-5">
           <h2 className="mb-4 text-lg font-bold uppercase tracking-wide text-ink">
@@ -190,7 +253,6 @@ export const PlayerProfilePage = () => {
         </div>
       )}
 
-      {/* Recent Matches */}
       {selectedLeague && playerMatches.length > 0 && (
         <RecentMatchList
           key={selectedLeague}
@@ -199,6 +261,86 @@ export const PlayerProfilePage = () => {
           playerNames={playerNames}
         />
       )}
+
+      {/* ── ACHIEVEMENTS (collassati di default) ── */}
+      {achievements.length > 0 && (
+        <div className="brut-border brut-shadow mt-6 bg-card p-5">
+          <button
+            type="button"
+            onClick={() => setAchievementsExpanded((v) => !v)}
+            className="flex w-full items-center justify-between gap-2 text-left"
+            aria-expanded={achievementsExpanded}
+          >
+            <h2 className="text-lg font-bold uppercase tracking-wide text-ink">
+              Achievements
+              <span className="ml-2 font-mono text-sm font-bold text-ink-muted">
+                {unlockedAchievements.length}/{achievements.length}
+              </span>
+            </h2>
+            <span className="flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-ink-soft">
+              {achievementsExpanded ? "Hide" : "Show"}
+              {achievementsExpanded ? (
+                <MdExpandLess size={20} />
+              ) : (
+                <MdExpandMore size={20} />
+              )}
+            </span>
+          </button>
+          {achievementsExpanded ? (
+            <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+              {unlockedAchievements.map((a) => (
+                <AchievementBadge key={a.type} {...a} />
+              ))}
+              {lockedAchievements.map((a) => (
+                <AchievementBadge key={a.type} {...a} />
+              ))}
+            </div>
+          ) : unlockedAchievements.length > 0 ? (
+            <div className="mt-3 flex flex-wrap gap-2">
+              {unlockedAchievements.slice(0, 8).map((a) => (
+                <span
+                  key={a.type}
+                  title={`${a.name} — ${a.description}`}
+                  className="brut-border bg-butter px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-ink"
+                >
+                  {a.name}
+                </span>
+              ))}
+              {unlockedAchievements.length > 8 && (
+                <span className="text-[10px] font-bold uppercase tracking-wider text-ink-soft">
+                  +{unlockedAchievements.length - 8} more
+                </span>
+              )}
+            </div>
+          ) : (
+            <p className="mt-3 text-sm font-medium text-ink-muted">
+              No achievements unlocked yet.
+            </p>
+          )}
+        </div>
+      )}
     </div>
   );
 };
+
+const HighlightEmpty = ({
+  label,
+  tone,
+}: {
+  label: string;
+  tone: "win" | "loss";
+}) => (
+  <div
+    className={`brut-border brut-shadow p-4 ${
+      tone === "win" ? "bg-butter" : "bg-peach"
+    }`}
+  >
+    <p className="text-[10px] font-bold uppercase tracking-wider text-ink-soft">
+      {label}
+    </p>
+    <p className="mt-1 font-mono text-xl font-bold text-ink-muted sm:text-2xl">
+      –
+    </p>
+    <p className="mt-2 text-xs font-medium text-ink-muted">No match yet.</p>
+  </div>
+);
