@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.17.0](https://github.com/Simi24/FoosbalLeague/compare/foosball-league-v0.16.0...foosball-league-v0.17.0) (2026-04-24)
+
+
+### Features
+
+* player insights + mobile profile polish ([b07e83f](https://github.com/Simi24/FoosbalLeague/commit/b07e83f7089aa82f35c1bec9a90f1f05e6a8dfa7))
+
 ## [0.16.0](https://github.com/Simi24/FoosbalLeague/compare/foosball-league-v0.15.1...foosball-league-v0.16.0) (2026-04-21)
 
 
