@@ -20,7 +20,7 @@ IS_LOCAL = os.getenv("LOCAL", "false").lower() == "true"
 ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "http://localhost:5173").split(",")
 
 app = FastAPI(
-    title="foosball-league",
+    title="foosrank",
     description="ELO-based foosball league management API",
     version=__version__,
     docs_url="/docs" if IS_LOCAL else None,

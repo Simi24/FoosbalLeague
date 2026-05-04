@@ -67,7 +67,8 @@
       "Bash(curl -sSfL -o space-grotesk-400.ttf \"https://github.com/floriankarsten/space-grotesk/raw/main/fonts/ttf/SpaceGrotesk-Regular.ttf\")",
       "Bash(curl -sSfL -I \"https://github.com/floriankarsten/space-grotesk/raw/main/fonts/ttf/SpaceGrotesk-Regular.ttf\")",
       "Bash(curl -sSfL -o space-grotesk-400.ttf \"https://raw.githubusercontent.com/google/fonts/main/ofl/spacegrotesk/SpaceGrotesk%5Bwght%5D.ttf\")",
-      "Bash(curl -sSfLI \"https://raw.githubusercontent.com/google/fonts/main/ofl/spacegrotesk/SpaceGrotesk%5Bwght%5D.ttf\")"
+      "Bash(curl -sSfLI \"https://raw.githubusercontent.com/google/fonts/main/ofl/spacegrotesk/SpaceGrotesk%5Bwght%5D.ttf\")",
+      "Bash(git -C /workspace remote -v)"
     ]
   }
 }

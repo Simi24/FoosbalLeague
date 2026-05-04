@@ -71,7 +71,7 @@ export const DashboardPage = () => {
             <MdSportsSoccer size={32} className="text-ink" />
           </div>
           <h1 className="mb-2 text-3xl font-bold tracking-tight text-ink">
-            Welcome to FoosLeague!
+            Welcome to FoosRank!
           </h1>
           <p className="mb-6 text-sm font-medium text-ink-soft">
             Choose a display name to complete your profile and start playing.
@@ -186,7 +186,7 @@ export const DashboardPage = () => {
       {myLeagues.length === 0 && !showCreate && !showJoin && (
         <div className="animate-in brut-border brut-shadow bg-butter p-6">
           <h2 className="mb-2 text-lg font-bold uppercase tracking-wide text-ink">
-            Get started with FoosLeague
+            Get started with FoosRank
           </h2>
           <p className="mb-4 text-sm font-medium text-ink-soft">
             Create a league and invite your colleagues, or join one with an invite code.

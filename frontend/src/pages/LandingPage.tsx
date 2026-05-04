@@ -106,7 +106,7 @@ export const LandingPage = () => {
           </div>
 
           <h1 className="animate-in mb-4 text-5xl font-bold tracking-tight text-ink sm:text-7xl">
-            Foos<span className="text-team-red">League</span>
+            Foos<span className="text-team-red">Rank</span>
           </h1>
 
           <p
@@ -232,7 +232,7 @@ export const LandingPage = () => {
 
       <footer className="border-t-2 border-ink px-4 py-6 text-center font-mono text-xs text-ink-muted">
         <Link to="/changelog" className="transition-colors hover:text-ink">
-          FoosLeague v{__APP_VERSION__}
+          FoosRank v{__APP_VERSION__}
         </Link>
       </footer>
     </div>

@@ -1,4 +1,4 @@
-# Foosball League
+# FoosRank
 
 ELO-based office foosball league management. Record matches asynchronously, track ratings, climb the leaderboard.
 
@@ -51,7 +51,7 @@ just scan-db          # Scan DynamoDB table (debug)
 ## Project Structure
 
 ```
-FoosbalLeauge/
+foosrank/
 ├── backend/          # FastAPI + Mangum (Python)
 ├── frontend/         # React + Vite (TypeScript)
 ├── infra/            # Terraform modules

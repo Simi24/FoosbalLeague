@@ -3,7 +3,7 @@
 export AWS_DEFAULT_REGION=eu-west-1
 
 echo "============================================"
-echo "  Foosball League - LocalStack Init"
+echo "  FoosRank - LocalStack Init"
 echo "============================================"
 
 # --------------------------------------------------

@@ -72,7 +72,7 @@ export const ChangelogPage = () => {
           What&apos;s New
         </h1>
         <p className="mb-8 text-sm font-medium text-ink-soft">
-          A history of updates and improvements to FoosLeague.
+          A history of updates and improvements to FoosRank.
         </p>
 
         {loading ? (

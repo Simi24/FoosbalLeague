@@ -36,7 +36,7 @@ export const LoginPage = () => {
           <BrandMark size="lg" />
         </div>
         <h1 className="mb-2 text-center text-4xl font-bold tracking-tight text-ink">
-          Foos<span className="text-team-red">League</span>
+          Foos<span className="text-team-red">Rank</span>
         </h1>
         <p className="mb-8 text-center text-xs font-semibold uppercase tracking-wider text-ink-soft">
           ELO-based office foosball rankings

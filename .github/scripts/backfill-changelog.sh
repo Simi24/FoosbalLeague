@@ -37,7 +37,7 @@ call_gemini() {
 
   # Build prompt via file for safe escaping
   cat > /tmp/bp-prompt.txt <<'PROMPT_END'
-You are writing a changelog for end users of a foosball league app called FoosLeague. The users are non-technical office workers who play foosball.
+You are writing a changelog for end users of a foosball ranking app called FoosRank. The users are non-technical office workers who play foosball.
 
 Transform the developer changelog below into 2-5 bullet points that a regular user would understand and care about. Focus on what changed from the user's perspective (new features, improvements, fixes they'd notice). Skip purely internal/infrastructure changes. If a release is ALL infrastructure, return a single bullet: "Behind-the-scenes improvements for reliability and performance."
 

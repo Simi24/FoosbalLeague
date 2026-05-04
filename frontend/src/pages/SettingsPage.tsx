@@ -89,7 +89,7 @@ export const SettingsPage = () => {
           to="/changelog"
           className="font-mono text-xs text-ink-muted transition-colors hover:text-ink"
         >
-          FoosLeague v{__APP_VERSION__}
+          FoosRank v{__APP_VERSION__}
         </Link>
       </div>
     </div>

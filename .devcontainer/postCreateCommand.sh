@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-echo "=== Foosball League - Dev Environment Setup ==="
+echo "=== FoosRank - Dev Environment Setup ==="
 
 # Install backend dependencies
 echo "Installing backend Python dependencies..."

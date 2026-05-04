@@ -1,5 +1,5 @@
 {
-  "name": "Foosball League",
+  "name": "FoosRank",
   "build": {
     "dockerfile": "Dockerfile"
   },

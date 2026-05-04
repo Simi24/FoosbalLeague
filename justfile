@@ -1,4 +1,4 @@
-# Foosball League - Development & Deploy Commands
+# FoosRank - Development & Deploy Commands
 # Run these from inside the devcontainer
 
 aws_region := "eu-west-1"

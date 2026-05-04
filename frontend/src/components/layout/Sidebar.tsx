@@ -23,7 +23,7 @@ export const Sidebar = () => {
         <Link to="/dashboard" className="flex items-center gap-2">
           <BrandMark size="sm" />
           <span className="text-lg font-bold tracking-tight text-ink">
-            Foos<span className="text-team-red">League</span>
+            Foos<span className="text-team-red">Rank</span>
           </span>
         </Link>
       </div>
