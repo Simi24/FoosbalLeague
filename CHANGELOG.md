@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.1](https://github.com/Simi24/FoosbalLeague/compare/foosball-league-v0.18.0...foosball-league-v0.18.1) (2026-05-04)
+
+
+### Bug Fixes
+
+* add fallback for Cloudflare API token in Terraform deployment ([591cb7d](https://github.com/Simi24/FoosbalLeague/commit/591cb7d7ad08cf497e16067035772ef9a187f16f))
+
 ## [0.18.0](https://github.com/Simi24/FoosbalLeague/compare/foosball-league-v0.17.0...foosball-league-v0.18.0) (2026-05-04)
 
 
