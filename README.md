@@ -50,7 +50,40 @@ just scan-db          # Scan DynamoDB table (debug)
 
 ## Production Deploy
 
-Deploys run via `.github/workflows/deploy.yml` (OIDC → AWS, no static keys).
+Two-track deployment model:
+
+| Change type | How | Where |
+|-------------|-----|-------|
+| App code (backend Python, frontend React) | Automatic on release-please merge | `.github/workflows/deploy.yml` |
+| Infrastructure (Terraform: modules, vars, IAM, etc.) | **Manual local apply** | `just tf-apply DEPLOY_ENV=<env>` |
+
+CI never touches Terraform. Only Lambda image + S3 sync + CloudFront invalidate.
+Lambda's `image_uri` is excluded from Terraform via `lifecycle { ignore_changes }` so local `tf apply` doesn't fight CI image updates.
+
+### Local infra changes
+
+Prereq:
+```bash
+export AWS_PROFILE=<your-profile>
+export CLOUDFLARE_API_TOKEN=<token>   # only required if domain_name is set in the env
+```
+
+Workflow:
+```bash
+just tf-init DEPLOY_ENV=prod    # only on env switch / first run
+just tf-plan DEPLOY_ENV=prod    # review diff
+just tf-apply DEPLOY_ENV=prod   # apply
+```
+
+State lives in `s3://foosball-league-terraform-state/<env>/terraform.tfstate` (locked via DynamoDB table).
+
+### Recovery: importing existing AWS resources
+
+If state is lost or new resources were ClickOps'd:
+```bash
+just tf-reconcile DEPLOY_ENV=<env>   # imports core AWS resources by convention
+just tf-plan DEPLOY_ENV=<env>        # check for drift
+```
 
 ### Custom Domain (Cloudflare)
 
@@ -70,16 +103,16 @@ When set, Terraform provisions:
 
 ### Cloudflare API Token
 
-Required only when `domain_name` is set.
+Required only when `domain_name` is set in tfvars.
 
 1. Cloudflare dashboard → My Profile → API Tokens → Create Token
 2. Permissions: `Zone:DNS:Edit` + `Zone:Zone:Read`, scoped to the target zone only
-3. Add as **secret** to the matching GitHub Environment (Settings → Environments → `prod` → Secrets), name: `CLOUDFLARE_API_TOKEN`
+3. Export locally before `just tf-*`:
+   ```bash
+   export CLOUDFLARE_API_TOKEN=<token>
+   ```
 
-For local `just tf-apply`, export the same token:
-```bash
-export CLOUDFLARE_API_TOKEN=...
-```
+CI does not need this token (no Terraform in CI).
 
 ### Web Analytics (optional)
 

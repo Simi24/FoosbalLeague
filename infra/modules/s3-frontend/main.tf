@@ -83,18 +83,12 @@ resource "aws_acm_certificate" "frontend" {
 }
 
 resource "cloudflare_record" "frontend_validation" {
-  for_each = local.custom_domain_enabled ? {
-    for dvo in aws_acm_certificate.frontend[0].domain_validation_options : dvo.domain_name => {
-      name  = dvo.resource_record_name
-      type  = dvo.resource_record_type
-      value = dvo.resource_record_value
-    }
-  } : {}
+  count = local.count
 
   zone_id = var.cloudflare_zone_id
-  name    = each.value.name
-  type    = each.value.type
-  content = trimsuffix(each.value.value, ".")
+  name    = tolist(aws_acm_certificate.frontend[0].domain_validation_options)[0].resource_record_name
+  type    = tolist(aws_acm_certificate.frontend[0].domain_validation_options)[0].resource_record_type
+  content = trimsuffix(tolist(aws_acm_certificate.frontend[0].domain_validation_options)[0].resource_record_value, ".")
   ttl     = 60
   proxied = false
   comment = "ACM DNS validation (CloudFront)"
@@ -104,7 +98,7 @@ resource "aws_acm_certificate_validation" "frontend" {
   count                   = local.count
   provider                = aws.us_east_1
   certificate_arn         = aws_acm_certificate.frontend[0].arn
-  validation_record_fqdns = [for r in cloudflare_record.frontend_validation : r.hostname]
+  validation_record_fqdns = [cloudflare_record.frontend_validation[0].hostname]
 }
 
 resource "aws_cloudfront_distribution" "frontend" {

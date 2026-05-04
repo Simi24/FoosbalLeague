@@ -15,10 +15,16 @@ import_resource() {
   local addr="$1"
   local id="$2"
   echo -n "  ${addr} ... "
-  if terraform import ${TF_ARGS} "${addr}" "${id}" &>/dev/null; then
+  local out
+  if out=$(terraform import ${TF_ARGS} "${addr}" "${id}" 2>&1); then
     echo "imported"
+  elif echo "${out}" | grep -q "Resource already managed by Terraform"; then
+    echo "already in state"
+  elif echo "${out}" | grep -q "Cannot import non-existent remote object"; then
+    echo "not in AWS (skip)"
   else
-    echo "skipped"
+    echo "FAILED"
+    echo "${out}" | sed 's/^/    /'
   fi
 }
 

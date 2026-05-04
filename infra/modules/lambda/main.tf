@@ -73,6 +73,10 @@ resource "aws_lambda_function" "main" {
       ALLOWED_ORIGINS = var.allowed_origins
     }
   }
+
+  lifecycle {
+    ignore_changes = [image_uri]
+  }
 }
 
 output "invoke_arn" {

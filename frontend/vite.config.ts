@@ -11,12 +11,17 @@ function cspPlugin() {
     transformIndexHtml: {
       order: "post" as const,
       handler(html: string) {
+        const apiOrigin = (() => {
+          try { return new URL(process.env.VITE_API_URL ?? "").origin; }
+          catch { return ""; }
+        })();
+        const connectExtras = ["https://*.amazonaws.com", apiOrigin].filter(Boolean).join(" ");
         const csp = [
           "default-src 'self'",
-          "script-src 'self'",
+          "script-src 'self' https://static.cloudflareinsights.com",
           "style-src 'self' 'unsafe-inline'",
           "font-src 'self'",
-          "connect-src 'self' https://*.amazonaws.com",
+          `connect-src 'self' ${connectExtras}`,
           "img-src 'self' data:",
         ].join("; ");
         return html.replace(

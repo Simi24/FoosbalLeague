@@ -31,18 +31,12 @@ resource "aws_acm_certificate" "api" {
 }
 
 resource "cloudflare_record" "api_validation" {
-  for_each = local.enabled ? {
-    for dvo in aws_acm_certificate.api[0].domain_validation_options : dvo.domain_name => {
-      name  = dvo.resource_record_name
-      type  = dvo.resource_record_type
-      value = dvo.resource_record_value
-    }
-  } : {}
+  count = local.count
 
   zone_id = var.cloudflare_zone_id
-  name    = each.value.name
-  type    = each.value.type
-  content = trimsuffix(each.value.value, ".")
+  name    = tolist(aws_acm_certificate.api[0].domain_validation_options)[0].resource_record_name
+  type    = tolist(aws_acm_certificate.api[0].domain_validation_options)[0].resource_record_type
+  content = trimsuffix(tolist(aws_acm_certificate.api[0].domain_validation_options)[0].resource_record_value, ".")
   ttl     = 60
   proxied = false
   comment = "ACM DNS validation (API Gateway)"
@@ -51,7 +45,7 @@ resource "cloudflare_record" "api_validation" {
 resource "aws_acm_certificate_validation" "api" {
   count                   = local.count
   certificate_arn         = aws_acm_certificate.api[0].arn
-  validation_record_fqdns = [for r in cloudflare_record.api_validation : r.hostname]
+  validation_record_fqdns = [cloudflare_record.api_validation[0].hostname]
 }
 
 resource "aws_apigatewayv2_domain_name" "api" {

@@ -160,26 +160,39 @@ deploy-frontend: build-frontend-prod
     aws cloudfront create-invalidation --distribution-id "$DIST_ID" --paths "/*"
     echo "Frontend deployed: https://$(terraform output -raw cloudfront_domain)"
 
-# ─── Terraform ───────────────────────────────────────────
+# ─── Terraform (LOCAL ONLY — infra changes) ──────────────
+# Prereq: export AWS_PROFILE=<your-profile> and CLOUDFLARE_API_TOKEN=<token>
+# CI does NOT run terraform; app deploys via .github/workflows/deploy.yml only
 
-# Initialize Terraform with backend config
-tf-init:
-    cd infra && terraform init -backend-config=envs/{{deploy_env}}/backend.hcl
+_tf-prereq:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    if [[ -z "${AWS_PROFILE:-}" ]]; then echo "❌ export AWS_PROFILE=<profile>" >&2; exit 1; fi
+    if [[ -z "${CLOUDFLARE_API_TOKEN:-}" ]]; then echo "❌ export CLOUDFLARE_API_TOKEN=<token>" >&2; exit 1; fi
+    aws sts get-caller-identity --query 'Arn' --output text >/dev/null || (echo "❌ AWS creds invalid for profile $AWS_PROFILE" >&2; exit 1)
+
+# Initialize Terraform backend (run once per env switch)
+tf-init: _tf-prereq
+    cd infra && terraform init -backend-config=envs/{{deploy_env}}/backend.hcl -reconfigure
 
 # Show Terraform plan
-tf-plan:
-    cd infra && terraform plan -var-file=envs/{{deploy_env}}/terraform.tfvars
+tf-plan: _tf-prereq
+    cd infra && terraform plan -var-file=envs/{{deploy_env}}/terraform.tfvars -var="image_tag=$(git rev-parse HEAD)"
 
-# Apply Terraform
-tf-apply:
-    cd infra && terraform apply -var-file=envs/{{deploy_env}}/terraform.tfvars
+# Apply Terraform (requires confirmation)
+tf-apply: _tf-prereq
+    cd infra && terraform apply -var-file=envs/{{deploy_env}}/terraform.tfvars -var="image_tag=$(git rev-parse HEAD)"
 
 # Show Terraform outputs
 tf-output:
     cd infra && terraform output
 
-# ─── Full Deploy ─────────────────────────────────────────
+# Reconcile state — import existing AWS resources (recovery only)
+tf-reconcile: _tf-prereq
+    cd infra && bash scripts/reconcile-state.sh {{deploy_env}} $(git rev-parse HEAD)
 
-# Full deploy: push image → terraform → frontend
-deploy: push-backend tf-apply deploy-frontend
-    @echo "Full deploy complete ({{deploy_env}})"
+# ─── Full Deploy (LOCAL — for emergencies/testing) ────────
+# Routine app deploys go via GitHub Actions on release-please merge
+
+deploy-app: deploy-backend deploy-frontend
+    @echo "App deploy complete ({{deploy_env}})"
