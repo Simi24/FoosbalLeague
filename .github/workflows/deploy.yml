@@ -94,7 +94,10 @@ jobs:
         id: tf
         working-directory: infra
         env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          # Cloudflare provider requires a token to initialize, even if no CF resources
+          # are created (dev/staging have domain_name=""). Fallback to dummy value so
+          # provider config validation passes; no API call is made when count=0.
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN || 'placeholder-not-used' }}
         run: |
           terraform apply -auto-approve \
             -var-file=envs/${{ inputs.environment }}/terraform.tfvars \
