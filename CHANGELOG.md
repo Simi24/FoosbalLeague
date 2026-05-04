@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.0](https://github.com/Simi24/FoosbalLeague/compare/foosball-league-v0.17.0...foosball-league-v0.18.0) (2026-05-04)
+
+
+### Features
+
+* implement custom domain support with Cloudflare for API and frontend ([a68c71e](https://github.com/Simi24/FoosbalLeague/commit/a68c71e4880e1a4bd30fb0d3c56647c0a43022aa))
+
 ## [0.17.0](https://github.com/Simi24/FoosbalLeague/compare/foosball-league-v0.16.0...foosball-league-v0.17.0) (2026-04-24)
 
 
