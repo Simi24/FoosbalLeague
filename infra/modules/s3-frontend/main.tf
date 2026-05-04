@@ -1,5 +1,32 @@
+terraform {
+  required_providers {
+    aws = {
+      source                = "hashicorp/aws"
+      configuration_aliases = [aws.us_east_1]
+    }
+    cloudflare = {
+      source = "cloudflare/cloudflare"
+    }
+  }
+}
+
 variable "environment" { type = string }
 variable "project" { type = string }
+
+variable "domain_name" {
+  type    = string
+  default = ""
+}
+
+variable "cloudflare_zone_id" {
+  type    = string
+  default = ""
+}
+
+locals {
+  custom_domain_enabled = var.domain_name != "" && var.cloudflare_zone_id != ""
+  count                 = local.custom_domain_enabled ? 1 : 0
+}
 
 resource "aws_s3_bucket" "frontend" {
   bucket = "${var.project}-${var.environment}-frontend"
@@ -44,9 +71,46 @@ resource "aws_s3_bucket_policy" "frontend" {
   })
 }
 
+resource "aws_acm_certificate" "frontend" {
+  count             = local.count
+  provider          = aws.us_east_1
+  domain_name       = var.domain_name
+  validation_method = "DNS"
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "cloudflare_record" "frontend_validation" {
+  for_each = local.custom_domain_enabled ? {
+    for dvo in aws_acm_certificate.frontend[0].domain_validation_options : dvo.domain_name => {
+      name  = dvo.resource_record_name
+      type  = dvo.resource_record_type
+      value = dvo.resource_record_value
+    }
+  } : {}
+
+  zone_id = var.cloudflare_zone_id
+  name    = each.value.name
+  type    = each.value.type
+  content = trimsuffix(each.value.value, ".")
+  ttl     = 60
+  proxied = false
+  comment = "ACM DNS validation (CloudFront)"
+}
+
+resource "aws_acm_certificate_validation" "frontend" {
+  count                   = local.count
+  provider                = aws.us_east_1
+  certificate_arn         = aws_acm_certificate.frontend[0].arn
+  validation_record_fqdns = [for r in cloudflare_record.frontend_validation : r.hostname]
+}
+
 resource "aws_cloudfront_distribution" "frontend" {
   enabled             = true
   default_root_object = "index.html"
+  aliases             = local.custom_domain_enabled ? [var.domain_name] : []
 
   origin {
     domain_name = aws_s3_bucket.frontend.bucket_regional_domain_name
@@ -87,7 +151,9 @@ resource "aws_cloudfront_distribution" "frontend" {
   }
 
   viewer_certificate {
-    cloudfront_default_certificate = true
+    cloudfront_default_certificate = local.custom_domain_enabled ? null : true
+    acm_certificate_arn            = local.custom_domain_enabled ? aws_acm_certificate_validation.frontend[0].certificate_arn : null
+    ssl_support_method             = local.custom_domain_enabled ? "sni-only" : null
     minimum_protocol_version       = "TLSv1.2_2021"
   }
 }

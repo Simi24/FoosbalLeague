@@ -30,3 +30,15 @@ variable "image_tag" {
   type        = string
   default     = "latest"
 }
+
+variable "domain_name" {
+  description = "Apex custom domain (e.g. foosrank.com). Empty = use AWS-generated URLs."
+  type        = string
+  default     = ""
+}
+
+variable "cloudflare_zone_id" {
+  description = "Cloudflare zone ID for the custom domain. Required when domain_name is set."
+  type        = string
+  default     = ""
+}

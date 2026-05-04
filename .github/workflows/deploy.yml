@@ -33,6 +33,7 @@ jobs:
     environment: ${{ inputs.environment }}
     outputs:
       api_url: ${{ steps.tf.outputs.api_url }}
+      api_url_public: ${{ steps.tf.outputs.api_url_public }}
       cognito_client_id: ${{ steps.tf.outputs.cognito_client_id }}
       frontend_bucket: ${{ steps.tf.outputs.frontend_bucket }}
       cloudfront_dist_id: ${{ steps.tf.outputs.cloudfront_dist_id }}
@@ -92,11 +93,14 @@ jobs:
       - name: Deploy via Terraform
         id: tf
         working-directory: infra
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: |
           terraform apply -auto-approve \
             -var-file=envs/${{ inputs.environment }}/terraform.tfvars \
             -var="image_tag=${{ github.sha }}"
           echo "api_url=$(terraform output -raw api_url)" >> "$GITHUB_OUTPUT"
+          echo "api_url_public=$(terraform output -raw api_url_public)" >> "$GITHUB_OUTPUT"
           echo "cognito_client_id=$(terraform output -raw cognito_client_id)" >> "$GITHUB_OUTPUT"
           echo "frontend_bucket=$(terraform output -raw frontend_bucket)" >> "$GITHUB_OUTPUT"
           echo "cloudfront_dist_id=$(terraform output -raw cloudfront_distribution_id)" >> "$GITHUB_OUTPUT"
@@ -115,7 +119,7 @@ jobs:
       - name: Build frontend
         working-directory: frontend
         env:
-          VITE_API_URL: ${{ needs.deploy-backend.outputs.api_url }}
+          VITE_API_URL: ${{ needs.deploy-backend.outputs.api_url_public }}
           VITE_COGNITO_REGION: eu-west-1
           VITE_COGNITO_CLIENT_ID: ${{ needs.deploy-backend.outputs.cognito_client_id }}
         run: |

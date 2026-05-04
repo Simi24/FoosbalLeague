@@ -140,7 +140,7 @@ build-frontend-prod:
     #!/usr/bin/env bash
     set -euo pipefail
     cd infra
-    API_URL=$(terraform output -raw api_url)
+    API_URL=$(terraform output -raw api_url_public)
     CLIENT_ID=$(terraform output -raw cognito_client_id)
     cd ../frontend
     VITE_API_URL="$API_URL" \

@@ -27,3 +27,13 @@ output "cognito_client_id" {
   description = "Cognito App Client ID"
   value       = module.cognito.client_id
 }
+
+output "app_url" {
+  description = "Public frontend URL (custom domain when set, else CloudFront)"
+  value       = var.domain_name != "" ? "https://${var.domain_name}" : "https://${module.s3_frontend.cloudfront_domain}"
+}
+
+output "api_url_public" {
+  description = "Public API URL (custom domain when set, else API Gateway invoke URL)"
+  value       = var.domain_name != "" ? "https://api.${var.domain_name}" : module.api_gateway.api_url
+}
