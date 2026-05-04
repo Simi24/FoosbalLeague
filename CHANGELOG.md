@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.3](https://github.com/Simi24/FoosbalLeague/compare/foosball-league-v0.18.2...foosball-league-v0.18.3) (2026-05-04)
+
+
+### Bug Fixes
+
+* force build ([9c73965](https://github.com/Simi24/FoosbalLeague/commit/9c7396599452990c8515925cb5a544711adeb0c2))
+
 ## [0.18.2](https://github.com/Simi24/FoosbalLeague/compare/foosball-league-v0.18.1...foosball-league-v0.18.2) (2026-05-04)
 
 
