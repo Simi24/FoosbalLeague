@@ -48,6 +48,7 @@ just dev-frontend     # Frontend dev server only
 just scan-db          # Scan DynamoDB table (debug)
 ```
 
+
 ## Production Deploy
 
 Two-track deployment model:
