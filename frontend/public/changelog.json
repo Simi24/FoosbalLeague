@@ -1,5 +1,13 @@
 [
   {
+    "version": "0.18.0",
+    "date": "2026-05-04",
+    "summary": [
+      "The app has been officially renamed from Foosball League to FoosRank.",
+      "Updated the website address and links to reflect the new FoosRank name."
+    ]
+  },
+  {
     "version": "0.17.0",
     "date": "2026-04-24",
     "summary": [
