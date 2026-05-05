@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.19.0](https://github.com/Simi24/FoosbalLeague/compare/foosball-league-v0.18.3...foosball-league-v0.19.0) (2026-05-05)
+
+
+### Features
+
+* GDPR data export, account deletion, and privacy policy ([d7a019d](https://github.com/Simi24/FoosbalLeague/commit/d7a019d1d1314a6af203fd27dba2ef7d21f53b5b))
+
 ## [0.18.3](https://github.com/Simi24/FoosbalLeague/compare/foosball-league-v0.18.2...foosball-league-v0.18.3) (2026-05-04)
 
 
