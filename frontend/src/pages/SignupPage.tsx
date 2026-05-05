@@ -11,7 +11,7 @@ import {
   saveTokens,
   initAuth,
 } from "@/features/auth";
-import { BrandMark } from "@/components/layout";
+import { BrandMark, Footer } from "@/components/layout";
 import { PasswordInput } from "@/components/inputs/PasswordInput";
 import { PasswordRules, isPasswordValid } from "@/components/inputs/PasswordRules";
 
@@ -31,6 +31,7 @@ export const SignupPage = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [code, setCode] = useState("");
+  const [acceptedPrivacy, setAcceptedPrivacy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -47,6 +48,10 @@ export const SignupPage = () => {
     }
     if (!passwordsMatch) {
       setError("Passwords do not match");
+      return;
+    }
+    if (!acceptedPrivacy) {
+      setError("You must accept the Privacy Policy");
       return;
     }
 
@@ -87,7 +92,8 @@ export const SignupPage = () => {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-paper p-4">
+    <div className="flex min-h-screen flex-col bg-paper">
+      <div className="flex flex-1 items-center justify-center p-4">
       <div className="animate-in brut-border brut-shadow-lg w-full max-w-sm bg-card p-8">
         <div className="mb-4 flex justify-center">
           <BrandMark size="lg" />
@@ -154,9 +160,29 @@ export const SignupPage = () => {
                 </p>
               )}
             </div>
+            <label className="flex items-start gap-2 text-xs text-ink-soft">
+              <input
+                type="checkbox"
+                checked={acceptedPrivacy}
+                onChange={(e) => setAcceptedPrivacy(e.target.checked)}
+                className="mt-0.5 h-4 w-4 shrink-0 accent-ink"
+                required
+              />
+              <span>
+                I have read and accept the{" "}
+                <Link
+                  to="/privacy"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-bold text-ink underline"
+                >
+                  Privacy Policy
+                </Link>
+              </span>
+            </label>
             <button
               type="submit"
-              disabled={loading || !passwordValid}
+              disabled={loading || !passwordValid || !acceptedPrivacy}
               className="brut-border btn-press brut-shadow min-h-[48px] w-full bg-ink px-4 py-2 text-sm font-bold uppercase tracking-wide text-paper transition-colors disabled:cursor-not-allowed disabled:bg-ink-muted"
             >
               {loading ? "Creating account..." : "Sign up"}
@@ -196,6 +222,8 @@ export const SignupPage = () => {
           </Link>
         </p>
       </div>
+      </div>
+      <Footer />
     </div>
   );
 };

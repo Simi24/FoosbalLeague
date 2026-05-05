@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 
 import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import { loginWithCredentials } from "@/features/auth";
-import { BrandMark } from "@/components/layout";
+import { BrandMark, Footer } from "@/components/layout";
 import { PasswordInput } from "@/components/inputs/PasswordInput";
 
 export const LoginPage = () => {
@@ -30,7 +30,8 @@ export const LoginPage = () => {
   const isLoading = authStatus === "loading";
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-paper p-4">
+    <div className="flex min-h-screen flex-col bg-paper">
+      <div className="flex flex-1 items-center justify-center p-4">
       <div className="animate-in brut-border brut-shadow-lg w-full max-w-sm bg-card p-8">
         <div className="mb-4 flex justify-center">
           <BrandMark size="lg" />
@@ -97,6 +98,8 @@ export const LoginPage = () => {
           Internal use only
         </p>
       </div>
+      </div>
+      <Footer />
     </div>
   );
 };

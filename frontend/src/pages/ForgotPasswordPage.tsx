@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 import { CognitoError, cognitoConfirmForgotPassword, cognitoForgotPassword } from "@/features/auth/cognito";
-import { BrandMark } from "@/components/layout";
+import { BrandMark, Footer } from "@/components/layout";
 import { PasswordInput } from "@/components/inputs/PasswordInput";
 import { PasswordRules, isPasswordValid } from "@/components/inputs/PasswordRules";
 
@@ -66,7 +66,8 @@ export const ForgotPasswordPage = () => {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-paper p-4">
+    <div className="flex min-h-screen flex-col bg-paper">
+      <div className="flex flex-1 items-center justify-center p-4">
       <div className="animate-in brut-border brut-shadow-lg w-full max-w-sm bg-card p-8">
         <div className="mb-4 flex justify-center">
           <BrandMark size="lg" />
@@ -159,6 +160,8 @@ export const ForgotPasswordPage = () => {
           </Link>
         </p>
       </div>
+      </div>
+      <Footer />
     </div>
   );
 };

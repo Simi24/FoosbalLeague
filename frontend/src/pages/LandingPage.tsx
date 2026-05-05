@@ -231,6 +231,10 @@ export const LandingPage = () => {
       )}
 
       <footer className="border-t-2 border-ink px-4 py-6 text-center font-mono text-xs text-ink-muted">
+        <Link to="/privacy" className="transition-colors hover:text-ink">
+          Privacy
+        </Link>
+        <span className="mx-2">·</span>
         <Link to="/changelog" className="transition-colors hover:text-ink">
           FoosRank v{__APP_VERSION__}
         </Link>

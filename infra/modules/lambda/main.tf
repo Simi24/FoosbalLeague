@@ -4,6 +4,9 @@ variable "image_tag" { type = string }
 variable "table_arn" { type = string }
 variable "table_name" { type = string }
 variable "allowed_origins" { type = string }
+variable "cognito_user_pool_id" { type = string }
+variable "cognito_user_pool_arn" { type = string }
+variable "aws_region" { type = string }
 
 data "aws_ecr_repository" "main" {
   name = var.project
@@ -15,8 +18,8 @@ resource "aws_iam_role" "lambda" {
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
-      Action = "sts:AssumeRole"
-      Effect = "Allow"
+      Action    = "sts:AssumeRole"
+      Effect    = "Allow"
       Principal = { Service = "lambda.amazonaws.com" }
     }]
   })
@@ -45,6 +48,20 @@ resource "aws_iam_role_policy" "dynamodb" {
   })
 }
 
+resource "aws_iam_role_policy" "cognito" {
+  name = "cognito-admin-delete"
+  role = aws_iam_role.lambda.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect   = "Allow"
+      Action   = ["cognito-idp:AdminDeleteUser"]
+      Resource = [var.cognito_user_pool_arn]
+    }]
+  })
+}
+
 resource "aws_iam_role_policy_attachment" "logs" {
   role       = aws_iam_role.lambda.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
@@ -66,11 +83,13 @@ resource "aws_lambda_function" "main" {
 
   environment {
     variables = {
-      APP_NAME        = var.project
-      ENV             = var.environment
-      CLOUD_ENV       = var.environment
-      DYNAMODB_TABLE  = var.table_name
-      ALLOWED_ORIGINS = var.allowed_origins
+      APP_NAME             = var.project
+      ENV                  = var.environment
+      CLOUD_ENV            = var.environment
+      DYNAMODB_TABLE       = var.table_name
+      ALLOWED_ORIGINS      = var.allowed_origins
+      COGNITO_USER_POOL_ID = var.cognito_user_pool_id
+      COGNITO_REGION       = var.aws_region
     }
   }
 

@@ -1,5 +1,7 @@
 """Player entity - registered user."""
 
+from datetime import datetime
+
 from models.base import BaseEntity
 
 
@@ -20,3 +22,6 @@ class PlayerModel(BaseEntity):
     total_wins: int = 0
     total_losses: int = 0
     notifications_read_until: str | None = None
+    deleted: bool = False
+    deleted_at: datetime | None = None
+    last_export_at: datetime | None = None

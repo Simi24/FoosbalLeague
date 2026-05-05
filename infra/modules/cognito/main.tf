@@ -39,8 +39,8 @@ resource "aws_cognito_user_pool" "main" {
 }
 
 resource "aws_cognito_user_pool_client" "web" {
-  name         = "${var.project}-${var.environment}-web"
-  user_pool_id = aws_cognito_user_pool.main.id
+  name                          = "${var.project}-${var.environment}-web"
+  user_pool_id                  = aws_cognito_user_pool.main.id
   prevent_user_existence_errors = "ENABLED"
 
   explicit_auth_flows = [
@@ -51,6 +51,10 @@ resource "aws_cognito_user_pool_client" "web" {
 
 output "user_pool_id" {
   value = aws_cognito_user_pool.main.id
+}
+
+output "user_pool_arn" {
+  value = aws_cognito_user_pool.main.arn
 }
 
 output "client_id" {

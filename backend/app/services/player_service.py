@@ -72,15 +72,17 @@ def update_display_name(
         return None
 
     now = datetime.now(timezone.utc)
-    PlayerModel.update(player.pk, player.sk).set(
-        "display_name", display_name
-    ).set("updated_at", now).execute()
+    PlayerModel.update(player.pk, player.sk).set("display_name", display_name).set(
+        "updated_at", now
+    ).execute()
 
     logger.info(f"Updated display name for {player_id} to '{display_name}'")
     return get_player(tenant_id, player_id)
 
 
 def list_players(tenant_id: str) -> list[PlayerModel]:
-    """List all players in a tenant."""
+    """List all players in a tenant (excluding soft-deleted)."""
     results = BaseEntity.query(f"TENANT#{tenant_id}").starts_with("PLAYER#").all()
-    return [item for item in results if isinstance(item, PlayerModel)]
+    return [
+        item for item in results if isinstance(item, PlayerModel) and not item.deleted
+    ]

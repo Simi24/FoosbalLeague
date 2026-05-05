@@ -11,6 +11,7 @@ import { ForgotPasswordPage } from "@/pages/ForgotPasswordPage";
 import { LandingPage } from "@/pages/LandingPage";
 import { LoginPage } from "@/pages/LoginPage";
 import { NotFoundPage } from "@/pages/NotFoundPage";
+import { PrivacyPage } from "@/pages/PrivacyPage";
 import { ProfileRedirect } from "@/pages/ProfileRedirect";
 import { SettingsPage } from "@/pages/SettingsPage";
 import { SignupPage } from "@/pages/SignupPage";
@@ -52,6 +53,7 @@ export const App = () => {
       <Route path="/signup" element={<SignupPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/changelog" element={<ChangelogPage />} />
+      <Route path="/privacy" element={<PrivacyPage />} />
       <Route
         path="*"
         element={

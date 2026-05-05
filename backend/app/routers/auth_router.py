@@ -1,7 +1,10 @@
+import json
+
 from dependencies.auth import AuthenticatedUser, get_current_user
 from dependencies.tenant import get_tenant_id
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Response
 from schemas.auth import RegisterRequest, RegisterResponse, UserInfo
+from services.gdpr_service import delete_user_account, export_user_data
 from services.player_service import get_player_by_cognito_sub
 
 router = APIRouter(
@@ -53,3 +56,28 @@ async def register(
         email=player.email,
         tenant_id=tenant_id,
     )
+
+
+@router.get("/me/export")
+async def export_my_data(
+    user: AuthenticatedUser = Depends(get_current_user),
+    tenant_id: str = Depends(get_tenant_id),
+) -> Response:
+    """GDPR art. 15/20: export all personal data as JSON download."""
+    data = export_user_data(tenant_id, user.sub)
+    payload = json.dumps(data, indent=2, default=str)
+    filename = f"foosrank-export-{user.sub[:8]}.json"
+    return Response(
+        content=payload,
+        media_type="application/json",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
+@router.delete("/me", status_code=204)
+async def delete_my_account(
+    user: AuthenticatedUser = Depends(get_current_user),
+    tenant_id: str = Depends(get_tenant_id),
+) -> None:
+    """GDPR art. 17: anonymize historical data + delete Cognito user."""
+    delete_user_account(tenant_id, user.sub)

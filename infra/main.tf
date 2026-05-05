@@ -61,13 +61,16 @@ locals {
 }
 
 module "lambda" {
-  source          = "./modules/lambda"
-  environment     = var.environment
-  project         = var.project
-  image_tag       = var.image_tag
-  table_arn       = module.dynamodb.table_arn
-  table_name      = module.dynamodb.table_name
-  allowed_origins = local.public_origin
+  source                = "./modules/lambda"
+  environment           = var.environment
+  project               = var.project
+  image_tag             = var.image_tag
+  table_arn             = module.dynamodb.table_arn
+  table_name            = module.dynamodb.table_name
+  allowed_origins       = local.public_origin
+  cognito_user_pool_id  = module.cognito.user_pool_id
+  cognito_user_pool_arn = module.cognito.user_pool_arn
+  aws_region            = var.aws_region
 }
 
 module "api_gateway" {
