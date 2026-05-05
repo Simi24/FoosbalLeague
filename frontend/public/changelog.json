@@ -1,5 +1,14 @@
 [
   {
+    "version": "0.19.0",
+    "date": "2026-05-05",
+    "summary": [
+      "Added the ability to download a copy of your personal data and permanently delete your account from the settings page.",
+      "Introduced a new Privacy Policy to clearly explain how your data is handled.",
+      "Updated the footer and settings menu for easier navigation to privacy and account management tools."
+    ]
+  },
+  {
     "version": "0.18.3",
     "date": "2026-05-04",
     "summary": [
