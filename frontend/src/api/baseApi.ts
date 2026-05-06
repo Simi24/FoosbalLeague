@@ -18,6 +18,7 @@ export type NotificationType =
   | "MATCH_PENDING"
   | "MATCH_CONFIRMED"
   | "MATCH_DISPUTED"
+  | "MATCH_DELETED"
   | "ACHIEVEMENT_UNLOCKED";
 
 export interface NotificationItem {
@@ -152,6 +153,18 @@ export const api = createApi({
       invalidatesTags: (_, __, { leagueId }) =>
         withScopedEffects(leagueId, ["Matches"]),
     }),
+    deleteMatch: build.mutation<
+      void,
+      { matchId: string; leagueId: string; reason?: string }
+    >({
+      query: ({ matchId, reason }) => ({
+        url: `/matches/${matchId}`,
+        method: "DELETE",
+        body: reason ? { reason } : undefined,
+      }),
+      invalidatesTags: (_, __, { leagueId }) =>
+        withScopedEffects(leagueId, ["Matches"]),
+    }),
 
     // ─── Rankings ──────────────────────────────────────────
     getLeaderboard: build.query<Leaderboard, string>({
@@ -247,6 +260,7 @@ export const {
   useRecordMatchMutation,
   useConfirmMatchMutation,
   useDisputeMatchMutation,
+  useDeleteMatchMutation,
   // Rankings
   useGetLeaderboardQuery,
   useGetEloHistoryQuery,

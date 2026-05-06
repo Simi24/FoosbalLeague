@@ -1,6 +1,7 @@
 import {
   MdCheck,
   MdClose,
+  MdDelete,
   MdEmojiEvents,
   MdNotifications,
   MdSportsSoccer,
@@ -31,6 +32,11 @@ const TYPE_STYLE: Record<
     icon: MdClose,
     fill: "bg-coral",
     title: "Match disputed",
+  },
+  MATCH_DELETED: {
+    icon: MdDelete,
+    fill: "bg-coral",
+    title: "Match deleted",
   },
   ACHIEVEMENT_UNLOCKED: {
     icon: MdEmojiEvents,
@@ -64,6 +70,14 @@ const subtitleFor = (n: NotificationItem): string => {
     }
     case "MATCH_DISPUTED":
       return `${leagueName} · Match disputed`;
+    case "MATCH_DELETED": {
+      const delta = typeof p.reverted_delta === "number" ? p.reverted_delta : 0;
+      const reason = typeof p.reason === "string" && p.reason ? p.reason : null;
+      const sign = delta > 0 ? "-" : delta < 0 ? "+" : "";
+      const eloPart = delta !== 0 ? ` · ${sign}${Math.abs(delta)} ELO reverted` : "";
+      const reasonPart = reason ? ` · ${reason}` : "";
+      return `${leagueName}${eloPart}${reasonPart}`;
+    }
     case "ACHIEVEMENT_UNLOCKED":
       return `${leagueName} · ${p.name ?? p.achievement_type ?? ""}`;
     default:

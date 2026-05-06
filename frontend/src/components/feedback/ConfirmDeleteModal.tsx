@@ -4,8 +4,10 @@ interface ConfirmDeleteModalProps {
   confirmText: string;
   title: string;
   description: string;
-  onConfirm: () => Promise<void>;
+  onConfirm: (reason?: string) => Promise<void>;
   onClose: () => void;
+  reasonPresets?: string[];
+  reasonPlaceholder?: string;
 }
 
 export const ConfirmDeleteModal = ({
@@ -14,16 +16,20 @@ export const ConfirmDeleteModal = ({
   description,
   onConfirm,
   onClose,
+  reasonPresets,
+  reasonPlaceholder,
 }: ConfirmDeleteModalProps) => {
   const [input, setInput] = useState("");
+  const [reason, setReason] = useState("");
   const [busy, setBusy] = useState(false);
   const matches = input === confirmText;
+  const showReason = reasonPresets !== undefined;
 
   const handleConfirm = async () => {
     if (!matches || busy) return;
     setBusy(true);
     try {
-      await onConfirm();
+      await onConfirm(showReason ? reason.trim() || undefined : undefined);
     } finally {
       setBusy(false);
     }
@@ -45,6 +51,41 @@ export const ConfirmDeleteModal = ({
           {title}
         </h2>
         <p className="mb-4 text-sm leading-relaxed text-ink-soft">{description}</p>
+
+        {showReason && (
+          <>
+            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-ink">
+              Reason (optional)
+            </p>
+            {reasonPresets && reasonPresets.length > 0 && (
+              <div className="mb-2 flex flex-wrap gap-1.5">
+                {reasonPresets.map((preset) => (
+                  <button
+                    key={preset}
+                    type="button"
+                    onClick={() => setReason(preset)}
+                    className={`brut-border btn-press px-2 py-1 text-xs font-semibold uppercase tracking-wide transition-colors ${
+                      reason === preset
+                        ? "bg-ink text-paper"
+                        : "bg-card text-ink hover:bg-paper-alt"
+                    }`}
+                  >
+                    {preset}
+                  </button>
+                ))}
+              </div>
+            )}
+            <input
+              type="text"
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              maxLength={200}
+              placeholder={reasonPlaceholder ?? "Why is this being deleted?"}
+              className="brut-border mb-4 min-h-[44px] w-full bg-card px-3 py-2 text-sm text-ink outline-none"
+            />
+          </>
+        )}
+
         <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-ink">
           Type <span className="font-mono text-ink">{confirmText}</span> to confirm
         </p>

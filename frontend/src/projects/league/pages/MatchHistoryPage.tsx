@@ -1,6 +1,6 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { MdArrowBack, MdCheck, MdClose } from "react-icons/md";
+import { MdArrowBack, MdCheck, MdClose, MdDelete } from "react-icons/md";
 
 import {
   useGetLeagueQuery,
@@ -8,8 +8,17 @@ import {
   useGetLeagueMatchesQuery,
   useConfirmMatchMutation,
   useDisputeMatchMutation,
+  useDeleteMatchMutation,
 } from "@/api/baseApi";
 import { useAppSelector } from "@/app/hooks";
+import { ConfirmDeleteModal } from "@/components/feedback";
+
+const DELETE_REASON_PRESETS = [
+  "Bogus match",
+  "Wrong score",
+  "Wrong players",
+  "Duplicate",
+];
 
 const STATUS_FILL: Record<string, string> = {
   CONFIRMED: "bg-mint",
@@ -27,6 +36,12 @@ export const MatchHistoryPage = () => {
 
   const [confirmMatch] = useConfirmMatchMutation();
   const [disputeMatch] = useDisputeMatchMutation();
+  const [deleteMatch] = useDeleteMatchMutation();
+
+  const [pendingDelete, setPendingDelete] = useState<{
+    matchId: string;
+    score: string;
+  } | null>(null);
 
   const loading = membersLoading || matchesLoading;
 
@@ -45,6 +60,15 @@ export const MatchHistoryPage = () => {
 
   const handleConfirm = (matchId: string) => confirmMatch({ matchId, leagueId: id! });
   const handleDispute = (matchId: string) => disputeMatch({ matchId, leagueId: id! });
+  const handleDeleteConfirmed = async (reason?: string) => {
+    if (!pendingDelete) return;
+    await deleteMatch({
+      matchId: pendingDelete.matchId,
+      leagueId: id!,
+      reason,
+    }).unwrap();
+    setPendingDelete(null);
+  };
 
   const groupedMatches = useMemo(() => {
     const sorted = [...matches].sort((a, b) => b.created_at.localeCompare(a.created_at));
@@ -166,13 +190,30 @@ export const MatchHistoryPage = () => {
                                 </button>
                               </div>
                             ) : (
-                              <span
-                                className={`inline-block border-2 border-ink px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-ink ${
-                                  STATUS_FILL[m.status] ?? "bg-paper-alt"
-                                }`}
-                              >
-                                {m.status}
-                              </span>
+                              <div className="flex items-center justify-center gap-1.5">
+                                <span
+                                  className={`inline-block border-2 border-ink px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-ink ${
+                                    STATUS_FILL[m.status] ?? "bg-paper-alt"
+                                  }`}
+                                >
+                                  {m.status}
+                                </span>
+                                {isAdmin && (
+                                  <button
+                                    onClick={() =>
+                                      setPendingDelete({
+                                        matchId: m.match_id,
+                                        score: `${m.team1_score}-${m.team2_score}`,
+                                      })
+                                    }
+                                    className="brut-border btn-press bg-card p-1.5 text-ink hover:bg-coral"
+                                    title="Delete match"
+                                    aria-label="Delete match"
+                                  >
+                                    <MdDelete size={14} />
+                                  </button>
+                                )}
+                              </div>
                             )}
                           </td>
                         </tr>
@@ -184,6 +225,17 @@ export const MatchHistoryPage = () => {
             </div>
           ))}
         </div>
+      )}
+
+      {pendingDelete && (
+        <ConfirmDeleteModal
+          confirmText={pendingDelete.score}
+          title="Delete match?"
+          description="ELO and stats from this match will be reverted. Players will be notified. This cannot be undone."
+          onConfirm={handleDeleteConfirmed}
+          onClose={() => setPendingDelete(null)}
+          reasonPresets={DELETE_REASON_PRESETS}
+        />
       )}
     </div>
   );

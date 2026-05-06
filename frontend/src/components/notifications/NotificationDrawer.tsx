@@ -25,6 +25,7 @@ const navigationTargetFor = (n: NotificationItem): string | null => {
     case "MATCH_PENDING":
     case "MATCH_CONFIRMED":
     case "MATCH_DISPUTED":
+    case "MATCH_DELETED":
       return `/leagues/${leagueId}`;
     case "ACHIEVEMENT_UNLOCKED":
       return `/profile`;

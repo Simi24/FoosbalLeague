@@ -8,6 +8,7 @@ NotificationType = Literal[
     "MATCH_PENDING",
     "MATCH_CONFIRMED",
     "MATCH_DISPUTED",
+    "MATCH_DELETED",
     "ACHIEVEMENT_UNLOCKED",
 ]
 

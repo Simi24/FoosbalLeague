@@ -166,7 +166,7 @@ export const LeagueDetailPage = () => {
             <h2 className="text-lg font-bold uppercase tracking-wide text-ink">
               Recent Matches
             </h2>
-            {matches.length > 5 && (
+            {matches.length > 0 && (
               <Link
                 to={`/leagues/${id}/matches`}
                 className="btn-press flex items-center gap-1 border-b-2 border-ink pb-0.5 text-xs font-bold uppercase tracking-wide text-ink"

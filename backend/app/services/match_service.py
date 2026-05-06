@@ -252,6 +252,67 @@ def confirm_match(
     )
 
 
+def delete_match(
+    tenant_id: str,
+    match_id: str,
+    deleted_by: str,
+    reason: str | None,
+) -> MatchModel | None:
+    """Soft-delete a match. If CONFIRMED, revert ELO/counters and history.
+
+    Idempotent: deleting an already-deleted match is a no-op (returns the
+    existing record). Returns None if the match does not exist.
+    """
+    match = get_match(tenant_id, match_id)
+    if not match:
+        return None
+    if match.deleted:
+        return match
+
+    now = datetime.now(timezone.utc)
+    league = get_league(tenant_id, match.league_id)
+    league_name = league.name if league else match.league_id
+
+    reverted_deltas: dict[str, int] = {}
+
+    if match.status == "CONFIRMED":
+        is_team1_winner = match.team1_score > match.team2_score
+        for pid in match.team1_player_ids + match.team2_player_ids:
+            change = match.elo_changes.get(pid)
+            delta = change.get("delta", 0) if isinstance(change, dict) else 0
+            reverted_deltas[pid] = delta
+
+            is_winner = (pid in match.team1_player_ids and is_team1_winner) or (
+                pid in match.team2_player_ids and not is_team1_winner
+            )
+            _revert_rating(tenant_id, match.league_id, pid, delta, is_winner, now)
+            _delete_elo_history_for_match(tenant_id, match.league_id, pid, match_id)
+
+    if league:
+        from models.league import LeagueModel
+
+        new_count = max(0, league.match_count - 1)
+        LeagueModel.update(league.pk, league.sk).set("match_count", new_count).set(
+            "updated_at", now
+        ).execute()
+
+    MatchModel.update(match.pk, match.sk).set("deleted", True).set(
+        "deleted_at", now
+    ).set("deleted_by", deleted_by).set("deletion_reason", reason or "").set(
+        "updated_at", now
+    ).execute()
+
+    logger.info(
+        f"Deleted match {match_id} (status was {match.status}) by {deleted_by}; "
+        f"reverted deltas: {reverted_deltas}"
+    )
+
+    deleted = get_match(tenant_id, match_id) or match
+    _notify_match_deleted(tenant_id, deleted, league_name, deleted_by, reverted_deltas)
+
+    return deleted
+
+
 def dispute_match(
     tenant_id: str,
     match_id: str,
@@ -278,14 +339,23 @@ def dispute_match(
     return disputed
 
 
-def list_matches_by_league(league_id: str) -> list[MatchModel]:
-    """Get all matches for a league via GSI1."""
+def list_matches_by_league(
+    league_id: str, include_deleted: bool = False
+) -> list[MatchModel]:
+    """Get all matches for a league via GSI1.
+
+    By default soft-deleted matches are filtered out. Pass
+    `include_deleted=True` to return them (audit views).
+    """
     results = (
         BaseEntity.query_index("GSI1", f"LEAGUE#{league_id}")
         .starts_with("MATCH#")
         .all()
     )
-    return [item for item in results if isinstance(item, MatchModel)]
+    matches = [item for item in results if isinstance(item, MatchModel)]
+    if include_deleted:
+        return matches
+    return [m for m in matches if not m.deleted]
 
 
 def _build_unlocked_achievements(raw_unlocked: list[str]) -> list[UnlockedAchievement]:
@@ -402,6 +472,81 @@ def _write_elo_history(
     history.save()
 
 
+def _revert_rating(
+    tenant_id: str,
+    league_id: str,
+    player_id: str,
+    delta: int,
+    was_winner: bool,
+    now: datetime,
+) -> None:
+    """Reverse a player's rating after a match deletion.
+
+    Mirrors `_update_rating` but with -delta and decremented counters.
+    Floors at zero so we never write negative values.
+    """
+    old_rating = _get_rating(tenant_id, league_id, player_id)
+    if not old_rating:
+        return
+
+    new_elo = max(0, old_rating.elo - delta)
+    new_mp = max(0, old_rating.matches_played - 1)
+    new_wins = max(0, old_rating.wins - (1 if was_winner else 0))
+    new_losses = max(0, old_rating.losses - (0 if was_winner else 1))
+    inverted_elo = str(9999 - new_elo).zfill(4)
+
+    RatingModel.delete(old_rating.pk, old_rating.sk)
+
+    new_rating = RatingModel(
+        pk=f"TENANT#{tenant_id}",
+        sk=f"RATING#{league_id}#{player_id}",
+        gsi1_pk=f"LEAGUE#{league_id}",
+        gsi1_sk=f"RATING#{inverted_elo}#{player_id}",
+        league_id=league_id,
+        player_id=player_id,
+        display_name=old_rating.display_name,
+        elo=new_elo,
+        matches_played=new_mp,
+        wins=new_wins,
+        losses=new_losses,
+        created_at=old_rating.created_at,
+        updated_at=now,
+    )
+    new_rating.save()
+
+    enrollment = BaseEntity.get(
+        f"TENANT#{tenant_id}", f"ENROLL#{league_id}#{player_id}"
+    )
+    if enrollment:
+        from models.enrollment import EnrollmentModel
+
+        EnrollmentModel.update(enrollment.pk, enrollment.sk).set(
+            "current_elo", new_elo
+        ).set("updated_at", now).execute()
+
+
+def _delete_elo_history_for_match(
+    tenant_id: str,
+    league_id: str,
+    player_id: str,
+    match_id: str,
+) -> None:
+    """Delete EloHistoryModel rows for a given (player, match) pair.
+
+    History rows are keyed by timestamp, not match_id, so we scan the
+    player's history and filter by `match_id`. There is at most one row
+    per player per match.
+    """
+    results = (
+        BaseEntity.query(f"TENANT#{tenant_id}")
+        .starts_with(f"ELOHIST#{league_id}#{player_id}#")
+        .all()
+    )
+    for item in results:
+        if isinstance(item, EloHistoryModel) and item.match_id == match_id:
+            EloHistoryModel.delete(item.pk, item.sk)
+
+
 # ---------------------------------------------------------------------------
 # Notification triggers
 # ---------------------------------------------------------------------------
@@ -484,6 +629,42 @@ def _notify_match_disputed(
         )
     except Exception:
         logger.exception(f"Failed to emit MATCH_DISPUTED for match {match.match_id}")
+
+
+def _notify_match_deleted(
+    tenant_id: str,
+    match: MatchModel,
+    league_name: str,
+    deleted_by: str,
+    reverted_deltas: dict[str, int],
+) -> None:
+    """Notify all participants + submitter + confirmer (except deleter).
+
+    Each recipient gets their own `reverted_delta` so the UI can show
+    the personal ELO swing. Empty dict for non-CONFIRMED deletions —
+    `reverted_delta` defaults to 0.
+    """
+    try:
+        recipients = set(match.team1_player_ids + match.team2_player_ids)
+        if match.submitted_by:
+            recipients.add(match.submitted_by)
+        if match.confirmed_by:
+            recipients.add(match.confirmed_by)
+        recipients.discard(deleted_by)
+
+        for pid in recipients:
+            payload = {
+                "league_id": match.league_id,
+                "league_name": league_name,
+                "match_id": match.match_id,
+                "team1_score": match.team1_score,
+                "team2_score": match.team2_score,
+                "reverted_delta": reverted_deltas.get(pid, 0),
+                "reason": match.deletion_reason or "",
+            }
+            create_notification(tenant_id, pid, "MATCH_DELETED", payload)
+    except Exception:
+        logger.exception(f"Failed to emit MATCH_DELETED for match {match.match_id}")
 
 
 def _notify_achievements_unlocked(

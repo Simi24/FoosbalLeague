@@ -1,5 +1,6 @@
 """Match entity - recorded match result."""
 
+from datetime import datetime
 from typing import Literal
 
 from models.base import BaseEntity
@@ -24,3 +25,7 @@ class MatchModel(BaseEntity):
     submitted_by: str = ""
     confirmed_by: str | None = None
     elo_changes: dict = {}
+    deleted: bool = False
+    deleted_at: datetime | None = None
+    deleted_by: str | None = None
+    deletion_reason: str | None = None

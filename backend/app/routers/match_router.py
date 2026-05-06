@@ -4,11 +4,17 @@ from dependencies.auth import AuthenticatedUser, get_current_user
 from dependencies.tenant import get_tenant_id
 from fastapi import APIRouter, Depends, HTTPException
 from schemas.confirmation import ConfirmationResult
-from schemas.match import EloChange, MatchResponse, RecordMatchRequest
+from schemas.match import (
+    DeleteMatchRequest,
+    EloChange,
+    MatchResponse,
+    RecordMatchRequest,
+)
 from services.exceptions import MatchNotFoundError, MissingRatingsError
 from services.league_service import get_enrollment, get_league
 from services.match_service import (
     confirm_match,
+    delete_match,
     dispute_match,
     get_match,
     list_matches_by_league,
@@ -166,6 +172,39 @@ async def dispute_match_endpoint(
         raise HTTPException(status_code=400, detail="Cannot dispute this match")
 
     return _match_to_response(disputed)
+
+
+@router.delete("/{match_id}", status_code=204)
+async def delete_match_endpoint(
+    match_id: str,
+    body: DeleteMatchRequest | None = None,
+    user: AuthenticatedUser = Depends(get_current_user),
+    tenant_id: str = Depends(get_tenant_id),
+) -> None:
+    """Delete a match (admin only).
+
+    Soft-deletes the match. If the match was CONFIRMED, reverts ELO/counters
+    and removes ELO history rows for that match. Idempotent: deleting an
+    already-deleted match returns 204 with no further side-effects.
+    """
+    player = get_player_by_cognito_sub(tenant_id, user.sub)
+    if not player:
+        raise HTTPException(status_code=400, detail="Player not registered")
+
+    match = get_match(tenant_id, match_id)
+    if not match:
+        raise HTTPException(status_code=404, detail="Match not found")
+
+    enrollment = get_enrollment(tenant_id, match.league_id, player.player_id)
+    is_admin = enrollment is not None and enrollment.role == "admin"
+    if not is_admin:
+        raise HTTPException(
+            status_code=403,
+            detail="Only a league admin can delete matches",
+        )
+
+    reason = body.reason if body else None
+    delete_match(tenant_id, match_id, player.player_id, reason)
 
 
 @router.get("/league/{league_id}", response_model=list[MatchResponse])

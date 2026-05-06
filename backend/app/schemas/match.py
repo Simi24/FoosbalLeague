@@ -22,6 +22,14 @@ class RecordMatchRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
+class DeleteMatchRequest(BaseModel):
+    """Delete a match (admin only). Reason is optional, max 200 chars."""
+
+    reason: str | None = Field(default=None, max_length=200)
+
+    model_config = ConfigDict(extra="forbid")
+
+
 class EloChange(BaseModel):
     """ELO change for a single player."""
 
