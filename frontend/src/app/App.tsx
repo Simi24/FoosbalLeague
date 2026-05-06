@@ -8,6 +8,7 @@ import { scheduleTokenRefresh } from "@/features/auth/authSlice";
 import { ChangelogPage } from "@/pages/ChangelogPage";
 import { DashboardPage } from "@/pages/DashboardPage";
 import { ForgotPasswordPage } from "@/pages/ForgotPasswordPage";
+import { HowEloWorksPage } from "@/pages/HowEloWorksPage";
 import { LandingPage } from "@/pages/LandingPage";
 import { LoginPage } from "@/pages/LoginPage";
 import { NotFoundPage } from "@/pages/NotFoundPage";
@@ -54,6 +55,7 @@ export const App = () => {
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/changelog" element={<ChangelogPage />} />
       <Route path="/privacy" element={<PrivacyPage />} />
+      <Route path="/how-elo-works" element={<HowEloWorksPage />} />
       <Route
         path="*"
         element={

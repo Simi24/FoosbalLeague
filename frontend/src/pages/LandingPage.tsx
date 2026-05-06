@@ -1,88 +1,11 @@
-import { useEffect, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
-import {
-  MdEmojiEvents,
-  MdGroups,
-  MdLeaderboard,
-  MdTimeline,
-  MdSportsSoccer,
-  MdVpnKey,
-} from "react-icons/md";
+import { MdBolt, MdLeaderboard, MdLock } from "react-icons/md";
 
 import { useAppSelector } from "@/app/hooks";
-import { EloExample } from "@/components/EloExample";
 import { BrandMark } from "@/components/layout";
-
-interface ChangelogEntry {
-  version: string;
-  date: string;
-  summary: string[];
-}
-
-const formatDate = (dateStr: string): string => {
-  const date = new Date(dateStr + "T00:00:00");
-  return date.toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
-};
-
-const features = [
-  {
-    icon: MdLeaderboard,
-    title: "ELO Rankings",
-    description: "Fair skill-based ratings powered by the same system used in chess.",
-    fill: "bg-team-blue-tint",
-    rotate: "rotate-[-1deg]",
-  },
-  {
-    icon: MdGroups,
-    title: "1v1 & 2v2",
-    description: "Singles or doubles — team ratings adjust individually.",
-    fill: "bg-lavender",
-    rotate: "rotate-[1deg]",
-  },
-  {
-    icon: MdEmojiEvents,
-    title: "Achievements",
-    description: "10 badges from common to legendary. First Blood, Giant Killer, Top Dog...",
-    fill: "bg-butter",
-    rotate: "rotate-[-1deg]",
-  },
-  {
-    icon: MdVpnKey,
-    title: "Private Leagues",
-    description: "Create invite-only leagues for your office, friend group, or team.",
-    fill: "bg-mint",
-    rotate: "rotate-[1deg]",
-  },
-  {
-    icon: MdTimeline,
-    title: "ELO History",
-    description: "Interactive charts tracking your rating over time.",
-    fill: "bg-team-red-tint",
-    rotate: "rotate-[-1deg]",
-  },
-  {
-    icon: MdSportsSoccer,
-    title: "Match Confirmation",
-    description: "Opponents confirm or dispute results — no cheating allowed.",
-    fill: "bg-peach",
-    rotate: "rotate-[1deg]",
-  },
-];
 
 export const LandingPage = () => {
   const { isAuthenticated, status } = useAppSelector((state) => state.auth);
-  const [changelog, setChangelog] = useState<ChangelogEntry[]>([]);
-
-  useEffect(() => {
-    fetch("/changelog.json")
-      .then((res) => res.json())
-      .then((data: ChangelogEntry[]) => setChangelog(data.slice(0, 3)))
-      .catch(() => setChangelog([]));
-  }, []);
 
   if (status === "idle" || status === "loading") {
     return (
@@ -99,29 +22,37 @@ export const LandingPage = () => {
   return (
     <div className="min-h-screen bg-paper">
       {/* Hero */}
-      <section className="relative overflow-hidden px-4 pt-16 pb-12 sm:pt-24 sm:pb-16">
+      <section className="relative overflow-hidden px-4 pt-16 pb-14 sm:pt-24 sm:pb-20">
         <div className="relative mx-auto flex max-w-3xl flex-col items-center text-center">
           <div className="animate-in brut-shadow-lg mb-8">
             <BrandMark size="lg" />
           </div>
 
-          <h1 className="animate-in mb-4 text-5xl font-bold tracking-tight text-ink sm:text-7xl">
+          <p
+            className="animate-in mb-4 font-mono text-xs font-bold uppercase tracking-widest text-ink-muted"
+            style={{ animationDelay: "30ms" }}
+          >
             Foos<span className="text-team-red">Rank</span>
+          </p>
+
+          <h1 className="animate-in mb-3 text-3xl font-bold leading-[1.1] tracking-tight text-ink sm:text-4xl md:text-5xl">
+            Office foosball, <span className="text-team-red">finally fair</span>.
           </h1>
 
           <p
-            className="animate-in mb-3 text-lg font-semibold text-ink-soft sm:text-xl"
-            style={{ animationDelay: "50ms" }}
+            className="animate-in mb-8 text-lg font-semibold leading-snug text-ink-soft sm:text-xl md:text-2xl"
+            style={{ animationDelay: "60ms" }}
           >
-            ELO-based office foosball rankings
+            Even when half the team works from home.
           </p>
 
           <p
-            className="animate-in mb-10 max-w-lg text-sm font-medium leading-relaxed text-ink-muted"
-            style={{ animationDelay: "100ms" }}
+            className="animate-in mb-10 max-w-xl text-sm font-medium leading-relaxed text-ink-muted sm:text-base"
+            style={{ animationDelay: "120ms" }}
           >
-            Create leagues, record matches, track your rating, and earn achievements.
-            Fair rankings powered by the same system used in chess.
+            FoosRank uses chess-style ELO ratings to rank everyone in your office, no
+            matter who shows up which day. Play whenever you're in, with whoever's there.
+            The leaderboard does the rest.
           </p>
 
           <div
@@ -129,115 +60,210 @@ export const LandingPage = () => {
             style={{ animationDelay: "150ms" }}
           >
             <Link
-              to="/login"
+              to="/signup"
               className="brut-border btn-press brut-shadow-lg min-h-[48px] bg-ink px-8 py-3 text-sm font-bold uppercase tracking-wide text-paper transition-colors"
+            >
+              Start your office league →
+            </Link>
+            <Link
+              to="/login"
+              className="brut-border btn-press brut-shadow-lg min-h-[48px] bg-team-blue-tint px-8 py-3 text-sm font-bold uppercase tracking-wide text-ink transition-colors"
             >
               Sign in
             </Link>
-            <Link
-              to="/signup"
-              className="brut-border btn-press brut-shadow-lg min-h-[48px] bg-team-blue-tint px-8 py-3 text-sm font-bold uppercase tracking-wide text-ink transition-colors"
-            >
-              Create account
-            </Link>
           </div>
         </div>
       </section>
 
-      {/* Features grid */}
-      <section className="px-4 py-12 sm:py-16">
-        <div className="mx-auto max-w-4xl">
-          <h2 className="animate-in mb-10 text-center text-3xl font-bold tracking-tight text-ink sm:text-4xl">
-            Everything you need to run a league
+      {/* Built for the hybrid office */}
+      <section className="border-y-2 border-ink bg-paper-alt px-4 py-14 sm:py-20">
+        <div className="mx-auto max-w-2xl">
+          <h2 className="mb-6 text-3xl font-bold tracking-tight text-ink sm:text-4xl">
+            Built for the hybrid office
           </h2>
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {features.map((feat, i) => (
-              <div
-                key={feat.title}
-                className={`animate-in card-interactive brut-border brut-shadow ${feat.fill} ${feat.rotate} p-5`}
-                style={{ animationDelay: `${i * 60}ms` }}
-              >
-                <div className="mb-3 flex h-11 w-11 items-center justify-center border-2 border-ink bg-card text-ink">
-                  <feat.icon size={24} />
-                </div>
-                <h3 className="mb-1 text-base font-bold text-ink">
-                  {feat.title}
-                </h3>
-                <p className="text-sm font-medium leading-relaxed text-ink-soft">
-                  {feat.description}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* How ELO works */}
-      <section className="border-y-2 border-ink bg-paper-alt px-4 py-12 sm:py-16">
-        <div className="mx-auto max-w-lg">
-          <h2 className="mb-2 text-center text-3xl font-bold tracking-tight text-ink sm:text-4xl">
-            How ELO Works
-          </h2>
-          <p className="mb-8 text-center text-sm font-medium text-ink-soft">
-            Everyone starts at 1200. Win and go up, lose and go down.
+          <p className="mb-4 text-base font-medium leading-relaxed text-ink-soft">
+            Tournaments don't work anymore. Half the team is in on Tuesday, the other
+            half on Thursday. By the time you've scheduled a bracket, three people have
+            called in remote.
           </p>
-          <EloExample />
+          <p className="text-base font-medium leading-relaxed text-ink-soft">
+            FoosRank doesn't need a bracket. Just play whenever you're in, with whoever's
+            there. Every match counts. The ratings adjust automatically. Over weeks and
+            months, the rankings reveal who's actually the strongest player — not just
+            who happened to be free on tournament day.
+          </p>
         </div>
       </section>
 
-      {/* What's New */}
-      {changelog.length > 0 && (
-        <section className="px-4 py-12 sm:py-16">
-          <div className="mx-auto max-w-2xl">
-            <h2 className="mb-8 text-center text-3xl font-bold tracking-tight text-ink sm:text-4xl">
-              What&apos;s New
-            </h2>
-            <div className="space-y-4">
-              {changelog.map((entry, i) => (
-                <div
-                  key={entry.version}
-                  className="animate-in brut-border brut-shadow bg-card p-4"
-                  style={{ animationDelay: `${i * 60}ms` }}
-                >
-                  <div className="mb-2 flex items-center gap-3">
-                    <span className="border-2 border-ink bg-butter px-2 py-0.5 font-mono text-xs font-bold text-ink">
-                      v{entry.version}
-                    </span>
-                    <span className="font-mono text-xs font-semibold text-ink-muted">
-                      {formatDate(entry.date)}
-                    </span>
-                  </div>
-                  <ul className="space-y-1">
-                    {entry.summary.map((item, j) => (
-                      <li key={j} className="flex gap-2 text-sm font-medium text-ink-soft">
-                        <span className="mt-1.5 h-1.5 w-1.5 shrink-0 bg-ink" />
-                        {item}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
+      {/* How it works */}
+      <section className="px-4 py-14 sm:py-20">
+        <div className="mx-auto max-w-4xl">
+          <h2 className="mb-10 text-center text-3xl font-bold tracking-tight text-ink sm:text-4xl">
+            How it works
+          </h2>
+          <div className="grid gap-5 sm:grid-cols-3">
+            <div className="card-interactive brut-border brut-shadow rotate-[-1deg] bg-mint p-5">
+              <div className="mb-3 flex h-11 w-11 items-center justify-center border-2 border-ink bg-card text-ink">
+                <MdLeaderboard size={24} />
+              </div>
+              <h3 className="mb-2 text-base font-bold text-ink">
+                Real rankings, not vibes.
+              </h3>
+              <p className="text-sm font-medium leading-relaxed text-ink-soft">
+                Same ELO system used in chess. Beat someone stronger? You climb faster.
+                Beat a beginner? Smaller gain. The leaderboard reflects skill, not luck.
+              </p>
             </div>
-            <div className="mt-6 text-center">
-              <Link
-                to="/changelog"
-                className="text-sm font-bold uppercase tracking-wide text-ink underline"
-              >
-                View all updates
-              </Link>
+            <div className="card-interactive brut-border brut-shadow rotate-[1deg] bg-butter p-5">
+              <div className="mb-3 flex h-11 w-11 items-center justify-center border-2 border-ink bg-card text-ink">
+                <MdLock size={24} />
+              </div>
+              <h3 className="mb-2 text-base font-bold text-ink">
+                Private to your office.
+              </h3>
+              <p className="text-sm font-medium leading-relaxed text-ink-soft">
+                Your league, your colleagues, your data. Nobody outside sees your matches
+                or rankings.
+              </p>
+            </div>
+            <div className="card-interactive brut-border brut-shadow rotate-[-1deg] bg-lavender p-5">
+              <div className="mb-3 flex h-11 w-11 items-center justify-center border-2 border-ink bg-card text-ink">
+                <MdBolt size={24} />
+              </div>
+              <h3 className="mb-2 text-base font-bold text-ink">Quick to log.</h3>
+              <p className="text-sm font-medium leading-relaxed text-ink-soft">
+                Pick the players, enter the score, done. Built to be filled in during the
+                walk back to your desk.
+              </p>
             </div>
           </div>
-        </section>
-      )}
+        </div>
+      </section>
+
+      {/* Leaderboard screenshot */}
+      <section className="border-y-2 border-ink bg-paper-alt px-4 py-14 sm:py-20">
+        <div className="mx-auto max-w-3xl">
+          <div className="brut-border brut-shadow-lg overflow-hidden bg-card">
+            <img
+              src="/landing/leaderboard.png"
+              alt="FoosRank leaderboard preview"
+              className="block w-full"
+            />
+          </div>
+          <p className="mt-6 text-center text-sm font-medium leading-relaxed text-ink-soft sm:text-base">
+            A real ranking, updated after every match. Watch your rating climb (or fall)
+            over weeks. See who you've beaten, who's beaten you, and exactly how much
+            each match was worth.
+          </p>
+        </div>
+      </section>
+
+      {/* Why I built this */}
+      <section className="px-4 py-14 sm:py-20">
+        <div className="mx-auto max-w-2xl">
+          <h2 className="mb-6 text-3xl font-bold tracking-tight text-ink sm:text-4xl">
+            Why I built this
+          </h2>
+          <p className="mb-4 text-base font-medium leading-relaxed text-ink-soft">
+            I work in a hybrid office. We have a foosball table that's been the
+            unofficial heart of our team's social life. But after we went hybrid,
+            organizing tournaments became impossible — there was never a day everyone
+            was in.
+          </p>
+          <p className="mb-4 text-base font-medium leading-relaxed text-ink-soft">
+            So we just... played whenever we could. With whoever was there. And nobody
+            really knew who was the best anymore.
+          </p>
+          <p className="mb-6 text-base font-medium leading-relaxed text-ink-soft">
+            A few weeks ago I built FoosRank to fix that. We're at 170 matches and
+            counting, and the team checks the leaderboard before lunch. Now I'm opening
+            it up so other offices can do the same.
+          </p>
+          <p className="font-mono text-sm font-bold text-ink">— Simone, Italy</p>
+        </div>
+      </section>
+
+      {/* Stats banner */}
+      <section className="border-y-2 border-ink bg-team-red-tint px-4 py-14 sm:py-20">
+        <div className="mx-auto max-w-3xl text-center">
+          <p className="mb-3 font-mono text-4xl font-bold tracking-tight text-ink sm:text-6xl">
+            170 matches in 6 weeks.
+          </p>
+          <p className="text-base font-bold uppercase tracking-wider text-ink-soft sm:text-lg">
+            One office addicted. Yours could be next.
+          </p>
+        </div>
+      </section>
+
+      {/* ELO teaser */}
+      <section className="px-4 py-14 sm:py-20">
+        <div className="mx-auto max-w-2xl">
+          <h2 className="mb-6 text-3xl font-bold tracking-tight text-ink sm:text-4xl">
+            Fair rankings, no math required
+          </h2>
+          <p className="mb-6 text-base font-medium leading-relaxed text-ink-soft">
+            Everyone starts at 1200. Win a match, your rating goes up. Lose, it goes
+            down. Beat someone stronger than you? You gain more. The system used by
+            chess for over a century — now keeping your office honest.
+          </p>
+          <Link
+            to="/how-elo-works"
+            className="text-sm font-bold uppercase tracking-wide text-ink underline underline-offset-4 hover:text-team-red"
+          >
+            Learn more about ELO →
+          </Link>
+        </div>
+      </section>
+
+      {/* Final CTA */}
+      <section className="border-y-2 border-ink bg-paper-alt px-4 py-16 sm:py-24">
+        <div className="mx-auto flex max-w-2xl flex-col items-center text-center">
+          <h2 className="mb-2 text-3xl font-bold leading-tight tracking-tight text-ink sm:text-5xl">
+            Stop arguing about who's the best.
+          </h2>
+          <h2 className="mb-10 text-3xl font-bold leading-tight tracking-tight text-team-red sm:text-5xl">
+            Start proving it.
+          </h2>
+          <Link
+            to="/signup"
+            className="brut-border btn-press brut-shadow-lg mb-4 min-h-[48px] bg-ink px-8 py-3 text-sm font-bold uppercase tracking-wide text-paper transition-colors"
+          >
+            Create your office league →
+          </Link>
+          <p className="font-mono text-xs uppercase tracking-wider text-ink-muted">
+            Free. Private. Two minutes to set up.
+          </p>
+        </div>
+      </section>
 
       <footer className="border-t-2 border-ink px-4 py-6 text-center font-mono text-xs text-ink-muted">
-        <Link to="/privacy" className="transition-colors hover:text-ink">
-          Privacy
-        </Link>
-        <span className="mx-2">·</span>
-        <Link to="/changelog" className="transition-colors hover:text-ink">
-          FoosRank v{__APP_VERSION__}
-        </Link>
+        <div className="mb-2">
+          FoosRank · Made by{" "}
+          <a
+            href="https://www.linkedin.com/in/simone-paolo-petta"
+            target="_blank"
+            rel="noreferrer"
+            className="font-bold text-ink underline underline-offset-2 hover:text-team-red"
+          >
+            Simone Petta
+          </a>
+        </div>
+        <div>
+          <Link to="/privacy" className="transition-colors hover:text-ink">
+            Privacy
+          </Link>
+          <span className="mx-2">·</span>
+          <Link to="/changelog" className="transition-colors hover:text-ink">
+            v{__APP_VERSION__}
+          </Link>
+          <span className="mx-2">·</span>
+          <a
+            href="mailto:hello@foosrank.app"
+            className="transition-colors hover:text-ink"
+          >
+            hello@foosrank.app
+          </a>
+        </div>
       </footer>
     </div>
   );

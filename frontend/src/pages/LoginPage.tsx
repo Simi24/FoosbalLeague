@@ -93,10 +93,6 @@ export const LoginPage = () => {
             Sign up
           </Link>
         </p>
-
-        <p className="mt-4 text-center font-mono text-[10px] uppercase tracking-wider text-ink-muted">
-          Internal use only
-        </p>
       </div>
       </div>
       <Footer />
