@@ -1,5 +1,14 @@
 [
   {
+    "version": "0.20.0",
+    "date": "2026-05-06",
+    "summary": [
+      "Admins can now delete incorrectly recorded matches.",
+      "Deleting a match will automatically revert and recalculate player rankings (ELO) to ensure accuracy.",
+      "Added a confirmation prompt when deleting matches to prevent accidental changes."
+    ]
+  },
+  {
     "version": "0.19.0",
     "date": "2026-05-05",
     "summary": [

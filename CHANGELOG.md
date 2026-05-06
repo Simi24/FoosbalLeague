@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.20.0](https://github.com/Simi24/FoosbalLeague/compare/foosball-league-v0.19.0...foosball-league-v0.20.0) (2026-05-06)
+
+
+### Features
+
+* admin-only match deletion with ELO revert ([6ac94a5](https://github.com/Simi24/FoosbalLeague/commit/6ac94a5eeaea5ddf814beeaccc19de0d093d7c1c))
+
 ## [0.19.0](https://github.com/Simi24/FoosbalLeague/compare/foosball-league-v0.18.3...foosball-league-v0.19.0) (2026-05-05)
 
 
