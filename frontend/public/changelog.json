@@ -1,5 +1,13 @@
 [
   {
+    "version": "0.21.0",
+    "date": "2026-05-26",
+    "summary": [
+      "Redesigned the landing page with a fresh new look tailored for hybrid-office players.",
+      "Added a new 'How Elo Works' page to help you understand how your ranking points are calculated."
+    ]
+  },
+  {
     "version": "0.20.0",
     "date": "2026-05-06",
     "summary": [
