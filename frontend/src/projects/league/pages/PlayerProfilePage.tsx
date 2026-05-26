@@ -101,6 +101,16 @@ export const PlayerProfilePage = () => {
     { skip: !playerId || !selectedLeague },
   );
 
+  // Auto-select the most-played opponent once head-to-head data is available
+  useEffect(() => {
+    const records = insights?.head_to_head ?? [];
+    if (records.length === 0) return;
+    setOpponentId((current) => {
+      if (current && records.some((r) => r.opponent_id === current)) return current;
+      return records[0]!.opponent_id;
+    });
+  }, [insights]);
+
   const rankingEntry = leaderboard?.entries.find((e) => e.player_id === playerId) ?? null;
 
   const playerMatches = useMemo(() => {
