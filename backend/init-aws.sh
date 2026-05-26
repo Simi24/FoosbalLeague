@@ -85,16 +85,20 @@ awslocal dynamodb put-item \
 echo "[OK] Tenant seeded"
 
 # --------------------------------------------------
-# Players (4 bots - your player is created at login)
+# Players (8 bots - your player is created at login)
 # --------------------------------------------------
 
 declare -A PLAYERS
-PLAYERS[001]="Marco Rossi:marco@foosball.local"
-PLAYERS[002]="Luca Bianchi:luca@foosball.local"
-PLAYERS[003]="Giulia Verdi:giulia@foosball.local"
-PLAYERS[004]="Chiara Neri:chiara@foosball.local"
+PLAYERS[001]="Mark Thompson:mark@foosball.local"
+PLAYERS[002]="Olivia Brooks:olivia@foosball.local"
+PLAYERS[003]="Sam Carter:sam@foosball.local"
+PLAYERS[004]="Emma Davis:emma@foosball.local"
+PLAYERS[005]="Jordan Lee:jordan@foosball.local"
+PLAYERS[006]="Ryan Walsh:ryan@foosball.local"
+PLAYERS[007]="Noah Bennett:noah@foosball.local"
+PLAYERS[008]="Liam Foster:liam@foosball.local"
 
-for ID in 001 002 003 004; do
+for ID in 001 002 003 004 005 006 007 008; do
     IFS=':' read -r DNAME EMAIL <<< "${PLAYERS[$ID]}"
     awslocal dynamodb put-item \
         --table-name foosball-league \
@@ -116,7 +120,7 @@ for ID in 001 002 003 004; do
         }"
 done
 
-echo "[OK] 4 players seeded"
+echo "[OK] 8 players seeded"
 
 # Test user player
 awslocal dynamodb put-item \
@@ -154,11 +158,11 @@ awslocal dynamodb put-item \
         \"name\": {\"S\": \"Office Champions 2v2\"},
         \"league_type\": {\"S\": \"2v2\"},
         \"initial_elo\": {\"N\": \"1200\"},
-        \"description\": {\"S\": \"La lega ufficiale del biliardino\"},
+        \"description\": {\"S\": \"The official office foosball league\"},
         \"created_by\": {\"S\": \"player-001\"},
         \"invite_code\": {\"S\": \"$INVITE_CODE\"},
-        \"member_count\": {\"N\": \"5\"},
-        \"match_count\": {\"N\": \"4\"},
+        \"member_count\": {\"N\": \"9\"},
+        \"match_count\": {\"N\": \"10\"},
         \"gsi1_pk\": {\"S\": \"LEAGUE#league-001\"},
         \"gsi1_sk\": {\"S\": \"LEAGUE#league-001\"},
         \"created_at\": {\"S\": \"$NOW\"},
@@ -172,12 +176,16 @@ echo "[OK] League seeded (invite code: $INVITE_CODE)"
 # --------------------------------------------------
 
 declare -A DNAMES
-DNAMES[001]="Marco Rossi"
-DNAMES[002]="Luca Bianchi"
-DNAMES[003]="Giulia Verdi"
-DNAMES[004]="Chiara Neri"
+DNAMES[001]="Mark Thompson"
+DNAMES[002]="Olivia Brooks"
+DNAMES[003]="Sam Carter"
+DNAMES[004]="Emma Davis"
+DNAMES[005]="Jordan Lee"
+DNAMES[006]="Ryan Walsh"
+DNAMES[007]="Noah Bennett"
+DNAMES[008]="Liam Foster"
 
-for ID in 001 002 003 004; do
+for ID in 001 002 003 004 005 006 007 008; do
     ROLE="player"
     if [ "$ID" = "001" ]; then ROLE="admin"; fi
 
@@ -226,12 +234,16 @@ echo "[OK] Test user enrolled as admin"
 # --------------------------------------------------
 
 declare -A ELOS WINS LOSSES PLAYED
-ELOS[001]=1280; WINS[001]=4; LOSSES[001]=2; PLAYED[001]=6
-ELOS[002]=1220; WINS[002]=3; LOSSES[002]=3; PLAYED[002]=6
-ELOS[003]=1140; WINS[003]=1; LOSSES[003]=3; PLAYED[003]=4
-ELOS[004]=1160; WINS[004]=2; LOSSES[004]=2; PLAYED[004]=4
+ELOS[001]=1320; WINS[001]=9; LOSSES[001]=3; PLAYED[001]=12
+ELOS[002]=1275; WINS[002]=7; LOSSES[002]=4; PLAYED[002]=11
+ELOS[003]=1240; WINS[003]=6; LOSSES[003]=4; PLAYED[003]=10
+ELOS[004]=1210; WINS[004]=5; LOSSES[004]=5; PLAYED[004]=10
+ELOS[005]=1180; WINS[005]=4; LOSSES[005]=6; PLAYED[005]=10
+ELOS[006]=1150; WINS[006]=3; LOSSES[006]=6; PLAYED[006]=9
+ELOS[007]=1120; WINS[007]=2; LOSSES[007]=7; PLAYED[007]=9
+ELOS[008]=1090; WINS[008]=1; LOSSES[008]=7; PLAYED[008]=8
 
-for ID in 001 002 003 004; do
+for ID in 001 002 003 004 005 006 007 008; do
     INV_ELO=$(printf "%04d" $((9999 - ${ELOS[$ID]})))
     awslocal dynamodb put-item \
         --table-name foosball-league \
@@ -256,7 +268,8 @@ done
 echo "[OK] Ratings seeded"
 
 # Test user rating
-INV_ELO_TEST=$(printf "%04d" $((9999 - 1200)))
+TEST_USER_ELO=1225
+INV_ELO_TEST=$(printf "%04d" $((9999 - TEST_USER_ELO)))
 awslocal dynamodb put-item \
     --table-name foosball-league \
     --item "{
@@ -266,10 +279,10 @@ awslocal dynamodb put-item \
         \"league_id\": {\"S\": \"league-001\"},
         \"player_id\": {\"S\": \"$TEST_USER_ID\"},
         \"display_name\": {\"S\": \"$TEST_USER_NAME\"},
-        \"elo\": {\"N\": \"1200\"},
-        \"matches_played\": {\"N\": \"0\"},
-        \"wins\": {\"N\": \"0\"},
-        \"losses\": {\"N\": \"0\"},
+        \"elo\": {\"N\": \"$TEST_USER_ELO\"},
+        \"matches_played\": {\"N\": \"6\"},
+        \"wins\": {\"N\": \"4\"},
+        \"losses\": {\"N\": \"2\"},
         \"gsi1_pk\": {\"S\": \"LEAGUE#league-001\"},
         \"gsi1_sk\": {\"S\": \"RATING#${INV_ELO_TEST}#$TEST_USER_ID\"},
         \"created_at\": {\"S\": \"$NOW\"},
@@ -279,17 +292,23 @@ awslocal dynamodb put-item \
 echo "[OK] Test user rating seeded"
 
 # --------------------------------------------------
-# Matches (4 confirmed)
+# Matches (10 confirmed)
 # --------------------------------------------------
 
 declare -A MATCHES
 # format: "t1p1,t1p2:t2p1,t2p2:score1:score2:date"
-MATCHES[001]="player-001,player-002:player-003,player-004:10:7:2026-03-05T14:00:00Z"
-MATCHES[002]="player-003,player-001:player-002,player-004:10:8:2026-03-07T10:30:00Z"
-MATCHES[003]="player-001,player-004:player-002,player-003:10:6:2026-03-09T16:00:00Z"
-MATCHES[004]="player-002,player-004:player-001,player-003:10:9:2026-03-11T13:00:00Z"
+MATCHES[001]="player-001,player-003:player-007,player-008:10:4:2026-03-02T14:00:00Z"
+MATCHES[002]="player-002,player-005:player-004,player-006:10:7:2026-03-04T10:30:00Z"
+MATCHES[003]="player-001,player-004:player-003,player-002:10:8:2026-03-06T16:00:00Z"
+MATCHES[004]="player-006,player-007:player-005,player-008:10:9:2026-03-08T13:00:00Z"
+MATCHES[005]="player-001,player-005:player-002,player-008:10:6:2026-03-10T15:00:00Z"
+MATCHES[006]="player-002,player-007:player-004,player-006:10:7:2026-03-12T11:00:00Z"
+MATCHES[007]="player-001,player-002:player-003,player-004:10:9:2026-03-14T17:00:00Z"
+MATCHES[008]="$TEST_USER_ID,player-003:player-007,player-008:10:5:2026-03-16T12:00:00Z"
+MATCHES[009]="player-001,$TEST_USER_ID:player-005,player-006:10:7:2026-03-18T14:30:00Z"
+MATCHES[010]="player-002,player-004:$TEST_USER_ID,player-008:10:8:2026-03-20T16:00:00Z"
 
-for MID in 001 002 003 004; do
+for MID in 001 002 003 004 005 006 007 008 009 010; do
     IFS=':' read -r T1 T2 S1 S2 DATE <<< "${MATCHES[$MID]}"
     IFS=',' read -r T1P1 T1P2 <<< "$T1"
     IFS=',' read -r T2P1 T2P2 <<< "$T2"
@@ -317,19 +336,23 @@ for MID in 001 002 003 004; do
         }"
 done
 
-echo "[OK] 4 matches seeded"
+echo "[OK] 10 matches seeded"
 
 # --------------------------------------------------
 # ELO History (15 points per player for chart)
 # --------------------------------------------------
 
 declare -A TRAJECTORIES
-TRAJECTORIES[001]="1200 1220 1210 1240 1230 1255 1245 1270 1260 1275 1265 1280 1270 1285 1280"
-TRAJECTORIES[002]="1200 1215 1225 1210 1230 1220 1235 1225 1240 1230 1225 1235 1220 1230 1220"
-TRAJECTORIES[003]="1200 1185 1175 1190 1170 1160 1175 1155 1145 1155 1140 1130 1125 1135 1140"
-TRAJECTORIES[004]="1200 1190 1200 1185 1175 1190 1170 1165 1175 1160 1155 1165 1150 1145 1160"
+TRAJECTORIES[001]="1200 1215 1230 1220 1240 1255 1245 1265 1280 1270 1290 1300 1290 1310 1320"
+TRAJECTORIES[002]="1200 1210 1225 1215 1235 1245 1230 1250 1260 1245 1265 1280 1265 1285 1275"
+TRAJECTORIES[003]="1200 1215 1225 1210 1230 1220 1235 1250 1235 1245 1230 1245 1255 1245 1240"
+TRAJECTORIES[004]="1200 1210 1195 1205 1220 1210 1225 1210 1225 1210 1225 1240 1225 1215 1210"
+TRAJECTORIES[005]="1200 1190 1205 1195 1185 1200 1190 1200 1190 1175 1185 1195 1180 1190 1180"
+TRAJECTORIES[006]="1200 1195 1185 1200 1190 1175 1185 1170 1180 1165 1175 1160 1170 1155 1150"
+TRAJECTORIES[007]="1200 1190 1180 1195 1180 1170 1180 1165 1175 1160 1145 1155 1140 1130 1120"
+TRAJECTORIES[008]="1200 1185 1170 1185 1170 1155 1170 1155 1145 1130 1140 1125 1115 1105 1090"
 
-for ID in 001 002 003 004; do
+for ID in 001 002 003 004 005 006 007 008; do
     read -ra TRAJ <<< "${TRAJECTORIES[$ID]}"
     PREV=${TRAJ[0]}
     for i in $(seq 1 $((${#TRAJ[@]} - 1))); do
@@ -369,7 +392,7 @@ echo "  LocalStack Init Complete!"
 echo "============================================"
 echo ""
 echo "  League: Office Champions 2v2"
-echo "  Players: Marco, Luca, Giulia, Chiara"
+echo "  Players: Mark, Olivia, Sam, Emma, Jordan, Ryan, Noah, Liam"
 echo ""
 echo "  ┌──────────────────────────────────┐"
 echo "  │  INVITE CODE:  $INVITE_CODE            │"

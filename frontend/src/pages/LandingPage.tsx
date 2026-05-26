@@ -236,7 +236,7 @@ export const LandingPage = () => {
         </div>
       </section>
 
-      <footer className="border-t-2 border-ink px-4 py-6 text-center font-mono text-xs text-ink-muted">
+      <footer className="border-t-2 border-ink px-4 pt-6 pb-24 text-center font-mono text-xs text-ink-muted sm:pb-6">
         <div className="mb-2">
           FoosRank · Made by{" "}
           <a
@@ -248,15 +248,15 @@ export const LandingPage = () => {
             Simone Petta
           </a>
         </div>
-        <div>
+        <div className="flex flex-wrap items-center justify-center gap-x-2">
           <Link to="/privacy" className="transition-colors hover:text-ink">
             Privacy
           </Link>
-          <span className="mx-2">·</span>
+          <span>·</span>
           <Link to="/changelog" className="transition-colors hover:text-ink">
             v{__APP_VERSION__}
           </Link>
-          <span className="mx-2">·</span>
+          <span>·</span>
           <a
             href="mailto:hello@foosrank.app"
             className="transition-colors hover:text-ink"
