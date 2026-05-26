@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.21.0](https://github.com/Simi24/FoosbalLeague/compare/foosball-league-v0.20.0...foosball-league-v0.21.0) (2026-05-26)
+
+
+### Features
+
+* changed landing page ([3b2176a](https://github.com/Simi24/FoosbalLeague/commit/3b2176abcac694cb6fe4cfd2d643726759b2c637))
+* rewrite landing for hybrid-office angle ([3289f34](https://github.com/Simi24/FoosbalLeague/commit/3289f34e26869d157faa781bdd549f52193107c8))
+
 ## [0.20.0](https://github.com/Simi24/FoosbalLeague/compare/foosball-league-v0.19.0...foosball-league-v0.20.0) (2026-05-06)
 
 
