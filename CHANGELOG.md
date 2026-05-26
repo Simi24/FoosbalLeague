@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.23.0](https://github.com/Simi24/FoosbalLeague/compare/foosball-league-v0.22.0...foosball-league-v0.23.0) (2026-05-26)
+
+
+### Features
+
+* **profile:** preselect most-played opponent in head-to-head ([c74ded2](https://github.com/Simi24/FoosbalLeague/commit/c74ded22edb308225ce2abbdccd90f5c05b640c2))
+
+
+### Bug Fixes
+
+* **auth:** refresh id_token on expiry, 401 and tab wake ([2fe5ce8](https://github.com/Simi24/FoosbalLeague/commit/2fe5ce8de93d5f8764b73d236fb5852d5dbe1f26))
+* **demo:** exit demo when landing on auth routes ([786f120](https://github.com/Simi24/FoosbalLeague/commit/786f12058bf57449d74d2a087c3ffc9179be8fdc))
+
 ## [0.22.0](https://github.com/Simi24/FoosbalLeague/compare/foosball-league-v0.21.0...foosball-league-v0.22.0) (2026-05-26)
 
 
