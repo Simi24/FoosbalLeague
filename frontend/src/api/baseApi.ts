@@ -6,6 +6,7 @@ import {
   type FetchBaseQueryError,
 } from "@reduxjs/toolkit/query/react";
 
+import { ensureFreshToken } from "@/features/auth/refreshGate";
 import { getIdToken } from "@/features/auth/tokenStorage";
 import { handleDemoQuery } from "@/projects/demo/demoQueryHandler";
 import { selectIsDemoMode } from "@/projects/demo/demoSlice";
@@ -75,7 +76,18 @@ const dynamicBaseQuery: BaseQueryFn<
     }
     return { data: result.data };
   }
-  return realBaseQuery(args, api, extraOptions);
+
+  await ensureFreshToken();
+  let result = await realBaseQuery(args, api, extraOptions);
+
+  if (result.error?.status === 401) {
+    const refreshed = await ensureFreshToken({ force: true });
+    if (refreshed) {
+      result = await realBaseQuery(args, api, extraOptions);
+    }
+  }
+
+  return result;
 };
 
 export const api = createApi({

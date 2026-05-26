@@ -4,8 +4,9 @@ import { Routes, Route, useLocation } from "react-router-dom";
 import { api } from "@/api/baseApi";
 import { ProtectedRoute } from "@/components/auth";
 import { AppShell } from "@/components/layout";
-import { initAuth, setUser } from "@/features/auth";
+import { initAuth, logout, setUser } from "@/features/auth";
 import { scheduleTokenRefresh } from "@/features/auth/authSlice";
+import { ensureFreshToken, setAuthFailureHandler } from "@/features/auth/refreshGate";
 import {
   DemoBanner,
   DemoBottomCta,
@@ -44,6 +45,13 @@ export const App = () => {
   const cleanupRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
+    setAuthFailureHandler(() => {
+      dispatch(logout());
+    });
+    return () => setAuthFailureHandler(null);
+  }, [dispatch]);
+
+  useEffect(() => {
     if (authStatus === "idle" && !isDemoMode) {
       dispatch(initAuth());
     }
@@ -59,6 +67,23 @@ export const App = () => {
       cleanupRef.current = null;
     };
   }, [dispatch, authStatus, isDemoMode]);
+
+  useEffect(() => {
+    if (authStatus !== "succeeded" || isDemoMode) return;
+
+    const onWake = () => {
+      if (document.visibilityState === "visible") {
+        void ensureFreshToken();
+      }
+    };
+
+    document.addEventListener("visibilitychange", onWake);
+    window.addEventListener("focus", onWake);
+    return () => {
+      document.removeEventListener("visibilitychange", onWake);
+      window.removeEventListener("focus", onWake);
+    };
+  }, [authStatus, isDemoMode]);
 
   useEffect(() => {
     if (isDemoMode && DEMO_EXIT_PATHS.has(location.pathname)) {
