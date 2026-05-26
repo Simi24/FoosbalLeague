@@ -1,5 +1,12 @@
 [
   {
+    "version": "0.22.0",
+    "date": "2026-05-26",
+    "summary": [
+      "Added a new interactive demo league, allowing new users to try out the app and see how it works before signing in or creating an account."
+    ]
+  },
+  {
     "version": "0.21.0",
     "date": "2026-05-26",
     "summary": [
