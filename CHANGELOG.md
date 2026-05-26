@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.22.0](https://github.com/Simi24/FoosbalLeague/compare/foosball-league-v0.21.0...foosball-league-v0.22.0) (2026-05-26)
+
+
+### Features
+
+* add interactive demo league for unauthenticated visitors ([cfe6f21](https://github.com/Simi24/FoosbalLeague/commit/cfe6f2129fb5af6a0f56fe276337d86283f6f1f9))
+
 ## [0.21.0](https://github.com/Simi24/FoosbalLeague/compare/foosball-league-v0.20.0...foosball-league-v0.21.0) (2026-05-26)
 
 
