@@ -1,5 +1,13 @@
 [
   {
+    "version": "0.23.0",
+    "date": "2026-05-26",
+    "summary": [
+      "Your player profile will now automatically preselect your most-played opponent when you open the head-to-head comparison screen.",
+      "Fixed an issue where you could get unexpectedly logged out or see errors after leaving the app open in a background tab."
+    ]
+  },
+  {
     "version": "0.22.0",
     "date": "2026-05-26",
     "summary": [
