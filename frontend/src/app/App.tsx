@@ -1,15 +1,17 @@
 import { useEffect, useRef } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 
+import { api } from "@/api/baseApi";
 import { ProtectedRoute } from "@/components/auth";
 import { AppShell } from "@/components/layout";
-import { initAuth } from "@/features/auth";
+import { initAuth, setUser } from "@/features/auth";
 import { scheduleTokenRefresh } from "@/features/auth/authSlice";
 import {
   DemoBanner,
   DemoBottomCta,
   DemoLauncher,
   DemoNudgeModal,
+  exitDemo,
 } from "@/projects/demo";
 import { ChangelogPage } from "@/pages/ChangelogPage";
 import { DashboardPage } from "@/pages/DashboardPage";
@@ -32,8 +34,11 @@ import { PlayerProfilePage } from "@/projects/league/pages/PlayerProfilePage";
 import { selectIsDemoMode } from "@/projects/demo";
 import { useAppDispatch, useAppSelector } from "./hooks";
 
+const DEMO_EXIT_PATHS = new Set(["/signup", "/login", "/forgot-password"]);
+
 export const App = () => {
   const dispatch = useAppDispatch();
+  const location = useLocation();
   const authStatus = useAppSelector((state) => state.auth.status);
   const isDemoMode = useAppSelector(selectIsDemoMode);
   const cleanupRef = useRef<(() => void) | null>(null);
@@ -54,6 +59,14 @@ export const App = () => {
       cleanupRef.current = null;
     };
   }, [dispatch, authStatus, isDemoMode]);
+
+  useEffect(() => {
+    if (isDemoMode && DEMO_EXIT_PATHS.has(location.pathname)) {
+      dispatch(api.util.resetApiState());
+      dispatch(exitDemo());
+      dispatch(setUser(null));
+    }
+  }, [dispatch, isDemoMode, location.pathname]);
 
   return (
     <>
