@@ -2,6 +2,7 @@ import { configureStore, createListenerMiddleware } from "@reduxjs/toolkit";
 
 import { api } from "@/api/baseApi";
 import { authSlice, logout } from "@/features/auth";
+import { demoSlice } from "@/projects/demo/demoSlice";
 
 const listenerMiddleware = createListenerMiddleware();
 listenerMiddleware.startListening({
@@ -14,6 +15,7 @@ listenerMiddleware.startListening({
 export const store = configureStore({
   reducer: {
     auth: authSlice.reducer,
+    demo: demoSlice.reducer,
     [api.reducerPath]: api.reducer,
   },
   middleware: (getDefaultMiddleware) =>

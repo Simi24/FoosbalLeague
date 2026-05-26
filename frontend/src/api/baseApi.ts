@@ -1,6 +1,14 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import {
+  createApi,
+  fetchBaseQuery,
+  type BaseQueryFn,
+  type FetchArgs,
+  type FetchBaseQueryError,
+} from "@reduxjs/toolkit/query/react";
 
 import { getIdToken } from "@/features/auth/tokenStorage";
+import { handleDemoQuery } from "@/projects/demo/demoQueryHandler";
+import { selectIsDemoMode } from "@/projects/demo/demoSlice";
 import { withScopedEffects } from "./tagHelpers";
 import type {
   Achievement,
@@ -38,16 +46,41 @@ const API_BASE_URL = import.meta.env.VITE_API_URL
   ? `${import.meta.env.VITE_API_URL}/api/v1`
   : "/api/v1";
 
+const realBaseQuery = fetchBaseQuery({
+  baseUrl: API_BASE_URL,
+  prepareHeaders: (headers) => {
+    const token = getIdToken();
+    if (token) headers.set("Authorization", `Bearer ${token}`);
+    return headers;
+  },
+});
+
+// Demo intercept: when `state.demo.isDemoMode` is true, every RTK Query call is
+// served from the in-memory demo slice instead of hitting the network. See
+// `projects/demo/demoQueryHandler.ts`.
+const dynamicBaseQuery: BaseQueryFn<
+  string | FetchArgs,
+  unknown,
+  FetchBaseQueryError
+> = async (args, api, extraOptions) => {
+  const state = api.getState() as { demo: Parameters<typeof selectIsDemoMode>[0]["demo"] };
+  if (selectIsDemoMode(state)) {
+    const result = handleDemoQuery(
+      args,
+      state as never,
+      api.dispatch as never,
+    );
+    if (result.error) {
+      return { error: result.error as FetchBaseQueryError };
+    }
+    return { data: result.data };
+  }
+  return realBaseQuery(args, api, extraOptions);
+};
+
 export const api = createApi({
   reducerPath: "api",
-  baseQuery: fetchBaseQuery({
-    baseUrl: API_BASE_URL,
-    prepareHeaders: (headers) => {
-      const token = getIdToken();
-      if (token) headers.set("Authorization", `Bearer ${token}`);
-      return headers;
-    },
-  }),
+  baseQuery: dynamicBaseQuery,
   tagTypes: [
     "MyLeagues",
     "League",

@@ -1,4 +1,4 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk, type PayloadAction } from "@reduxjs/toolkit";
 
 import { apiFetch } from "@/api";
 import { cognitoLogin, cognitoRefreshTokens } from "./cognito";
@@ -92,6 +92,11 @@ export const authSlice = createSlice({
       state.status = "idle";
       clearTokens();
     },
+    setUser: (state, action: PayloadAction<UserInfo | null>) => {
+      state.user = action.payload;
+      state.isAuthenticated = action.payload !== null;
+      state.status = action.payload !== null ? "succeeded" : "idle";
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -135,7 +140,7 @@ export const authSlice = createSlice({
   },
 });
 
-export const { logout } = authSlice.actions;
+export const { logout, setUser } = authSlice.actions;
 
 /**
  * Schedule a token refresh 60 seconds before the current ID token expires.

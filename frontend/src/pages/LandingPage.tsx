@@ -66,6 +66,12 @@ export const LandingPage = () => {
               Start your office league →
             </Link>
             <Link
+              to="/demo"
+              className="brut-border btn-press brut-shadow-lg min-h-[48px] bg-mint px-8 py-3 text-sm font-bold uppercase tracking-wide text-ink transition-colors"
+            >
+              Try the demo →
+            </Link>
+            <Link
               to="/login"
               className="brut-border btn-press brut-shadow-lg min-h-[48px] bg-team-blue-tint px-8 py-3 text-sm font-bold uppercase tracking-wide text-ink transition-colors"
             >
@@ -226,9 +232,15 @@ export const LandingPage = () => {
           </h2>
           <Link
             to="/signup"
-            className="brut-border btn-press brut-shadow-lg mb-4 min-h-[48px] bg-ink px-8 py-3 text-sm font-bold uppercase tracking-wide text-paper transition-colors"
+            className="brut-border btn-press brut-shadow-lg mb-3 min-h-[48px] bg-ink px-8 py-3 text-sm font-bold uppercase tracking-wide text-paper transition-colors"
           >
             Create your office league →
+          </Link>
+          <Link
+            to="/demo"
+            className="mb-4 text-sm font-bold uppercase tracking-wide text-ink underline underline-offset-4 hover:text-team-red"
+          >
+            Or try a demo first →
           </Link>
           <p className="font-mono text-xs uppercase tracking-wider text-ink-muted">
             Free. Private. Two minutes to set up.
