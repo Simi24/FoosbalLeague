@@ -1,5 +1,7 @@
 """Tenant entity - organization/company metadata."""
 
+from pydantic import Field
+
 from models.base import BaseEntity
 
 
@@ -13,4 +15,4 @@ class TenantModel(BaseEntity):
 
     tenant_id: str
     name: str
-    settings: dict = {}
+    settings: dict = Field(default_factory=dict)

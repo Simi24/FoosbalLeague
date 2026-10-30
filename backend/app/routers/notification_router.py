@@ -1,6 +1,7 @@
+from fastapi import APIRouter, Depends, HTTPException
+
 from dependencies.auth import AuthenticatedUser, get_current_user
 from dependencies.tenant import get_tenant_id
-from fastapi import APIRouter, Depends, HTTPException
 from schemas.notification import NotificationListResponse, NotificationResponse
 from services.notification_service import (
     is_effectively_read,

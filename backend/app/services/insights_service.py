@@ -61,8 +61,7 @@ def compute_player_insights(
 
         if won:
             cur_streak = cur_streak + 1 if cur_streak >= 0 else 1
-            if cur_streak > longest_win:
-                longest_win = cur_streak
+            longest_win = max(longest_win, cur_streak)
         else:
             cur_streak = cur_streak - 1 if cur_streak <= 0 else -1
 

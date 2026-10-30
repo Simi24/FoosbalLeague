@@ -4,6 +4,7 @@ import os
 
 import boto3
 from botocore.exceptions import ClientError
+
 from libs.commons.logging import logger
 
 COGNITO_REGION = os.getenv("COGNITO_REGION", "eu-west-1")

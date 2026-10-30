@@ -10,6 +10,8 @@ from typing import Any
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
+from pydantic import ValidationError
+
 from dependencies.auth import (
     APIGatewayAuthorizerProvider,
     AuthenticatedUser,
@@ -69,7 +71,7 @@ class TestAuthenticatedUser:
     def test_immutability(self) -> None:
         """AuthenticatedUser should be frozen (immutable)."""
         user = AuthenticatedUser(sub="abc-123", email="a@b.com")
-        with pytest.raises(Exception):
+        with pytest.raises(ValidationError):
             user.sub = "new-sub"  # type: ignore[misc]
 
 

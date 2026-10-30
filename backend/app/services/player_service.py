@@ -1,7 +1,7 @@
 """Player service - business logic for player operations."""
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from libs.commons.logging import logger
 from models.base import BaseEntity
@@ -16,7 +16,7 @@ def create_player(
 ) -> PlayerModel:
     """Create a new player in the tenant."""
     player_id = str(uuid.uuid4())[:8]
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
 
     player = PlayerModel(
         pk=f"TENANT#{tenant_id}",
@@ -71,7 +71,7 @@ def update_display_name(
     if not player:
         return None
 
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     PlayerModel.update(player.pk, player.sk).set("display_name", display_name).set(
         "updated_at", now
     ).execute()

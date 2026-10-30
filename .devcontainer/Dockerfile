@@ -8,7 +8,7 @@ RUN npm install -g yarn 2>/dev/null || true
 
 # Python dev tools
 RUN pip install --no-cache-dir \
-    ruff \
+    ruff==0.17.3 \
     pytest \
     httpx
 

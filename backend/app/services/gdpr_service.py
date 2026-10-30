@@ -1,8 +1,9 @@
 """GDPR service - user data export + account deletion (with anonymization)."""
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from fastapi import HTTPException, status
+
 from libs.cognito_client import admin_delete_user
 from libs.commons.logging import logger
 from models.achievement import AchievementModel
@@ -48,7 +49,7 @@ def export_user_data(tenant_id: str, cognito_sub: str) -> dict:
     if not player:
         raise PlayerNotRegisteredError()
 
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     if player.last_export_at:
         elapsed = (now - player.last_export_at).total_seconds()
         if elapsed < EXPORT_COOLDOWN_SECONDS:
@@ -156,7 +157,7 @@ def export_user_data(tenant_id: str, cognito_sub: str) -> dict:
 
     return {
         "export_metadata": {
-            "exported_at": datetime.now(timezone.utc).isoformat(),
+            "exported_at": datetime.now(UTC).isoformat(),
             "format_version": EXPORT_FORMAT_VERSION,
             "service": "Foosrank",
         },
@@ -194,7 +195,7 @@ def delete_user_account(tenant_id: str, cognito_sub: str) -> None:
     anon_label = f"Deleted player #{player_id[:6]}"
     anon_email = f"deleted-{player_id}@foosrank.local"
     anon_sub = f"deleted-{player_id}"
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
 
     PlayerModel.update(player.pk, player.sk).set("display_name", anon_label).set(
         "email", anon_email

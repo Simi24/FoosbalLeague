@@ -3,6 +3,7 @@ import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from mangum import Mangum
+
 from middlewares.aws_api_gateway_path import AWSAPIGatewayMiddleware
 from routers import (
     achievement_router,

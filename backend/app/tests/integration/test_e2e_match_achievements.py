@@ -13,11 +13,12 @@ Expected achievements for the test player:
     - giant_killer: beat a team with 50+ ELO advantage
 """
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import pytest
-from dependencies.auth import AuthenticatedUser, get_current_user
 from fastapi.testclient import TestClient
+
+from dependencies.auth import AuthenticatedUser, get_current_user
 from models.enrollment import EnrollmentModel
 from models.player import PlayerModel
 from models.rating import RatingModel
@@ -39,7 +40,7 @@ TEST_PLAYER_ID = "player-e2e"
 @pytest.fixture(scope="module")
 def _seed_test_player():
     """Seed the test player, enrollment, and rating into DynamoDB once."""
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
 
     # Player
     PlayerModel(

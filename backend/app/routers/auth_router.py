@@ -1,8 +1,9 @@
 import json
 
+from fastapi import APIRouter, Depends, HTTPException, Response
+
 from dependencies.auth import AuthenticatedUser, get_current_user
 from dependencies.tenant import get_tenant_id
-from fastapi import APIRouter, Depends, HTTPException, Response
 from schemas.auth import RegisterRequest, RegisterResponse, UserInfo
 from services.gdpr_service import delete_user_account, export_user_data
 from services.player_service import get_player_by_cognito_sub
