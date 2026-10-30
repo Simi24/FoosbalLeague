@@ -4,7 +4,7 @@ TDD: each test targets a single achievement rule in isolation.
 All DB access is replaced via callable overrides.
 """
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from models.match import MatchModel
 from schemas.match_context import MatchContext, PlayerMatchResult
@@ -15,7 +15,7 @@ from services.achievement_service import (
     evaluate_achievements,
 )
 
-NOW = datetime.now(timezone.utc)
+NOW = datetime.now(UTC)
 
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
@@ -109,7 +109,6 @@ def _empty_leaderboard(_lid: str) -> list:
 
 def _no_save(_tid: str, _lid: str, _pid: str, _atype: str) -> None:
     """Override: no-op save."""
-    pass
 
 
 # ── CATALOG ──────────────────────────────────────────────────────────────────

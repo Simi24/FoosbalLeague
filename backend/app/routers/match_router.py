@@ -1,8 +1,9 @@
 from typing import Any
 
+from fastapi import APIRouter, Depends, HTTPException
+
 from dependencies.auth import AuthenticatedUser, get_current_user
 from dependencies.tenant import get_tenant_id
-from fastapi import APIRouter, Depends, HTTPException
 from schemas.confirmation import ConfirmationResult
 from schemas.match import (
     DeleteMatchRequest,

@@ -46,8 +46,9 @@ export const DashboardPage = () => {
     try {
       await registerPlayer({ display_name: displayName }).unwrap();
       await dispatch(initAuth());
-    } catch (err: any) {
-      setRegisterError(err?.data?.detail ?? "Registration failed");
+    } catch (err) {
+      const detail = (err as { data?: { detail?: string } } | undefined)?.data?.detail;
+      setRegisterError(detail ?? "Registration failed");
     }
   };
 
@@ -58,8 +59,9 @@ export const DashboardPage = () => {
       await joinLeague({ code: joinCode }).unwrap();
       setJoinCode("");
       setShowJoin(false);
-    } catch (err: any) {
-      setJoinError(err?.data?.detail ?? "Invalid code");
+    } catch (err) {
+      const detail = (err as { data?: { detail?: string } } | undefined)?.data?.detail;
+      setJoinError(detail ?? "Invalid code");
     }
   };
 

@@ -4,9 +4,8 @@ import os
 from datetime import datetime
 from typing import Any
 
-from pydantic import model_validator
-
 from dynantic import Discriminator, DynamoModel, GSIKey, GSISortKey, Key, SortKey
+from pydantic import model_validator
 
 TABLE_NAME = os.getenv("DYNAMODB_TABLE", "foosball-league")
 

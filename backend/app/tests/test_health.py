@@ -14,7 +14,7 @@ def test_root():
     assert response.status_code == 200
     data = response.json()
     assert "version" in data
-    assert data["app_name"] == "foosball-league"
+    assert data["app_name"] == "foosrank"
 
 
 def test_health():

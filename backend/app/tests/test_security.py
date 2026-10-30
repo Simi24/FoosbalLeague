@@ -4,12 +4,13 @@ Unit tests using TestClient with mocked auth dependency.
 """
 
 from contextlib import ExitStack
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from unittest.mock import MagicMock, patch
 
 import pytest
-from dependencies.auth import AuthenticatedUser
 from fastapi.testclient import TestClient
+
+from dependencies.auth import AuthenticatedUser
 
 
 @pytest.fixture()
@@ -60,7 +61,7 @@ def _make_match_mock(
     m.team1_score = team1_score
     m.team2_score = team2_score
     m.elo_changes = None
-    m.created_at = datetime.now(timezone.utc)
+    m.created_at = datetime.now(UTC)
     return m
 
 

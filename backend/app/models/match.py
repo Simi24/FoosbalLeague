@@ -3,6 +3,8 @@
 from datetime import datetime
 from typing import Literal
 
+from pydantic import Field
+
 from models.base import BaseEntity
 
 
@@ -24,7 +26,7 @@ class MatchModel(BaseEntity):
     status: Literal["PENDING", "CONFIRMED", "DISPUTED"] = "PENDING"
     submitted_by: str = ""
     confirmed_by: str | None = None
-    elo_changes: dict = {}
+    elo_changes: dict = Field(default_factory=dict)
     deleted: bool = False
     deleted_at: datetime | None = None
     deleted_by: str | None = None

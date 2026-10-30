@@ -8,11 +8,12 @@ since the overrides dict is shared across the app and fixtures cannot cleanly
 switch identity mid-test without colliding.
 """
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import pytest
-from dependencies.auth import AuthenticatedUser, get_current_user
 from fastapi.testclient import TestClient
+
+from dependencies.auth import AuthenticatedUser, get_current_user
 from models.base import BaseEntity
 from models.enrollment import EnrollmentModel
 from models.notification import NotificationModel
@@ -33,7 +34,7 @@ RECIPIENT_ID = "player-notif-recipient"
 
 @pytest.fixture(scope="module", autouse=True)
 def _seed_users():
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
 
     # Wipe any stale notifications for these test players (e.g. from prior
     # test runs or from older notif-id formats) so each run starts clean.

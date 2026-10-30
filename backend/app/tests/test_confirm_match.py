@@ -5,10 +5,11 @@ Mocking strategy: patch DynamoDB-backed helpers and achievement evaluation
 so the tests stay fast and deterministic.
 """
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from unittest.mock import MagicMock, patch
 
 import pytest
+
 from models.match import MatchModel
 from models.rating import RatingModel
 from schemas.confirmation import (
@@ -36,7 +37,7 @@ def _make_match(
     status: str = "PENDING",
     submitted_by: str = "p1",
 ) -> MatchModel:
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     return MatchModel(
         pk=f"TENANT#{tenant_id}",
         sk=f"MATCH#{match_id}",
@@ -68,7 +69,7 @@ def _make_rating(
 ) -> RatingModel:
     if not display_name:
         display_name = player_id.title()
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     inverted = str(9999 - elo).zfill(4)
     return RatingModel(
         pk=f"TENANT#{tenant_id}",
@@ -104,6 +105,9 @@ def _patch_db():
         patch(f"{SERVICE}._write_elo_history") as mock_write_history,
         patch(f"{SERVICE}.MatchModel") as mock_match_model,
         patch(f"{SERVICE}.evaluate_achievements") as mock_eval,
+        patch(f"{SERVICE}.get_league", return_value=None),
+        patch(f"{SERVICE}._notify_match_confirmed"),
+        patch(f"{SERVICE}._notify_achievements_unlocked"),
     ):
         # Default: no achievements unlocked
         mock_eval.return_value = []

@@ -12,7 +12,7 @@ class LogLevel(str, Enum):
 
 
 class Settings:
-    settings: dict = {}
+    settings: dict
 
     def __init__(self, config_file: str = "config.json"):
         self.settings = {}

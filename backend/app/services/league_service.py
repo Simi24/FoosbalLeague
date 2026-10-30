@@ -1,7 +1,7 @@
 """League service - business logic for league operations."""
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Literal
 
 from libs.commons.logging import logger
@@ -22,7 +22,7 @@ def create_league(
     """Create a new league."""
     league_id = str(uuid.uuid4())[:8]
     invite_code = _generate_unique_invite_code(tenant_id)
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
 
     league = LeagueModel(
         pk=f"TENANT#{tenant_id}",
@@ -70,7 +70,7 @@ def regenerate_invite_code(tenant_id: str, league_id: str) -> str | None:
         return None
 
     new_code = _generate_unique_invite_code(tenant_id)
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     LeagueModel.update(league.pk, league.sk).set(
         "invite_code", new_code
     ).set("updated_at", now).execute()
@@ -111,7 +111,7 @@ def update_league(
         updates["description"] = description
 
     if updates:
-        updates["updated_at"] = datetime.now(timezone.utc)
+        updates["updated_at"] = datetime.now(UTC)
         builder = LeagueModel.update(league.pk, league.sk)
         for field, value in updates.items():
             builder = builder.set(field, value)
@@ -133,7 +133,7 @@ def join_league(
     if not league:
         raise ValueError(f"League {league_id} not found")
 
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     initial_elo = league.initial_elo
 
     # Create enrollment
@@ -189,7 +189,7 @@ def leave_league(tenant_id: str, league_id: str, player_id: str) -> bool:
 
     league = get_league(tenant_id, league_id)
     if league:
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         LeagueModel.update(league.pk, league.sk).set(
             "member_count", max(0, league.member_count - 1)
         ).set("updated_at", now).execute()
@@ -238,7 +238,7 @@ def set_member_role(
     if not enrollment or not isinstance(enrollment, EnrollmentModel):
         return False
 
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     EnrollmentModel.update(enrollment.pk, enrollment.sk).set(
         "role", role
     ).set("updated_at", now).execute()
