@@ -13,6 +13,31 @@ ELO-based office foosball league management. Record matches asynchronously, trac
 | IaC | Terraform |
 | Local Dev | Docker + LocalStack + DevContainer |
 
+## Built on dynantic
+
+FoosRank runs in production at [foosrank.app](https://foosrank.app/) and is a real-world example of [dynantic](https://github.com/Simi24/dynantic), a Pydantic-based ORM for DynamoDB.
+
+The whole app lives in one DynamoDB table. [`backend/app/models/base.py`](backend/app/models/base.py) declares the shared keys once, and every entity (player, league, match, rating, achievement, notification) registers itself on the same base through a discriminator:
+
+```python
+class BaseEntity(DynamoModel):
+    pk: str = Key()
+    sk: str = SortKey()
+    entity_type: str = Discriminator()
+    gsi1_pk: str | None = GSIKey(index_name="GSI1", default=None)
+    gsi1_sk: str | None = GSISortKey(index_name="GSI1", default=None)
+
+
+@BaseEntity.register("MATCH")
+class MatchModel(BaseEntity): ...
+```
+
+Queries come back as typed models. The leaderboard, for example, is one GSI query ([`backend/app/services/ranking_service.py`](backend/app/services/ranking_service.py)):
+
+```python
+BaseEntity.query_index("GSI1", f"LEAGUE#{league_id}").starts_with("RATING#").all()
+```
+
 ## Getting Started
 
 ### Prerequisites
