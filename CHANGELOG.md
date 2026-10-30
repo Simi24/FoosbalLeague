@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.23.1](https://github.com/Simi24/FoosbalLeague/compare/foosball-league-v0.23.0...foosball-league-v0.23.1) (2026-10-30)
+
+
+### Bug Fixes
+
+* make CI green on the public repo ([#55](https://github.com/Simi24/FoosbalLeague/issues/55)) ([0ba9d07](https://github.com/Simi24/FoosbalLeague/commit/0ba9d07b5ec78fb1d83686d5a6bfdaac77d76266))
+
 ## [0.23.0](https://github.com/Simi24/FoosbalLeague/compare/foosball-league-v0.22.0...foosball-league-v0.23.0) (2026-05-26)
 
 
