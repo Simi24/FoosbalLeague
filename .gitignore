@@ -48,3 +48,6 @@ app/logs/*
 
 # Build
 frontend/dist/
+
+# Claude Code local settings
+.claude/settings.local.json
