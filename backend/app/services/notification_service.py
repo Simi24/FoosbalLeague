@@ -15,7 +15,7 @@ Read-state: two overlapping mechanisms.
 """
 
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from libs.commons.logging import logger
 from models.base import BaseEntity
@@ -48,7 +48,7 @@ def create_notification(
     payload: dict,
 ) -> NotificationModel:
     """Create a single notification for a recipient."""
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     notif_id = _build_notif_id(now)
     expires_at = int((now + timedelta(days=TTL_DAYS_UNREAD)).timestamp())
 
@@ -119,7 +119,7 @@ def mark_read(tenant_id: str, recipient_id: str, notif_id: str) -> bool:
 
     Returns True if the item existed and was updated, False otherwise.
     """
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     sk = _sk(recipient_id, notif_id)
     existing = BaseEntity.get(f"TENANT#{tenant_id}", sk)
     if not existing or not isinstance(existing, NotificationModel):
@@ -140,7 +140,7 @@ def mark_all_read(tenant_id: str, recipient_id: str) -> int:
 
     Returns the number of records updated.
     """
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     results = (
         BaseEntity.query(f"TENANT#{tenant_id}")
         .starts_with(f"NOTIF#{recipient_id}#")

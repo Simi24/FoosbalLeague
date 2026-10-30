@@ -39,11 +39,11 @@ logs-frontend:
 
 # Run backend unit tests (no docker needed)
 test-backend:
-    cd backend && PYTHONPATH=app ENV=local LOCAL=true python -m pytest tests/ -v --ignore=tests/integration
+    cd backend && PYTHONPATH=app ENV=local LOCAL=true python -m pytest app/tests -v --ignore=app/tests/integration
 
 # Run integration tests (requires: docker compose up localstack -d)
 test-integration:
-    cd backend && PYTHONPATH=app ENV=local LOCAL=true DYNAMODB_TABLE=foosball-league python -m pytest tests/integration/ -v
+    cd backend && PYTHONPATH=app ENV=local LOCAL=true DYNAMODB_TABLE=foosball-league python -m pytest app/tests/integration/ -v
 
 # Lint backend
 lint-backend:

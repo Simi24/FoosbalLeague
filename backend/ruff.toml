@@ -1,0 +1,11 @@
+target-version = "py312"
+src = ["app"]  # the app runs with PYTHONPATH=app
+
+[lint]
+# Best-effort side effects (notifications, achievements) catch Exception and log it with
+# logger.exception; telling ruff about the logger lets BLE001 recognise that pattern.
+logger-objects = ["libs.commons.logging.logger"]
+
+[lint.flake8-bugbear]
+# FastAPI dependency injection: Depends() in argument defaults is the framework's idiom.
+extend-immutable-calls = ["fastapi.Depends"]

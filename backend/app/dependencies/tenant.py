@@ -2,8 +2,9 @@
 
 import os
 
-from dependencies.auth import AuthenticatedUser, get_current_user
 from fastapi import Depends
+
+from dependencies.auth import AuthenticatedUser, get_current_user
 
 DEFAULT_TENANT_ID = os.getenv("DEFAULT_TENANT_ID", "default")
 

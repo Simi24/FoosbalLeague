@@ -1,7 +1,7 @@
 """Match service - match recording and ELO orchestration."""
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from libs.commons.logging import logger
 from models.base import BaseEntity
@@ -35,7 +35,7 @@ def record_match(
 ) -> MatchModel:
     """Record a new match with PENDING status."""
     match_id = str(uuid.uuid4())[:8]
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     timestamp = now.isoformat()
 
     match = MatchModel(
@@ -100,7 +100,7 @@ def confirm_match(
     if not match or match.status != "PENDING":
         raise MatchNotFoundError(match_id)
 
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
 
     # ------------------------------------------------------------------
     # 1. Gather current ratings — capture elo_before per player
@@ -269,7 +269,7 @@ def delete_match(
     if match.deleted:
         return match
 
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     league = get_league(tenant_id, match.league_id)
     league_name = league.name if league else match.league_id
 
@@ -323,7 +323,7 @@ def dispute_match(
     if not match or match.status != "PENDING":
         return None
 
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     MatchModel.update(match.pk, match.sk).set("status", "DISPUTED").set(
         "updated_at", now
     ).execute()

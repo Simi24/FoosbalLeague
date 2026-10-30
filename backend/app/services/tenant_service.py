@@ -1,6 +1,6 @@
 """Tenant service - business logic for tenant operations."""
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from libs.commons.logging import logger
 from models.base import BaseEntity
@@ -17,7 +17,7 @@ def get_tenant(tenant_id: str) -> TenantModel | None:
 
 def create_tenant(tenant_id: str, name: str) -> TenantModel:
     """Create a new tenant."""
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     tenant = TenantModel(
         pk=f"TENANT#{tenant_id}",
         sk="METADATA",

@@ -1,7 +1,7 @@
 """Achievement service - definitions, evaluation, and storage."""
 
 from collections.abc import Callable
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from libs.commons.logging import logger
 from models.achievement import AchievementModel
@@ -197,9 +197,8 @@ def evaluate_achievements(
                     new_for_player.append("brick_wall")
 
         # top_dog: #1 on leaderboard (uses pre-fetched leaderboard)
-        if "top_dog" not in unlocked:
-            if leaderboard and leaderboard[0].player_id == pid:
-                new_for_player.append("top_dog")
+        if "top_dog" not in unlocked and leaderboard and leaderboard[0].player_id == pid:
+            new_for_player.append("top_dog")
 
         # Save newly unlocked
         for atype in new_for_player:
@@ -237,7 +236,7 @@ def _save_achievement(
     achievement_type: str,
 ) -> None:
     """Save an unlocked achievement."""
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     logger.info(
         f"Saving achievement {achievement_type} for {player_id} "
         f"in league {league_id} (tenant={tenant_id})"
